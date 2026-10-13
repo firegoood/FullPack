@@ -5,9 +5,10 @@ updating this repository. These files record the user's persistent preferences.
 
 - Preserve the authorized native Wat ICMP and peer Auto changes described in
   `docs/waticmp-dual-server-design.md` and their evidence/limits in
-  `docs/waticmp-verification.md`. Keep `11/WatTunnel` read-only and excluded
-  from Git, formatting, tests and release archives. Preserve the adapted
-  engine's MIT attribution and its nonce, resource, ACK and stream repairs.
+  `docs/waticmp-verification.md`. Keep `11/WatTunnel` read-only. Exclude the
+  entire `11/` directory from Git/publication, formatting, tests and release
+  archives. Preserve the adapted engine's MIT attribution and its nonce,
+  resource, ACK and stream repairs.
   Auto remains opt-in; never weaken enrollment, generation fencing or security
   floors to resolve an upstream merge, and never report pending gates as passed.
 

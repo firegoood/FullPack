@@ -9,14 +9,16 @@
 | 2026-10-12 | Add CLI tunnel methods missing from the web panel | Reverse Naive/HTTP2, XHTTP/TLS, REALITY/Vision; direct IP and SNI spoofing |
 | 2026-10-13 | Execute audited Wat ICMP / peer coordination / intelligent Auto prompt | Opt-in native `waticmp`, preservation of xDi/manual/fallback defaults, immutable local WatTunnel reference, licensed source attribution and evidence gates |
 | 2026-10-13 | Publish to the user-created `firegoood/FullPack` repository | Git destination, application source/update URLs, installer, documentation, panel links and persistent reapply guards |
+| 2026-10-13 | Never upload the entire `11/` directory | Root Git ignore rule, persistent update guard and source/release publication exclusion; the local reference remains read-only |
 
 ## Approved Wat ICMP and peer Auto implementation
 
 - Preserve `docs/waticmp-dual-server-design.md`, `docs/waticmp-verification.md`,
   the native engine's MIT LICENSE/ORIGIN.json and its security/resource repairs
   through upstream source merges. Do not rename xDi or replace its wire.
-- `11/WatTunnel` is the authoritative read-only reference, excluded from Git,
-  formatting, clean builds and releases. Native source is adapted into
+- The entire `11/` directory is excluded from Git/publication, formatting,
+  clean builds and releases. `11/WatTunnel` remains the authoritative read-only
+  reference. Native source is adapted into
   `internal/tunnel/waticmp`, without a local module replacement or helper process.
 - Auto is disabled by default. Preserve typed peer authentication, explicit
   enrollment, stable Iran port ownership, fresh cryptographic incarnations,
@@ -101,8 +103,9 @@
   `https://github.com/firegoood/FullPack`; local archive version parsing passed.
 - This authorization covers this source publication. It does not authorize
   release tags, unsigned binary publication, live deployment or automatic
-  publication of later work. The read-only reference and local audit artifacts
-  remain excluded from Git.
+  publication of later work. The entire `11/` directory and local audit
+  artifacts remain excluded from Git. Neither tracked source nor the published
+  commit history contains files from `11/`.
 
 ## Web tunnel methods
 

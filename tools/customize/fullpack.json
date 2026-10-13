@@ -205,7 +205,7 @@
       "HTTPS and other non-KCP editors never offer the KCP-only profile",
       "returning to KCP restores all profiles without changing the API list"
     ],
-    ".gitignore": ["/11/WatTunnel/"],
+    ".gitignore": ["/11/"],
     "tools/check-gofmt.sh": ["./11"],
     "tools/package-release.sh": ["licenses/waticmp", "ORIGIN.json"],
     "config/config.go": ["WATICMP TransportType = \"waticmp\""],

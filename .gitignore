@@ -8,8 +8,8 @@ __pycache__/
 *.test
 /dist/
 /release/
-# Local read-only transport reference; never stage or ship it.
-/11/WatTunnel/
+# Local reference directory; never stage or ship any of its contents.
+/11/
 
 # Go module cache accidentally copied into the project (must live outside it)
 /go/
