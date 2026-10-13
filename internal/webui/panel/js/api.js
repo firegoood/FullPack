@@ -85,8 +85,10 @@ export const tunnelOptions = () => get('/api/tunnel/options');
 export const autoStatus = name => get('/api/tunnel/auto?name=' + encodeURIComponent(name));
 export const autoAction = (name, operation, candidate = '') =>
   post('/api/tunnel/auto?name=' + encodeURIComponent(name), { operation, candidate });
-export const peerEnrollment = (name, transport, link) =>
-  post('/api/tunnel/peer-enrollment', { name, transport, link });
+export const peerEnrollment = (name, transport, link, local = undefined) =>
+  post('/api/tunnel/peer-enrollment', { name, transport, link, ...(local?.length ? {local} : {}) });
+export const peerEnrollmentPreview = (transport, link) =>
+  post('/api/tunnel/peer-enrollment', { transport, link, preview: true });
 
 /* ---- Handing a tunnel's paired settings to the other server --------------- */
 /* One string carrying everything the two ends must agree on. The mirroring —

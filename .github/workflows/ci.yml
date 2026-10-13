@@ -148,6 +148,10 @@ jobs:
         env:
           BP_CONNTEST_HELPERS: '1'
         run: go test ./internal/manage -run '^(TestRealityCoverSelectionAuthenticatesWithThePinnedHelper|TestAConnectionTestOverLoopbackPassesEveryReverseTransport)$' -race -count=1 -v -timeout 8m
+      - name: Enrolled Auto HTTPS in both physical directions
+        env:
+          FULLPACK_AUTO_HELPERS: '1'
+        run: go test ./internal/e2e -run '^TestPeerAutoManagedHTTPSBothDirections$' -race -count=1 -timeout 5m
 
   native-peer:
     name: Native ICMP and enrolled peer recovery
@@ -160,7 +164,7 @@ jobs:
           go-version-file: go.mod
           cache: true
       - name: Real raw sockets and fresh carrier probes
-        run: sudo env "PATH=$PATH" WATICMP_LIVE=1 go test ./internal/tunnel/waticmp ./internal/e2e -run 'TestNative|TestWatICMP|TestPeerCoordinated|TestPeerAuto|TestEnrolled' -race -count=1 -timeout 8m
+        run: sudo env "PATH=$PATH" WATICMP_LIVE=1 go test ./internal/tunnel/waticmp ./internal/e2e -run 'TestNative|TestWatICMP|TestPeerCoordinated|TestPeerAuto|TestEnrolled' -race -count=1 -timeout 15m
       - name: Two isolated nodes, MTU and reverse-only path
         run: |
           sudo env "PATH=$PATH" WATICMP_NETNS=1 bash internal/e2e/testdata/waticmp-netns.sh
@@ -171,6 +175,25 @@ jobs:
         run: sudo env "PATH=$PATH" WATICMP_NETNS=1 bash internal/e2e/testdata/peerauto-netns.sh
       - name: Opt-in sustained degradation with a reachable alternative
         run: sudo env "PATH=$PATH" WATICMP_NETNS=1 WATICMP_DEGRADATION=1 DEGRADATION_ENABLED=true bash internal/e2e/testdata/peerauto-netns.sh
+
+  auto-carriers:
+    name: Auto Direct and L3 network namespaces
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Raw streams and small-path L3, with unavailable QUIC fenced
+        run: sudo env "PATH=$PATH" FULLPACK_AUTO_NETNS=1 FULLPACK_AUTO_RAW_CARRIERS='waticmp xdi pck spoof sni' bash internal/e2e/testdata/auto-carriers-netns.sh
+      - name: Full-MTU L3 QUIC
+        run: sudo env "PATH=$PATH" FULLPACK_AUTO_NETNS=1 FULLPACK_AUTO_PLANES=l3 FULLPACK_AUTO_L3_CARRIERS=quic FULLPACK_AUTO_OUTER_MTU=1500 bash internal/e2e/testdata/auto-carriers-netns.sh
+      - name: Native Auto in both physical directions with normal Echo requests
+        run: sudo env "PATH=$PATH" FULLPACK_AUTO_NETNS=1 FULLPACK_AUTO_PLANES=stream FULLPACK_AUTO_RAW_CARRIERS=waticmp FULLPACK_AUTO_WAT_DIRECTION=normal bash internal/e2e/testdata/auto-carriers-netns.sh
+      - name: Optional enrolled TCP and UDP forwarding through TUN
+        run: sudo env "PATH=$PATH" FULLPACK_AUTO_NETNS=1 FULLPACK_AUTO_PLANES=l3 FULLPACK_AUTO_L3_CARRIERS=udp FULLPACK_AUTO_L3_FORWARD=1 bash internal/e2e/testdata/auto-carriers-netns.sh
 
   audit:
     name: Vulnerabilities and static analysis

@@ -212,9 +212,12 @@ and total network cuts yield NO_ROUTE, not fictitious healing.
 Default off; `BACKPACK_DISABLE_AUTO=1` and `BACKPACK_DISABLE_WATICMP=1` refuse
 the corresponding feature at startup. `[auto].enabled`, candidate `disabled`,
 observe-only, manual lock, test-now/status/history provide scoped controls.
-The implemented Auto adapters are native Wat, Noise (`stealth`), QUIC, WSS and
-WSSMUX. Plaintext/other adapters, including xDi/PCK and managed HTTPS, are
-refused even with `allow_plaintext_fallback=true`; keep those in manual mode.
+The original five adapters remain supported. The approved completion now adds
+the remaining Reverse carriers, explicit Direct initiation for all eighteen
+registry choices and the six datagram L3 carriers. See
+[Auto carrier completion](auto-carrier-completion.md) for the current matrix,
+helper identities, local edits and packet security. Legacy weak carriers gain
+authenticated Auto wrappers; `allow_plaintext_fallback=true` is still refused.
 Default security floor excludes plaintext or unauthenticated candidates even
 if faster. Candidate eligibility requires
 both-peer support, identity, permissions, direction, resources and completed
@@ -319,8 +322,9 @@ No TLS private key, helper executable path or Iran local bind is exported.
 Connection Test (CLI option 0) has separate native normal/reverse results.
 Both explicit test peer IPv4s are required; otherwise the rows are clearly
 SKIPPED. Its legacy interactive joining coordinator still needs its existing
-TCP/UDP bootstrap. Unattended Auto has independent pre-enrolled reverse-only
-bootstrap and does not inherit that joining limitation. Link Test remains
+TCP/UDP bootstrap. Unattended Auto has independent pre-enrolled bootstrap in
+the candidate's approved Reverse or Direct direction and does not inherit
+that joining limitation. Link Test remains
 route diagnostics.
 
 On Iran, actual private-IPC operations are:
@@ -399,6 +403,11 @@ WAN number is a measured FullPack result. Validate installer/rollback only in
 disposable Linux; no live VPS access is authorized.
 
 ## خلاصهٔ فارسی
+
+تکمیل تأییدشدهٔ بعدی، Auto را به هر ۱۸ حامل با آغاز اتصال Reverse یا Direct
+و شش حامل دیتاگرامی L3 گسترش می‌دهد. مرجع جاری جزئیات و محدودیت‌ها
+`docs/auto-carrier-completion.md` است. ایران همچنان تنها مرجع تصمیم سوئیچ است؛
+هویت جفت، fencing، تأیید TLS و پیش‌فرض خاموش حفظ شده‌اند.
 
 <div dir="rtl">
 

@@ -419,7 +419,9 @@ func reverseClientFromLink(link ShareLink, host string) TunnelSpec {
 		if link.Host == "" {
 			f.ServerAddr = host
 		}
-		s, _ := specFromPeerNew(f.ToNewTunnel())
+		// A link has no receiver-local certificate or private key. Build its
+		// shared shape first; creation/update validates local identity later.
+		s, _ := specFromPeerNew(f.ToNewTunnel(), true)
 		return s
 	}
 	s := TunnelSpec{

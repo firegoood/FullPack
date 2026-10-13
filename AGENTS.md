@@ -12,6 +12,15 @@ updating this repository. These files record the user's persistent preferences.
   Auto remains opt-in; never weaken enrollment, generation fencing or security
   floors to resolve an upstream merge, and never report pending gates as passed.
 
+- Preserve the approved complete Auto carrier registry shared by CLI, web and
+  engine. Stream Auto supports Reverse and Direct initiation; L3 Auto uses the
+  six datagram carriers and owns one stable TUN across agreed generations.
+  Keep IP outside reliable KCP/TCP streams, authenticated bounded reassembly,
+  replay/nonce protections and datagram probes. Keep SPOOF production/probe
+  conversations on the same enrolled endpoint with bounded authenticated
+  demultiplexing. Never export local helper private keys, paths or interfaces;
+  retain receiver-local enrollment forms and matching public trust checks.
+
 - The final project name is **FullPack**, with two `l` characters. The command
   and installation namespace are `fullpack`. Do not use `FulPack`.
 - Keep web tunnel choices in parity with the CLI: include managed HTTPS

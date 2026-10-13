@@ -78,9 +78,11 @@ func servePeerEnrollment(w http.ResponseWriter, r *http.Request, create func(man
 		return
 	}
 	var request struct {
-		Link      string `json:"link"`
-		Name      string `json:"name"`
-		Transport string `json:"transport"`
+		Link      string                 `json:"link"`
+		Name      string                 `json:"name"`
+		Transport string                 `json:"transport"`
+		Local     []manage.AutoPeerLocal `json:"local,omitempty"`
+		Preview   bool                   `json:"preview,omitempty"`
 	}
 	d := json.NewDecoder(http.MaxBytesReader(w, r.Body, maxTunnelBody))
 	d.DisallowUnknownFields()
@@ -92,7 +94,16 @@ func servePeerEnrollment(w http.ResponseWriter, r *http.Request, create func(man
 		http.Error(w, "unexpected trailing enrollment data", 400)
 		return
 	}
-	n, err := manage.PeerNewTunnel(request.Link, request.Name, request.Transport)
+	if request.Preview {
+		requirements, err := manage.PeerLocalRequirements(request.Link, request.Transport)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		writeJSON(w, requirements)
+		return
+	}
+	n, err := manage.PeerNewTunnel(request.Link, request.Name, request.Transport, request.Local...)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return

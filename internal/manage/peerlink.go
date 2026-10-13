@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"reflect"
 	"strings"
 
 	"github.com/backpack/backpack/config"
@@ -37,6 +38,10 @@ func encodePeerLink(l ShareLink) (string, error) {
 	l.EnrollmentMAC = peerLinkMAC(l)
 	if e := validatePeerLink(l); e != nil {
 		return "", e
+	}
+	plain, e := json.Marshal(l)
+	if e != nil || len(plain)+1 > 64<<10 {
+		return "", fmt.Errorf("peer setup link exceeds decoded size limit")
 	}
 	var b bytes.Buffer
 	z := gzip.NewWriter(&b)
@@ -96,7 +101,7 @@ func validatePeerLink(l ShareLink) error {
 	}
 	if l.AutoEnrollment != "" {
 		var a config.AutoConfig
-		if len(l.AutoEnrollment) > 8192 {
+		if len(l.AutoEnrollment) > 48<<10 {
 			return fmt.Errorf("Auto enrollment exceeds size limit")
 		}
 		if e = strictJSON([]byte(l.AutoEnrollment), &a); e != nil {
@@ -105,10 +110,8 @@ func validatePeerLink(l ShareLink) error {
 		if l.Tr != "auto" || !a.Enabled {
 			return fmt.Errorf("Auto enrollment missing explicit opt-in")
 		}
-		for _, p := range a.Candidates {
-			if p.LocalBind != "" {
-				return fmt.Errorf("remote link cannot set local listener overrides")
-			}
+		if !reflect.DeepEqual(a, a.PeerEnrollment()) {
+			return fmt.Errorf("remote link cannot set local listener overrides, helper paths/private keys or interfaces")
 		}
 	} else {
 		var w watEnrollment
@@ -126,7 +129,7 @@ func validatePeerLink(l ShareLink) error {
 		}
 	}
 	f := mirrorPeerLink(l)
-	_, e = specFromPeerNew(f.ToNewTunnel())
+	_, e = specFromPeerNew(f.ToNewTunnel(), true)
 	return e
 }
 func mirrorPeerLink(l ShareLink) PeerForm {
@@ -182,12 +185,7 @@ func sharePeerLink(name, host string, c config.Config) (string, error) {
 		l.Tok = c.Client.Token
 	}
 	if c.Auto.Enabled {
-		a := c.Auto
-		a.Candidates = append([]config.AutoCandidate(nil), a.Candidates...)
-		for i := range a.Candidates {
-			a.Candidates[i].LocalBind = ""
-		}
-		a.MaxMemoryMB = 0 // a local pressure setting, never privileged peer material
+		a := c.Auto.PeerEnrollment()
 		b, e := json.Marshal(a)
 		if e != nil {
 			return "", e

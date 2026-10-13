@@ -2,13 +2,50 @@ package peerauto
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/backpack/backpack/config"
 )
+
+func TestManifestKeepsLegacyHashAndIgnoresOnlyLocalOverrides(t *testing.T) {
+	a := stateConfig().Auto
+	// Original five-carrier schema: new optional fields must not alter old fencing state.
+	legacy := `{"enabled":true,"observeOnly":false,"tunnelId":"state-test-tunnel","iranId":"state-test-iran-id","kharejId":"state-test-kharej-id","ports":["23457=127.0.0.1:23458"],"acceptUdp":false,"candidates":[{"id":"noise","transport":"stealth","disabled":false,"endpoint":"127.0.0.1:23456","iranIp":"","kharejIp":"","direction":"","maxPayload":0}],"allowPlaintextFallback":false,"allowDegradationSwitch":false,"probeInterval":600,"cooldown":300,"minimumDwell":600,"maxSwitchesPerHour":2,"failureThreshold":3,"maxConnections":64,"manualLock":"","maxMemoryMb":256}`
+	h := sha256.Sum256([]byte(legacy))
+	if manifestHash(a) != hex.EncodeToString(h[:]) {
+		t.Fatal("legacy enrollment hash changed")
+	}
+	a.Candidates[0].Transport = config.PCK
+	original := manifestHash(a)
+	a.Candidates[0].Packet = &config.AutoPacketConfig{Interface: "eth1"}
+	a.Candidates[0].LocalBind = "0.0.0.0:23456"
+	a.ObserveOnly = true
+	a.MaxMemoryMB = 384
+	if manifestHash(a) != original {
+		t.Fatal("receiver-local raw interface changed enrollment hash")
+	}
+	a.Candidates[0].Mode = "direct"
+	if manifestHash(a) == original {
+		t.Fatal("physical direction not fenced by enrollment")
+	}
+}
+
+func TestSpoofUDPPortReservationUsesParsedProfile(t *testing.T) {
+	for _, profile := range []string{"udp", " UDP "} {
+		c := stateConfig()
+		c.Auto.AcceptUDP = true
+		c.Auto.Candidates = []config.AutoCandidate{{ID: "spoof", Transport: config.SPOOF, Mode: "direct", Endpoint: "192.0.2.2:23457", IranIP: "192.0.2.1", KharejIP: "192.0.2.2", Packet: &config.AutoPacketConfig{SpoofProfile: profile, IranSource: "198.51.100.1", KharejSource: "198.51.100.2"}}}
+		if err := Validate(c); err == nil || profile == "udp" && !strings.Contains(err.Error(), "conflicts") {
+			t.Fatalf("spoof receive port collision bypassed with profile %q: %v", profile, err)
+		}
+	}
+}
 
 func stateConfig() *config.Config {
 	return &config.Config{Server: config.ServerConfig{BindAddr: "127.0.0.1:23456", Transport: config.STEALTH, Token: "0123456789abcdef0123456789abcdef", Ports: []string{"23457=127.0.0.1:23458"}}, Auto: config.AutoConfig{Enabled: true, TunnelID: "state-test-tunnel", IranID: "state-test-iran-id", KharejID: "state-test-kharej-id", Ports: []string{"23457=127.0.0.1:23458"}, Candidates: []config.AutoCandidate{{ID: "noise", Transport: config.STEALTH, Endpoint: "127.0.0.1:23456"}}}}

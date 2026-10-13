@@ -749,7 +749,11 @@ func (s *server) pushPeerEnd(run node.Runner, nodeName, tunnel string, peerConn 
 			c.SimpleAuth = true
 			peerConn = &c
 		}
-		if t.Managed == nil {
+		if t.Auto != nil {
+			// The receiving node restores its own local Auto bindings and
+			// helper identities before validating this enrolled rebuild.
+			t.Conn = nil
+		} else if t.Managed == nil {
 			t.Conn = peerConn
 		} else {
 			// Managed HTTPS retires incompatible routing/proxy/simple-auth settings.

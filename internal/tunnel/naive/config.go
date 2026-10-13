@@ -299,6 +299,9 @@ func xrayIdentity(binary, mode, id, serverName string) error {
 	if err := readableFile(binary); err != nil {
 		return fmt.Errorf("Xray helper binary: %w", err)
 	}
+	return validateXrayIdentity(mode, id, serverName)
+}
+func validateXrayIdentity(mode, id, serverName string) error {
 	if mode != "xhttp" && mode != "reality" {
 		return errors.New("Xray mode must be xhttp or reality")
 	}
@@ -316,6 +319,27 @@ func xrayIdentity(binary, mode, id, serverName string) error {
 		return errors.New("Xray server_name must be an explicit valid DNS name")
 	}
 	return nil
+}
+
+// ValidatePublicXrayIdentity reuses the engine's paired identity validators
+// without inspecting receiver-local executables or private certificate paths.
+func ValidatePublicXrayIdentity(x config.XrayClientConfig) error {
+	if err := validateXrayIdentity(x.Mode, x.UUID, x.ServerName); err != nil {
+		return err
+	}
+	if _, _, err := xrayEndpoint(x.Server); err != nil {
+		return err
+	}
+	if x.Mode == "reality" {
+		if x.Path != "" || x.Host != "" || x.CAFile != "" {
+			return errors.New("REALITY does not accept XHTTP identity fields")
+		}
+		return xrayReality(x.PublicKey, x.ShortID)
+	}
+	if x.PublicKey != "" || x.ShortID != "" {
+		return errors.New("XHTTP does not accept REALITY identity fields")
+	}
+	return xrayHTTP(x.Path, x.Host)
 }
 
 func xrayHTTP(path, host string) error {

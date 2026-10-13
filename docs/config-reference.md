@@ -12,6 +12,46 @@ go run ./tools/configref > docs/config-reference.md
 The prose pages under `docs/` explain what to *use* these for and which of
 them both ends have to agree on. This says what exists.
 
+## AutoHelperConfig
+
+| Key | Type | Description |
+|---|---|---|
+| `binary` | `string` | Binary is the local helper executable; blank uses the managed installation. |
+| `ca_file` | `string` | CAFile optionally supplies a dialer's local CA bundle without disabling TLS verification. |
+| `ca_pem` | `string` | CAPEM is the public CA certificate enrolled for HTTPS peer verification. |
+| `certificate` | `string` | Certificate is the listener's local TLS certificate path matching its enrolled hostname and CA. |
+| `host` | `string` | Host optionally overrides the enrolled XHTTP HTTP Host header. |
+| `key` | `string` | Key is the listener's local TLS private-key path; never exported in enrollment. |
+| `password` | `string` | Password is the paired Naive account secret; settings responses redact it. |
+| `path` | `string` | Path is the enrolled XHTTP request path. |
+| `private_key` | `string` | PrivateKey is the listener-local REALITY key matching PublicKey; never exported. |
+| `public_key` | `string` | PublicKey is the enrolled REALITY X25519 public key. |
+| `reverse_port` | `int` | ReversePort is the restricted loopback engine port, distinct from public and user ports. |
+| `server_name` | `string` | ServerName is the verified HTTPS hostname or authenticated REALITY cover name. |
+| `short_id` | `string` | ShortID is the enrolled REALITY short ID. |
+| `target` | `string` | Target is the REALITY cover host:port checked with the authenticated cover probe. |
+| `username` | `string` | Username is the enrolled Naive account name. |
+| `uuid` | `string` | UUID is the enrolled XHTTP or REALITY account identity. |
+
+## AutoL3Config
+
+| Key | Type | Description |
+|---|---|---|
+| `interface` | `string` | Interface is a local TUN name; blank selects a stable pair-specific name. |
+| `iran_ip` | `string` | IranIP is Iran's enrolled unicast TUN address with CIDR prefix. |
+| `kharej_ip` | `string` | KharejIP is the distinct peer TUN address in the same enrolled subnet. |
+| `mtu` | `int` | MTU bounds inner IP packets, up to 9000 bytes; IPv6 requires at least 1280. |
+
+## AutoPacketConfig
+
+| Key | Type | Description |
+|---|---|---|
+| `interface` | `string` | Interface optionally selects the local raw-packet interface; never exported. |
+| `iran_source` | `string` | IranSource is Iran's enrolled forged unicast source address for SPOOF. |
+| `kharej_source` | `string` | KharejSource is Kharej's enrolled forged unicast source address for SPOOF. |
+| `sni_domain` | `string` | SNIDomain is the enrolled hostname embedded by the direct SNI carrier. |
+| `spoof_profile` | `string` | SpoofProfile selects an existing SPOOF packet profile; Auto adds independent authentication. |
+
 ## Config
 
 | Key | Type | Description |
@@ -51,13 +91,16 @@ them both ends have to agree on. This says what exists.
 |---|---|---|
 | `direction` | `string` | Direction is normal or reverse for Wat Echo Requests; application users still enter on Iran. |
 | `disabled` | `bool` | Disabled prevents this candidate from opening a listener or dialing after startup. |
-| `endpoint` | `string` | Endpoint is the explicitly permitted Iran listener Kharej dials. |
+| `endpoint` | `string` | Endpoint is the explicitly permitted listener on the side Mode selects. |
+| `helper` | `*AutoHelperConfig` | Helper enrolls an HTTPS wrapper's identity and restricted loopback target. |
 | `id` | `string` | ID identifies an approved candidate, 1-16 safe characters, unique within this pair. |
 | `iran_ip` | `string` | IranIP is Iran's explicit unicast IPv4 for a Wat candidate. |
 | `kharej_ip` | `string` | KharejIP is Kharej's explicit unicast IPv4 for a Wat candidate. |
-| `local_bind` | `string` | LocalBind is an optional Iran-only local address using the same approved endpoint port; never exported to the peer. |
+| `local_bind` | `string` | LocalBind is an optional listener-local address with the enrolled port; never exported to the peer or interpreted as a dial destination. |
 | `max_payload` | `int` | MaxPayload caps Wat datagrams at 256-1400 bytes, default 512, subject to authenticated PMTU discovery. |
-| `transport` | `TransportType` | Transport is waticmp, stealth, quic, wss or wssmux; other Auto adapters are unverified and refused. |
+| `mode` | `string` | Mode is empty/reverse (Kharej dials Iran) or direct (Iran dials Kharej). Geography and the sole switching authority do not change with this field. |
+| `packet` | `*AutoPacketConfig` | Packet tunes the existing raw packet carriers. Interface is local-only. |
+| `transport` | `TransportType` | Transport selects a registered carrier. Auto adds authenticated encryption to legacy carriers that do not provide it; manual transport wire is unchanged. |
 
 ## [auto]
 
@@ -72,11 +115,13 @@ them both ends have to agree on. This says what exists.
 | `failure_threshold` | `int` | FailureThreshold debounces carrier failure, default 3, range 3-20; skipped probes do not count. |
 | `iran_id` | `string` | IranID identifies the sole switching authority, independent of packet direction. |
 | `kharej_id` | `string` | KharejID identifies the distinct enrolled follower; changing identities requires a new pair. |
+| `l3` | `*AutoL3Config` | L3 enrolls the shared addresses and MTU. Interface is a local setting. |
 | `manual_lock` | `string` | ManualLock fixes the allowed active candidate ID; runtime unlock cannot weaken an enrolled lock. |
 | `max_connections` | `int` | MaxConnections bounds simultaneous user connections, default 64, maximum 192; probes reserve separate streams. |
 | `max_memory_mb` | `int` | MaxMemoryMB skips probes above this local process RSS pressure threshold, default 256 MB; it is not a hard memory limit. |
 | `max_switches_per_hour` | `int` | MaxSwitchesPerHour limits persisted cross-carrier commits, default 2, range 1-12. |
 | `minimum_dwell` | `int` | MinimumDwell is seconds before optional degradation switching, default 600, minimum 5. |
+| `mode` | `string` | Mode is empty/stream for stable port forwarding, or l3 for an owned TUN. |
 | `observe_only` | `bool` | ObserveOnly bootstraps the primary/last-good route and measures candidates without automatic cross-carrier changes. |
 | `ports` | `[]string` | These exact maps are authenticated as part of the manifest. The follower dials only this enrolled backend allowlist, indexed by mapping number. |
 | `probe_interval` | `int` | ProbeInterval is seconds between paced bulk tests, default 600, minimum 30; schedules include jitter. |

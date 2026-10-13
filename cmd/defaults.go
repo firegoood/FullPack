@@ -223,6 +223,9 @@ func warnIgnoredProxyProtocol(cfg *config.Config) {
 // exited again. The first load still treats an error as fatal; a reload logs
 // it and keeps what is running. See reload.go.
 func validateConfig(cfg *config.Config) error {
+	if cfg.Auto.Enabled {
+		return peerauto.Validate(cfg)
+	}
 	for _, check := range []func(*config.Config) error{
 		checkNaive,
 		checkXray,

@@ -6,7 +6,7 @@ import "fmt"
 // Legacy panel/fleet pairing is unchanged. The operator must obtain this link
 // over a trusted out-of-band channel; its embedded PSK cannot authenticate the
 // channel that delivered a wholly substituted link.
-func PeerNewTunnel(raw, name, transport string) (NewTunnel, error) {
+func PeerNewTunnel(raw, name, transport string, locals ...AutoPeerLocal) (NewTunnel, error) {
 	l, err := DecodeShareLink(raw)
 	if err != nil {
 		return NewTunnel{}, err
@@ -18,8 +18,19 @@ func PeerNewTunnel(raw, name, transport string) (NewTunnel, error) {
 	if name != "" {
 		n.Name = name
 	}
-	if _, err := specFromPeerNew(n); err != nil {
+	if n.Auto != nil {
+		if err := applyAutoPeerLocal(n.Auto, locals); err != nil {
+			return NewTunnel{}, err
+		}
+	} else if len(locals) > 0 {
+		return NewTunnel{}, fmt.Errorf("local Auto overrides require Auto enrollment")
+	}
+	s, err := specFromPeerNew(n)
+	if err != nil {
 		return NewTunnel{}, err
+	}
+	if n.Auto != nil {
+		n.Auto = &s.Auto
 	}
 	return n, nil
 }

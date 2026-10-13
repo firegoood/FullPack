@@ -164,6 +164,9 @@ func newSpoofConn(server bool, o spoofConnOpts) (net.PacketConn, error) {
 	// the receiver filters on. The tag half of the identity backed the
 	// tag/direction frame, which this carrier no longer writes.
 	_, port := spoofIdentity(o.token)
+	if o.port != 0 {
+		port = o.port
+	}
 
 	// The client sends on the uplink and receives on the downlink; the server is
 	// the mirror.

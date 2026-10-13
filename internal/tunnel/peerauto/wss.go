@@ -105,11 +105,7 @@ func (l *limitedListener) Accept() (net.Conn, error) {
 }
 
 func listenWSS(ctx context.Context, p config.AutoCandidate, token string, settings network.TLSSettings) (acceptCarrier, func(), error) {
-	settings.SelfSignedHost, _, _ = net.SplitHostPort(p.Endpoint)
-	cfg, e := network.ServerTLSConfig(settings, func(string, ...any) {})
-	if e != nil {
-		return nil, nil, e
-	}
+	secure := p.Transport == config.WSS || p.Transport == config.WSSMUX
 	bind := p.LocalBind
 	if bind == "" {
 		bind = p.Endpoint
@@ -118,36 +114,59 @@ func listenWSS(ctx context.Context, p config.AutoCandidate, token string, settin
 	if e != nil {
 		return nil, nil, e
 	}
-	listener := tls.NewListener(&limitedListener{Listener: raw, slots: make(chan struct{}, 8)}, cfg)
+	var listener net.Listener = &limitedListener{Listener: raw, slots: make(chan struct{}, 8)}
+	if secure {
+		settings.SelfSignedHost, _, _ = net.SplitHostPort(p.Endpoint)
+		cfg, err := network.ServerTLSConfig(settings, func(string, ...any) {})
+		if err != nil {
+			raw.Close()
+			return nil, nil, err
+		}
+		listener = tls.NewListener(listener, cfg)
+	}
 	accepted := make(chan carrierSession, 2)
 	done := make(chan struct{})
 	var handoff sync.Mutex
 	closed := false
 	upgrader := websocket.Upgrader{HandshakeTimeout: 5 * time.Second, ReadBufferSize: 4096, WriteBufferSize: 32768, CheckOrigin: func(*http.Request) bool { return true }}
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "GET" || !strings.HasPrefix(r.URL.Path, "/peer-auto/v1/") || r.TLS == nil {
+		if r.Method != "GET" || !strings.HasPrefix(r.URL.Path, "/peer-auto/v1/") || secure && r.TLS == nil {
 			http.NotFound(w, r)
 			return
 		}
-		proof, e := network.WSSServerProof(r.TLS, token)
-		if e != nil || !hmac.Equal([]byte(r.Header.Get("Authorization")), []byte("Bearer "+proof)) {
-			http.NotFound(w, r)
-			return
+		var proof string
+		headers := http.Header{}
+		if secure {
+			var err error
+			proof, err = network.WSSServerProof(r.TLS, token)
+			if err != nil || !hmac.Equal([]byte(r.Header.Get("Authorization")), []byte("Bearer "+proof)) {
+				http.NotFound(w, r)
+				return
+			}
+			answer, err := network.WSSServerAnswer(r.TLS, token)
+			if err != nil {
+				http.NotFound(w, r)
+				return
+			}
+			headers.Set(network.WSSServerProofHeader, answer)
 		}
-		answer, e := network.WSSServerAnswer(r.TLS, token)
+		ws, e := upgrader.Upgrade(w, r, headers)
 		if e != nil {
-			http.NotFound(w, r)
 			return
 		}
-		ws, e := upgrader.Upgrade(w, r, http.Header{network.WSSServerProofHeader: []string{answer}})
+		var s carrierSession
+		if secure {
+			s, e = multiplex(newWSConn(ws), true)
+		} else {
+			s, e = secureStream(ctx, newWSConn(ws), token, true)
+		}
 		if e != nil {
 			return
 		}
-		s, e := multiplex(newWSConn(ws), true)
-		if e != nil {
-			return
+		session := s
+		if secure {
+			session = boundCarrier{carrierSession: s, binding: proof}
 		}
-		session := boundCarrier{carrierSession: s, binding: proof}
 		handoff.Lock()
 		defer handoff.Unlock()
 		if closed || ctx.Err() != nil {

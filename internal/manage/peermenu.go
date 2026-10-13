@@ -23,8 +23,17 @@ func askWatDirection(current string) string {
 	return current
 }
 func setupPeerServer(transport string) {
-	tui.Info("Experimental reverse TCP/UDP forwarding. Wat requires Linux root/CAP_NET_RAW. Direct GRE/L3 is unsupported.")
-	n := NewTunnel{Role: "server", Transport: transport, Name: uniqueName(tui.PromptDefault("Tunnel Name", "server-"+transport)), Token: tui.PromptDefault("Enrollment Secret (At Least 32 Bytes)", randomToken(64)), Ports: tui.Prompt("Forwarded Ports: ")}
+	tui.Info("Enrolled peer forwarding. Auto supports Reverse, Direct initiation and datagram L3; Wat needs Linux CAP_NET_RAW.")
+	n := NewTunnel{Role: "server", Transport: transport, Name: uniqueName(tui.PromptDefault("Tunnel Name", "server-"+transport)), Token: tui.PromptDefault("Enrollment Secret (At Least 32 Bytes)", randomToken(64))}
+	l3Mode := false
+	if transport == "auto" {
+		pick := tui.ChooseOpt("Auto Traffic Mode", []tui.Option{{Title: "TCP/UDP Port Forwarding", Desc: "Each enrolled carrier may use Reverse or Direct initiation"}, {Title: "Layer 3 (Stable TUN)", Desc: "Routed IP datagrams; optional forwarded ports"}})
+		if pick < 0 {
+			return
+		}
+		l3Mode = pick == 1
+	}
+	n.Ports = tui.Prompt("Forwarded Ports (Optional For L3): ")
 	public := PublicIPv4()
 	if public == "-" {
 		public = ""
@@ -40,8 +49,21 @@ func setupPeerServer(transport string) {
 		n.WatICMP = &config.WatICMPConfig{Enabled: true, PeerIP: tui.Prompt("Kharej Explicit IPv4: "), TunnelID: randomToken(32), Direction: direction, MaxPayload: 512, MaxStreams: 128, Paths: 4}
 	} else {
 		a := config.AutoConfig{Enabled: true, ObserveOnly: tui.Confirm("Start In Observe-Only Mode (No Automatic Cross-Carrier Switch)", true), TunnelID: randomToken(32), IranID: randomToken(32), KharejID: randomToken(32), Ports: parsePorts(n.Ports), AcceptUDP: accept}
+		if l3Mode {
+			a.Mode = "l3"
+			a.L3 = &config.AutoL3Config{IranIP: tui.PromptDefault("Iran TUN Address/Prefix", "10.44.0.1/30"), KharejIP: tui.PromptDefault("Kharej TUN Address/Prefix", "10.44.0.2/30"), MTU: 1400, Interface: tui.Prompt("Local TUN Interface (Blank = Pair-Specific Default): ")}
+		}
+		carriers := []config.AutoCarrier{}
+		for _, v := range config.AutoCarriers() {
+			if !l3Mode || v.L3 {
+				carriers = append(carriers, v)
+			}
+		}
 		for len(a.Candidates) < 4 {
-			opts := []tui.Option{{Title: "Wat ICMP", Desc: "explicit two peer IPv4 addresses, normal/reverse direction"}, {Title: "TCP + Stealth", Desc: "encrypted Noise; explicitly approved Iran TCP listener"}, {Title: "QUIC", Desc: "encrypted; explicitly approved Iran UDP listener"}, {Title: "WSS", Desc: "TLS-bound peer authentication; explicitly approved Iran TCP listener"}}
+			opts := []tui.Option{}
+			for _, v := range carriers {
+				opts = append(opts, tui.Option{Title: v.Label, Desc: "Explicitly enrolled " + v.Socket + " endpoint; authenticated encryption"})
+			}
 			if len(a.Candidates) > 0 {
 				opts = append(opts, tui.Option{Title: "Finish Candidate Enrollment"})
 			}
@@ -49,12 +71,19 @@ func setupPeerServer(transport string) {
 			if pick < 0 {
 				return
 			}
-			if pick == 4 {
+			if pick == len(carriers) {
 				break
 			}
 			p := config.AutoCandidate{ID: tui.PromptDefault("Candidate ID (1-16 Safe Characters)", fmt.Sprintf("carrier%d", len(a.Candidates)+1))}
-			if pick == 0 {
-				p.Transport = config.WATICMP
+			p.Transport = carriers[pick].Value
+			mode := tui.ChooseOpt("Connection Initiator", []tui.Option{{Title: "Reverse — Kharej Connects To Iran"}, {Title: "Direct — Iran Connects To Kharej"}})
+			if mode < 0 {
+				return
+			}
+			if mode == 1 {
+				p.Mode = "direct"
+			}
+			if p.Transport == config.WATICMP {
 				p.IranIP = iran
 				p.KharejIP = tui.Prompt("Kharej Explicit IPv4: ")
 				p.Direction = askWatDirection("")
@@ -63,14 +92,35 @@ func setupPeerServer(transport string) {
 					return
 				}
 			} else {
-				p.Transport = []config.TransportType{config.STEALTH, config.QUIC, config.WSS}[pick-1]
-				port := tui.Prompt("Approved Iran Data Listener Port: ")
+				host := iran
+				if p.Mode == "direct" {
+					host = tui.Prompt("Approved Kharej Listener Host/IP: ")
+				}
+				port := tui.Prompt("Approved Data Listener Port: ")
 				if !validPort(port) {
 					tui.Error("Invalid data listener port.")
 					return
 				}
-				p.Endpoint = net.JoinHostPort(iran, port)
-				p.LocalBind = net.JoinHostPort("0.0.0.0", port)
+				p.Endpoint = net.JoinHostPort(host, port)
+				if p.ListenerIsIran() {
+					p.LocalBind = net.JoinHostPort("0.0.0.0", port)
+				}
+				if carriers[pick].Raw && p.Transport != config.XDI {
+					p.Packet = &config.AutoPacketConfig{Interface: tui.Prompt("Local Raw Interface (Optional): ")}
+					if p.Transport == config.SPOOF {
+						p.IranIP = iran
+						p.KharejIP = tui.Prompt("Kharej Real IPv4: ")
+						p.Packet.SpoofProfile = tui.PromptDefault("Spoof Profile", "udp")
+						p.Packet.IranSource = tui.Prompt("Iran Forged Source IPv4: ")
+						p.Packet.KharejSource = tui.Prompt("Kharej Forged Source IPv4: ")
+					}
+					if p.Transport == "sni" {
+						p.Packet.SNIDomain = tui.PromptDefault("SNI Domain", "www.microsoft.com")
+					}
+				}
+				if carriers[pick].Helper {
+					p.Helper = promptAutoHelper(p)
+				}
 			}
 			a.Candidates = append(a.Candidates, p)
 		}
@@ -112,6 +162,37 @@ func setupPeerClient(transport string) {
 	f := MirrorForPeer(l)
 	n := f.ToNewTunnel()
 	n.Name = uniqueName(tui.PromptDefault("Tunnel Name", f.Name))
+	if n.Auto != nil {
+		if n.Auto.L3 != nil {
+			n.Auto.L3.Interface = tui.Prompt("Local TUN Interface (Optional): ")
+		}
+		for i := range n.Auto.Candidates {
+			p := &n.Auto.Candidates[i]
+			if !p.ListenerIsIran() && p.Transport != config.WATICMP {
+				p.LocalBind = tui.PromptDefault("Local Listener Bind For "+p.ID, net.JoinHostPort("0.0.0.0", addrPort(p.Endpoint)))
+			}
+			if p.Packet == nil && (p.Transport == config.PCK || p.Transport == "sni") {
+				p.Packet = &config.AutoPacketConfig{}
+			}
+			if p.Packet != nil {
+				p.Packet.Interface = tui.Prompt("Local Raw Interface For " + p.ID + " (Optional): ")
+			}
+			if p.Helper != nil {
+				h := p.Helper
+				h.Binary = tui.Prompt("Local Helper Executable For " + p.ID + " (Blank = Installed Default): ")
+				if !p.ListenerIsIran() {
+					if p.Transport == "reality" {
+						h.PrivateKey = tui.Prompt("Matching Local REALITY Private Key: ")
+					} else {
+						h.Certificate = tui.Prompt("Matching Local Certificate Path: ")
+						h.Key = tui.Prompt("Local Certificate Private Key Path: ")
+					}
+				} else if p.Transport != "reality" {
+					h.CAFile = tui.Prompt("Local CA File For " + p.ID + " (Optional): ")
+				}
+			}
+		}
+	}
 	s, e := specFromPeerNew(n)
 	if e != nil {
 		tui.Error(e.Error())
@@ -125,14 +206,17 @@ func setupPeerClient(transport string) {
 	tui.PressEnter()
 }
 func summarisePeer(s TunnelSpec) {
-	tui.Info("Reverse Forwarding — " + selectedTransport(s))
+	tui.Info("Enrolled Forwarding — " + selectedTransport(s))
 	if s.Auto.Enabled {
 		tui.Info("Authority: Iran " + s.Auto.IranID + "; foreign peer: " + s.Auto.KharejID)
+		if s.Auto.L3 != nil {
+			tui.Info("Stable L3 TUN: " + s.Auto.L3.IranIP + " ↔ " + s.Auto.L3.KharejIP)
+		}
 		for _, p := range s.Auto.Candidates {
 			if p.Transport == config.WATICMP {
 				tui.Info(p.ID + ": Wat " + p.Direction + " ICMP, Iran=" + p.IranIP + ", Kharej=" + p.KharejIP)
 			} else {
-				tui.Info(p.ID + ": " + string(p.Transport) + " data endpoint " + p.Endpoint)
+				tui.Info(p.ID + ": " + string(p.Transport) + " " + defaultString(p.Mode, "reverse") + " data endpoint " + p.Endpoint)
 			}
 		}
 		tui.Info("Observe-only: " + onOff(s.Auto.ObserveOnly) + "; probes, commits and recovery use these approved carriers only.")

@@ -35,18 +35,34 @@ func TestPeerCoordinatedAuthenticatedAdapters(t *testing.T) {
 	}
 }
 
-func testPeerCoordinatedSwitchKeepsUserListener(t *testing.T, transport config.TransportType, withAlternate bool) {
+func TestPeerAutoAdditionalStreamCarriers(t *testing.T) {
+	for _, carrier := range []config.TransportType{config.TCP, config.TCPMUX, config.WS, config.WSMUX, config.KCP, config.UDP} {
+		for _, mode := range []string{"reverse", "direct"} {
+			t.Run(string(carrier)+"/"+mode, func(t *testing.T) {
+				testPeerCoordinatedSwitchKeepsUserListener(t, carrier, true, mode)
+			})
+		}
+	}
+}
+
+func testPeerCoordinatedSwitchKeepsUserListener(t *testing.T, transport config.TransportType, withAlternate bool, modes ...string) {
 	t.Helper()
 	backend := startEchoBackend(t)
 	udpBackend := startUDPEcho(t)
 	entry, udpEntry, noise := freePort(t), freePort(t), freePort(t)
 	endpoint := fmt.Sprintf("127.0.0.1:%d", freePort(t))
 	primary := config.AutoCandidate{ID: "primary", Transport: transport, Endpoint: endpoint}
+	if len(modes) != 0 {
+		primary.Mode = modes[0]
+	}
 	if transport == config.WATICMP {
 		primary.IranIP, primary.KharejIP, primary.Direction = "127.0.0.1", "127.0.0.1", "reverse"
 	}
+	if transport == "naive" || transport == "xhttp" || transport == "reality" {
+		primary.Helper = autoHTTPSIdentity(t, string(transport))
+	}
 	maps := []string{fmt.Sprintf("127.0.0.1:%d=%s", entry, backend.addr), fmt.Sprintf("127.0.0.1:%d=%s", udpEntry, udpBackend)}
-	a := config.AutoConfig{Enabled: true, TunnelID: "e2e-enrolled-tunnel", IranID: "e2e-enrolled-iran", KharejID: "e2e-enrolled-kharej", Ports: maps, AcceptUDP: true,
+	a := config.AutoConfig{Enabled: true, ObserveOnly: true, TunnelID: "e2e-enrolled-tunnel", IranID: "e2e-enrolled-iran", KharejID: "e2e-enrolled-kharej", Ports: maps, AcceptUDP: true,
 		Candidates: []config.AutoCandidate{primary, {ID: "noise", Transport: config.STEALTH, Endpoint: fmt.Sprintf("127.0.0.1:%d", noise)}}}
 	if !withAlternate {
 		a.Candidates = a.Candidates[:1]
@@ -54,6 +70,27 @@ func testPeerCoordinatedSwitchKeepsUserListener(t *testing.T, transport config.T
 	token := "0123456789abcdef0123456789abcdef"
 	srv := &config.Config{Auto: a, Server: config.ServerConfig{Transport: transport, BindAddr: endpoint, Token: token, Ports: maps}}
 	cli := &config.Config{Auto: a, Client: config.ClientConfig{Transport: transport, RemoteAddr: endpoint, Token: token}}
+	if primary.Helper != nil {
+		server := *primary.Helper
+		client := *primary.Helper
+		client.Certificate, client.Key, client.PrivateKey = "", "", ""
+		if transport == "naive" {
+			server.Binary = autoTestHelper(t, "sing-box")
+			client.Binary = autoTestHelper(t, "naive")
+		} else {
+			server.Binary = autoTestHelper(t, "xray")
+			client.Binary = server.Binary
+		}
+		srv.Auto.Candidates = append([]config.AutoCandidate(nil), a.Candidates...)
+		cli.Auto.Candidates = append([]config.AutoCandidate(nil), a.Candidates...)
+		if primary.ListenerIsIran() {
+			srv.Auto.Candidates[0].Helper = &server
+			cli.Auto.Candidates[0].Helper = &client
+		} else {
+			srv.Auto.Candidates[0].Helper = &client
+			cli.Auto.Candidates[0].Helper = &server
+		}
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	m, err := peerauto.New(ctx, srv, filepath.Join(t.TempDir(), "iran.json"))
@@ -120,10 +157,12 @@ func testPeerCoordinatedSwitchKeepsUserListener(t *testing.T, transport config.T
 	}
 	checkHeld()
 	beforeProbe := m.Snapshot().Generation
+	probeStart := time.Now()
 	if err = m.Action(actionCtx, peerauto.Action{Operation: "test-now", Candidate: primary.ID}); err != nil {
-		t.Fatal(err)
+		t.Fatalf("isolated probe: %v; iran=%+v; kharej=%+v", err, m.Snapshot(), p.Snapshot())
 	}
 	checkHeld()
+	t.Logf("isolated probe took %s", time.Since(probeStart))
 	if m.Snapshot().Generation != beforeProbe {
 		t.Fatal("probe changed production generation")
 	}
@@ -135,7 +174,7 @@ func testPeerCoordinatedSwitchKeepsUserListener(t *testing.T, transport config.T
 		return
 	}
 	if err = m.Action(actionCtx, peerauto.Action{Operation: "switch", Candidate: "noise"}); err != nil {
-		t.Fatal(err)
+		t.Fatalf("switch: %v; iran=%+v; kharej=%+v", err, m.Snapshot(), p.Snapshot())
 	}
 	if m.Snapshot().Active != "noise" || p.Snapshot().Active != "noise" || m.Snapshot().Generation != p.Snapshot().Generation {
 		t.Fatalf("peers disagree: %+v %+v", m.Snapshot(), p.Snapshot())

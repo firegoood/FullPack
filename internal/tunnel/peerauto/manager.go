@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/backpack/backpack/config"
+	"github.com/backpack/backpack/internal/tunnel/l3"
 	"github.com/backpack/backpack/internal/tunnel/portmap"
 	"github.com/backpack/backpack/internal/tunnel/probe"
 	"github.com/backpack/backpack/internal/tunnel/waticmp"
@@ -52,6 +53,7 @@ type preparation struct {
 }
 
 type CandidateStatus struct {
+	Mode            string    `json:"mode,omitempty"`
 	ID              string    `json:"id"`
 	Transport       string    `json:"transport"`
 	Direction       string    `json:"direction,omitempty"`
@@ -80,6 +82,8 @@ type Status struct {
 	History     []Event           `json:"history"`
 	Candidates  []CandidateStatus `json:"candidates"`
 	Flows       FlowStatus        `json:"flows"`
+	Mode        string            `json:"mode,omitempty"`
+	Packets     *PacketStatus     `json:"packets,omitempty"`
 }
 
 // Stream outcomes are reported after closure. Interrupted includes route/session
@@ -121,6 +125,9 @@ type Manager struct {
 	endpointCancel                                                                         map[string]context.CancelFunc
 	degradedSamples                                                                        int
 	tls                                                                                    network.TLSSettings
+	device                                                                                 l3.PacketDevice
+	openPacketDevice                                                                       func(l3.Config, *logrus.Logger) (l3.PacketDevice, error)
+	packets                                                                                packetCounters
 	flowAdmitted, flowCompleted, flowDrained, flowInterrupted, flowRejected, udpQueueDrops atomic.Uint64
 }
 
@@ -141,6 +148,7 @@ func New(ctx context.Context, cfg *config.Config, statePath string) (*Manager, e
 	m := &Manager{ctx: mctx, cancel: cancel, policy: a, iran: cfg.Server.BindAddr != "", manifest: h, incarnation: fresh(), store: store,
 		log: logrus.New(), endpoints: map[string]*candidate{}, recentTx: map[string]time.Time{}, connections: make(chan struct{}, a.MaxConnections), actions: make(chan actionRequest, 8), pendingProbes: map[string]*pendingProbe{}}
 	m.token = cfg.Client.Token
+	m.openPacketDevice = l3.OpenPacketDevice
 	m.tls = tlsSettings(cfg)
 	m.runtimeLock = a.ManualLock
 	m.runtimeDisabled = map[string]bool{}
@@ -148,7 +156,9 @@ func New(ctx context.Context, cfg *config.Config, statePath string) (*Manager, e
 	if m.iran {
 		m.token = cfg.Server.Token
 	}
-	m.mappings, e = portmap.Expand(a.Ports, "127.0.0.1")
+	if a.Mode != "l3" {
+		m.mappings, e = portmap.Expand(a.Ports, "127.0.0.1")
+	}
 	if e != nil {
 		m.Close()
 		return nil, e
@@ -163,7 +173,7 @@ func New(ctx context.Context, cfg *config.Config, statePath string) (*Manager, e
 		if p.Disabled {
 			reason = "disabled by enrollment policy"
 		}
-		m.status.Candidates = append(m.status.Candidates, CandidateStatus{ID: p.ID, Transport: string(p.Transport), Direction: p.Direction, Reason: reason})
+		m.status.Candidates = append(m.status.Candidates, CandidateStatus{ID: p.ID, Transport: string(p.Transport), Mode: p.Mode, Direction: p.Direction, Reason: reason})
 	}
 	return m, nil
 }
@@ -174,6 +184,10 @@ func (m *Manager) Snapshot() Status {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	s := m.status
+	s.Mode = m.policy.Mode
+	if m.device != nil {
+		s.Packets = &PacketStatus{Sent: m.packets.sent.Load(), Received: m.packets.received.Load(), Dropped: m.packets.dropped.Load(), Interface: m.device.Name()}
+	}
 	if s.State == "DEGRADED" {
 		next = maxTime(next, s.LastSwitch.Add(time.Duration(m.policy.MinimumDwell)*time.Second))
 	}
@@ -225,7 +239,11 @@ func pause(ctx context.Context, d time.Duration) bool {
 // persist independently of the active route: rendezvous has no wall-clock or
 // current-control-channel dependency. There is one switching authority.
 func (m *Manager) Start() error {
-	if m.iran {
+	if m.policy.Mode == "l3" {
+		if err := m.startL3(); err != nil {
+			return err
+		}
+	} else if m.iran {
 		if err := m.bindUsers(); err != nil {
 			return err
 		}
@@ -261,7 +279,7 @@ func (m *Manager) endpointLoop(p config.AutoCandidate) {
 	}
 	var accept acceptCarrier
 	var closeListener func()
-	if m.iran {
+	if m.iran == p.ListenerIsIran() {
 		var e error
 		accept, closeListener, e = listenCarrier(epctx, m.policy, p, m.token, m.tls)
 		if e != nil {
@@ -271,7 +289,14 @@ func (m *Manager) endpointLoop(p config.AutoCandidate) {
 		defer closeListener()
 		// One main peer plus one separately authenticated ephemeral probe.
 		// Both use the same explicitly permitted data endpoint, never user ports.
-		permits := make(chan struct{}, 2)
+		limit := 2
+		// Native Wat probes already own a transaction-scoped raw identity.
+		// A second main handshake on its same raw ID would compete for peer
+		// nonces (especially when Kharej accepts Direct control initiation).
+		if p.Transport == config.WATICMP {
+			limit = 1
+		}
+		permits := make(chan struct{}, limit)
 		for epctx.Err() == nil {
 			select {
 			case permits <- struct{}{}:
@@ -281,6 +306,7 @@ func (m *Manager) endpointLoop(p config.AutoCandidate) {
 			s, err := accept(epctx)
 			if err != nil {
 				<-permits
+				m.candidateStatus(p.ID, func(s *CandidateStatus) { s.Reason = "carrier accept unavailable: " + err.Error() })
 				if !pause(epctx, time.Second) {
 					return
 				}
@@ -294,13 +320,9 @@ func (m *Manager) endpointLoop(p config.AutoCandidate) {
 	for epctx.Err() == nil {
 		var s carrierSession
 		var err error
-		if m.iran {
-			s, err = accept(epctx)
-		} else {
-			s, err = dialCarrier(epctx, m.policy, p, m.token)
-		}
+		s, err = dialCarrier(epctx, m.policy, p, m.token)
 		if err != nil {
-			m.candidateStatus(p.ID, func(s *CandidateStatus) { s.Ready = false; s.Reason = "carrier handshake unavailable" })
+			m.candidateStatus(p.ID, func(s *CandidateStatus) { s.Ready = false; s.Reason = "carrier handshake unavailable: " + err.Error() })
 			if !pause(epctx, backoff) {
 				return
 			}
@@ -324,7 +346,8 @@ func (m *Manager) runSession(p config.AutoCandidate, s carrierSession) {
 	defer stop()
 	var ctrl net.Conn
 	var err error
-	if m.iran {
+	initiator := m.iran != p.ListenerIsIran()
+	if !initiator {
 		ctrl, err = s.Accept(ctx)
 	} else {
 		ctrl, err = s.Open(ctx)
@@ -334,7 +357,7 @@ func (m *Manager) runSession(p config.AutoCandidate, s carrierSession) {
 	}
 	defer ctrl.Close()
 	_ = ctrl.SetDeadline(time.Now().Add(10 * time.Second))
-	if !m.iran {
+	if initiator {
 		_, err = ctrl.Write([]byte{0})
 	} else {
 		var b [1]byte
@@ -348,11 +371,15 @@ func (m *Manager) runSession(p config.AutoCandidate, s carrierSession) {
 	}
 	w, peer, err := m.authenticate(ctrl, s, p.ID, "")
 	if err != nil {
+		m.log.WithField("candidate", p.ID).WithError(err).Debug("carrier control authentication failed")
 		m.candidateStatus(p.ID, func(s *CandidateStatus) { s.Ready = false; s.Reason = "peer identity/version/policy rejected" })
 		return
 	}
+	if w.packet != nil {
+		defer w.packet.close()
+	}
 	if w.base.Transaction != "" {
-		m.deliverProbe(ctx, w)
+		m.deliverProbe(ctx, w, s)
 		return
 	}
 	e := &candidate{spec: p, session: s, w: w, ctx: ctx, cancel: cancel, data: make(chan net.Conn, 4), peerGeneration: peer.Generation}
@@ -411,7 +438,18 @@ func (m *Manager) runSession(p config.AutoCandidate, s carrierSession) {
 			}
 		}
 	}()
-	if m.iran {
+	if m.policy.Mode == "l3" {
+		done := make(chan struct{})
+		go func() { defer close(done); m.receivePackets(e) }()
+		if m.iran {
+			<-ctx.Done()
+		} else {
+			m.follow(e)
+			cancel()
+		}
+		s.Close()
+		<-done
+	} else if m.iran {
 		// Receive pre-opened data streams while the single leader owns control.
 		done := make(chan struct{})
 		go func() { defer close(done); m.acceptData(e) }()
@@ -594,6 +632,15 @@ func (m *Manager) followProbe(e *candidate, r message) error {
 	if used {
 		return errors.New("replayed probe transaction")
 	}
+	probeCtx, cancel := context.WithTimeout(e.ctx, 15*time.Second)
+	defer cancel()
+	if !e.spec.ListenerIsIran() {
+		pending := &pendingProbe{ctx: probeCtx, candidate: e.spec.ID, peerIncarnation: e.w.base.PeerIncarnation, ch: make(chan probeConnection, 1)}
+		m.mu.Lock()
+		m.pendingProbes[r.Transaction] = pending
+		m.mu.Unlock()
+		defer func() { m.mu.Lock(); delete(m.pendingProbes, r.Transaction); m.mu.Unlock() }()
+	}
 	if err := e.w.send(message{Op: "PROBE_READY", Transaction: r.Transaction, Bytes: r.Bytes}); err != nil {
 		return err
 	}
@@ -607,8 +654,6 @@ func (m *Manager) followProbe(e *candidate, r message) error {
 	// Fresh transport Session ID/keys, independent from the production/control
 	// session. The typed offer is its one-use authorization; endpoints remain
 	// exactly those in the enrolled manifest.
-	probeCtx, cancel := context.WithTimeout(e.ctx, 15*time.Second)
-	defer cancel()
 	digest, release, err := m.respondIsolatedProbe(probeCtx, e, r.Transaction, r.Bytes)
 	if err != nil {
 		return err
@@ -648,10 +693,16 @@ func (m *Manager) exchangeProbe(e *candidate, probeBytes int) (err error) {
 		// ICMP has no listener port. Only after a local authenticated offer can
 		// this separate, transaction-scoped raw identity allocate a socket.
 		m.launch(func() {
-			s, err := probeWatConnect(probeCtx, m.policy, e.spec, m.token, tx, true)
+			var s carrierSession
+			var err error
+			s, err = probeWatConnect(probeCtx, m.policy, e.spec, m.token, tx, true)
 			if err == nil {
 				defer s.Close()
-				m.runSession(e.spec, s)
+				w, err := m.openProbeControl(probeCtx, s, e.spec, tx)
+				if err == nil {
+					defer w.c.Close()
+					m.deliverProbe(probeCtx, w, s)
+				}
 			}
 		})
 	}
@@ -666,6 +717,24 @@ func (m *Manager) exchangeProbe(e *candidate, probeBytes int) (err error) {
 			e.cancel()
 		}
 		return fmt.Errorf("probe start: %w", err)
+	}
+	if !e.spec.ListenerIsIran() && e.spec.Transport != config.WATICMP {
+		m.launch(func() {
+			s, err := dialCarrier(probeCtx, m.policy, e.spec, m.token)
+			if err != nil {
+				m.log.WithField("candidate", e.spec.ID).WithError(err).Debug("direct isolated carrier handshake failed")
+				return
+			}
+			defer s.Close()
+			w, err := m.openProbeControl(probeCtx, s, e.spec, tx)
+			if err != nil {
+				m.log.WithField("candidate", e.spec.ID).WithError(err).Debug("direct isolated control authentication failed")
+			}
+			if err == nil {
+				defer w.c.Close()
+				m.deliverProbe(probeCtx, w, s)
+			}
+		})
 	}
 	aligned := false
 	defer func() {
@@ -709,6 +778,14 @@ func (m *Manager) exchangeProbe(e *candidate, probeBytes int) (err error) {
 			elapsed = d
 		}
 		digest = h
+	}
+	if pc.w.packet != nil {
+		packetRTT, packetElapsed, packetDigest, packetErr := exchangePacketProbe(probeCtx, pc.w.packet, probeBytes)
+		if packetErr != nil {
+			return packetErr
+		}
+		rtt, elapsed = packetRTT, packetElapsed
+		digest = combineProbeDigest(digest, packetDigest)
 	}
 	// The responder waits for this fresh session's integrity confirmation
 	// before either endpoint can mark the probe successful.

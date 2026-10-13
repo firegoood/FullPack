@@ -3,6 +3,12 @@
 Date: 2026-10-13. Status: **LOCAL ACCEPTANCE PASSED WITH DOCUMENTED LIMITS**. This is an
 experimental opt-in implementation, not approval to deploy on a live VPS.
 
+Sections 1-7 retain the original five-carrier/native audit and its measurements.
+They predate the approved Reverse/Direct/L3 expansion and must not be read as
+current registry restrictions. The current expansion is recorded separately
+in section 8 and `auto-carrier-completion.md`; no historical outage/soak result
+is silently extended to new carriers.
+
 ## 1. Source, attribution and preservation
 
 Target `E:/P_OX/back`; module `github.com/backpack/backpack`; implementation baseline HEAD
@@ -330,4 +336,69 @@ race detector و پوشش ۵۷٫۳٪، هر ۱۴ حداقل پوشش، ساخت 
 
 </div>
 
-*Last verified against FullPack v1.9.0 (local acceptance with documented limits, 2026-10-13).*
+*Original native baseline verified against FullPack v1.9.0 (local acceptance with documented limits, 2026-10-13).*
+
+## 8. Approved Auto Reverse/Direct/L3 completion
+
+Source baseline for this expansion: `7fc182f568fdbfa0c9b0ef3f6840519178d99b60`.
+The eighteen stream registry choices and six L3 datagram choices now serve
+CLI, web and engine validation. The implementation and operator limits are
+described in `auto-carrier-completion.md`. Changes remain source customizations;
+there is no new deployment, release, signing key or publication in this audit.
+
+Evidence is retained outside the checkout in
+`E:/P_OX/fullpack-waticmp-audit`. `11/` is excluded from source snapshots,
+formatting, tests, Git and release packaging. No dependency upgrade was made.
+
+| Local acceptance | Evidence and practical scope |
+| --- | --- |
+| TCP/TCPMUX/WS/WSMUX/KCP/UDP stream | Both physical directions; actual 32 KiB TCP, 8 KiB UDP, fresh integrity probes, coordinated switch and flow drain. KCP's stale probe handshake initially blocked later conversations; eight bounded secure accept workers fixed the regression. |
+| Stealth/QUIC/WSS/WSSMUX stream | Actual Direct tests plus retained Reverse bootstrap/probe/handover tests; TLS/authenticated bindings stay enabled. |
+| Managed HTTPS | All six Naive/XHTTP/REALITY × Reverse/Direct cases passed using checksum-pinned actual helpers; `auto-https-stage3-tests.log`, 110 s. Embedded CA initially enabled an inapplicable helper; assigning CA only to the selected helper fixed it. |
+| Raw and L3 namespace matrix | `auto-netns-matrix1.log`: eight xDi/PCK/SPOOF/SNI stream cases and twelve UDP/QUIC/xDi/PCK/SPOOF/SNI real-TUN cases at outer MTU1500, both directions. Four concurrent 32 KiB TCP exchanges, UDP 1/64/1400/8000, 9000-byte bidirectional IP ping, independent probe, agreed handover and stable listeners/TUN. |
+| Small outer paths | Raw stream matrix at MTU700 passed. `auto-l3-smallpath2.log` passed ten real-TUN UDP/xDi/PCK/SPOOF/SNI cases at MTU700. Enrolled QUIC selection was explicitly rejected without changing the working generation; QUIC below 1200 is SKIPPED, not reported as a passing route. |
+| Native Wat Direct | Initial namespace tests failed because the manual Wat client refused peer-opened streams. Serialized handshakes alone did not fix it. Optional Auto Direct odd/even stream identities fixed both directions at MTU700; `auto-wat-bidirectional.log` and engine race tests passed. The additional `auto-wat-normal.log` passed Reverse and Direct initiation with normal Echo requests, separately from the reverse Echo fixture. Default manual admission is retained. |
+| SPOOF profiles | `auto-spoof-{tcp,icmp,icmpv6,ipip,gre}.log` plus UDP matrices: all six profiles passed actual stream traffic, isolated probes and handover in both directions at MTU700, with one enrolled receive endpoint. |
+| L3 cryptographic and lifecycle checks | `auto-l3-stage2-tests.log` and packet tests passed race: 9000-byte reordering/reassembly, authentication/replay/purpose/generation rejection, stable fake TUN UDP Direct→QUIC Reverse and control-only probe rejection. Actual TUN evidence is separate above. |
+| Additional real L3 paths | SPOOF TCP and ICMP profiles passed both physical directions at MTU700 with real TUN traffic/probes/handover (`auto-spoof-l3-{tcp,icmp}.log`). Optional enrolled TCP/UDP port forwarding through TUN also passed both directions and handover (`auto-l3-forward.log`). |
+| Import, edit and rebuild | Helper enrollment tests cover all six role combinations, public/private identity matching, secret-safe edits and sanitized links. Canonical hash regression preserves the old schema hash and ignores only local overrides. Node rebuild tests retain local keys and reject incompatible enrollment. Generic CLI link mirroring now builds public shape before local validation. |
+| Browser and JavaScript | Actual panel modules passed in headless Chrome against an isolated mock API: eighteen stream choices, six L3 choices, role-specific forms, trusted local import, local edit/save preserving paired fields, and mobile width. Screenshots retained. All 46 panel tests passed; this is UI evidence, not a production service claim. |
+
+The first whole-project pass was interrupted while valid long-running e2e
+cases were progressing; it is not a deadlock result. The next run passed all
+code packages including e2e (871 s) but failed config declaration documentation.
+All 25 new keys now have declaration comments and the reference was regenerated.
+A Windows-mounted Go temporary directory had also failed cleanup; test temp
+files now use the disposable container's Linux filesystem.
+
+Final whole-project race/coverage passed (`auto-final-race.log`): e2e 871.418 s,
+manage 488.635 s, **58.4% total**, above the unchanged 50% floor. All fourteen
+unchanged package floors passed (`auto-final-coverage-gates.log`). The later
+CLI local-rebuild correction passed a separate affected-package race suite
+on its exact source (`auto-final-local.log`, manage/webui/node/peerauto/config).
+No carrier code changed after the whole-project race run. This distinction is
+retained instead of claiming that every later edit was in that earlier snapshot.
+
+The first staticcheck run found an unused test result in SPOOF retirement;
+the test now also verifies the returned payload length. Its targeted race
+rerun passed. Final exact-source formatting, whole-project vet/staticcheck,
+and static Linux amd64/arm64 builds passed (`auto-final-analysis-*.log`,
+`auto-final-spoof-unit.log`, `auto-final-fullpack-{amd64,arm64}`). All 46 panel
+tests and all nine customization-tool tests passed; naming reapply changed
+zero files and its required feature guards passed. Wat adaptation provenance
+now records the optional Direct stream admission without changing original
+hashes or the MIT license.
+
+The online vulnerability database request failed with HTTP 403
+(`auto-current-online-vuln.log`). The final exact-source govulncheck passed
+against the retained official OSV snapshot, modified `2026-10-08T22:31:09Z`,
+with zero reached or imported-package vulnerabilities and two unreachable
+module advisories (`auto-final-analysis-govulncheck.log`). This does **not**
+claim a current online vulnerability scan; no security gate or signature
+verification was disabled to obtain a pass.
+
+Real Iran/Kharej WAN, two live VPS, arbitrary NAT/firewall/anti-spoofing policy,
+production load and a 24-hour expansion soak remain **NOT VERIFIED**. The
+original Wat/Noise outage and reachable-degradation timings are not results
+for every new carrier. QUIC cannot work on the 700-byte outer path. A passing
+local suite cannot guarantee absence of bugs or authorize a signed release.

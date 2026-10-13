@@ -202,6 +202,7 @@ func applySockBuf(pc net.PacketConn, sockBuf int) {
 // in the cross-platform file so the Linux carrier and the non-Linux stub share
 // one signature.
 type spoofConnOpts struct {
+	port       uint16
 	token      string
 	uplink     SpoofProfile // client->server profile
 	downlink   SpoofProfile // server->client profile

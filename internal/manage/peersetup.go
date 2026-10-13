@@ -13,7 +13,7 @@ import (
 
 // The same schema/validators serve terminal setup, web setup and peer links.
 // ICMP has no TCP/UDP tunnel port; 0 is only the engine's role marker.
-func specFromPeerNew(n NewTunnel) (TunnelSpec, error) {
+func specFromPeerNew(n NewTunnel, publicOnly ...bool) (TunnelSpec, error) {
 	s := TunnelSpec{Name: strings.TrimSpace(n.Name), Role: n.Role, Transport: n.Transport, Token: strings.TrimSpace(n.Token), LogLevel: "info", Heartbeat: 5, RetryInterval: 1, ConnectionPool: 4}
 	if !validName(s.Name) {
 		return s, fmt.Errorf("invalid tunnel name")
@@ -33,7 +33,7 @@ func specFromPeerNew(n NewTunnel) (TunnelSpec, error) {
 		if e := validatePortSpecs(s.Ports); e != nil {
 			return s, e
 		}
-		if len(s.Ports) == 0 {
+		if len(s.Ports) == 0 && (n.Auto == nil || n.Auto.Mode != "l3") {
 			return s, fmt.Errorf("at least one forwarded port is required")
 		}
 	}
@@ -43,6 +43,11 @@ func specFromPeerNew(n NewTunnel) (TunnelSpec, error) {
 		}
 		s.Auto = peerauto.Defaults(*n.Auto)
 		s.Auto.Candidates = append([]config.AutoCandidate(nil), s.Auto.Candidates...)
+		if len(publicOnly) == 0 || !publicOnly[0] {
+			if err := prepareAutoHelpers(&s); err != nil {
+				return s, err
+			}
+		}
 		if len(s.Auto.Candidates) == 0 {
 			return s, fmt.Errorf("no enrolled candidates")
 		}
@@ -95,7 +100,7 @@ func specFromPeerNew(n NewTunnel) (TunnelSpec, error) {
 			s.RemoteAddr = net.JoinHostPort(s.WatICMP.PeerIP, "0")
 		}
 	}
-	if e := s.ValidatePeerFeatures(); e != nil {
+	if e := s.ValidatePeerFeatures(publicOnly...); e != nil {
 		return s, e
 	}
 	return s, nil

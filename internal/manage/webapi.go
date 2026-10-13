@@ -414,6 +414,15 @@ func CreateTunnel(n NewTunnel) (service string, active bool, err error) {
 // applySpec, so a configuration that will not start is rolled back and the
 // previous one is filed, exactly as an edit made on this machine would be.
 func ApplyTunnel(n NewTunnel) (service string, active bool, created bool, err error) {
+	if n.Auto != nil && validName(strings.TrimSpace(n.Name)) && fileExists(app.ConfigPath(strings.TrimSpace(n.Name))) {
+		current, loadErr := LoadSpec(strings.TrimSpace(n.Name))
+		if loadErr != nil {
+			return "", false, false, loadErr
+		}
+		if err := carryAutoNodeLocal(&n, current); err != nil {
+			return "", false, false, err
+		}
+	}
 	s, err := specFromNew(n)
 	if err != nil {
 		return "", false, false, err
@@ -920,7 +929,7 @@ func TunnelSettingsOf(name string) (TunnelSettings, error) {
 
 func tunnelSettingsFrom(s TunnelSpec) TunnelSettings {
 	out := TunnelSettings{
-		WatICMP: s.WatICMP, Auto: s.Auto,
+		WatICMP: s.WatICMP, Auto: s.Auto.RedactSecrets(),
 		Name:          s.Name,
 		Role:          s.Role,
 		Transport:     selectedTransport(s),

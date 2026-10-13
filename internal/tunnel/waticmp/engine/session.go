@@ -48,21 +48,24 @@ const (
 var ErrSessionDead = errors.New("wat: session closed")
 
 type Config struct {
-	MaxStreams int // defaults to 128; hard ceiling 256
-	Server     bool
-	Key        []byte
-	SID        uint64        // session id (client: random if 0; server sessions get the client's)
-	Paths      int           // client: lanes (ICMP identifiers) to stripe over
-	InitBps    float64       // starting pace, bytes/s (default 1.5 MB/s)
-	MaxBps     float64       // pace ceiling, bytes/s (default 16 MB/s)
-	MinBps     float64       // pace floor (default 200 KB/s)
-	Slack      time.Duration // extra RTT over the minimum tolerated before slowing down (default 8 ms)
-	Boot       uint64        // server process id (random per run); clients reset their streams when it changes
-	MaxPayload int           // datagram size cap incl. header and tag; 0 = MaxPayload (640), bounded to [256, 1400]
-	Hedge      bool          // send young packets twice on different lanes (costs ~8% extra packets)
-	FEC        bool          // adaptive XOR parity after bursts of small packets (both ends must enable it; see fec.go)
-	Bond       PathTimings   // multipath health/probe timings (server side; zero = production values)
-	Logf       func(string, ...any)
+	// BidirectionalStreams is used only by explicitly enrolled Auto Direct.
+	// Even/odd stream namespaces prevent opposite initiators from colliding.
+	BidirectionalStreams bool
+	MaxStreams           int // defaults to 128; hard ceiling 256
+	Server               bool
+	Key                  []byte
+	SID                  uint64        // session id (client: random if 0; server sessions get the client's)
+	Paths                int           // client: lanes (ICMP identifiers) to stripe over
+	InitBps              float64       // starting pace, bytes/s (default 1.5 MB/s)
+	MaxBps               float64       // pace ceiling, bytes/s (default 16 MB/s)
+	MinBps               float64       // pace floor (default 200 KB/s)
+	Slack                time.Duration // extra RTT over the minimum tolerated before slowing down (default 8 ms)
+	Boot                 uint64        // server process id (random per run); clients reset their streams when it changes
+	MaxPayload           int           // datagram size cap incl. header and tag; 0 = MaxPayload (640), bounded to [256, 1400]
+	Hedge                bool          // send young packets twice on different lanes (costs ~8% extra packets)
+	FEC                  bool          // adaptive XOR parity after bursts of small packets (both ends must enable it; see fec.go)
+	Bond                 PathTimings   // multipath health/probe timings (server side; zero = production values)
+	Logf                 func(string, ...any)
 }
 
 type Stats struct {
@@ -297,6 +300,9 @@ func NewSession(cfg Config, pio PacketIO) (*Session, error) {
 	// restored from a snapshot. Counter uniqueness does not depend on wall time.
 	if cfg.Server {
 		s.nextPN = dirServerBit
+		if cfg.BidirectionalStreams {
+			s.nextSID = 2
+		}
 	}
 	s.acceptC = sync.NewCond(&s.mu)
 	if !cfg.Server {
@@ -368,7 +374,14 @@ func (s *Session) OpenStream() (*Stream, error) {
 		return nil, ErrTooManyConns
 	}
 	id := s.nextSID
-	s.nextSID++
+	if id == 0 || id > (1<<62)-2 {
+		return nil, errors.New("wat: stream identity exhausted; reconnect required")
+	}
+	if s.cfg.BidirectionalStreams {
+		s.nextSID += 2
+	} else {
+		s.nextSID++
+	}
 	return s.newStream(id), nil
 }
 
@@ -1154,7 +1167,10 @@ func (s *Session) onStream(sid, off uint64, data []byte, fin bool) {
 	}
 	st := s.streams[sid]
 	if st == nil {
-		if !s.cfg.Server || len(s.streams) >= s.cfg.MaxStreams || len(s.tomb) >= 4096 {
+		if !s.cfg.Server && !s.cfg.BidirectionalStreams || len(s.streams) >= s.cfg.MaxStreams || len(s.tomb) >= 4096 {
+			return
+		}
+		if s.cfg.BidirectionalStreams && (sid%2 == 0) == s.cfg.Server {
 			return
 		}
 		if _, gone := s.tomb[sid]; gone {

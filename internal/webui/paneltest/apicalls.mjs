@@ -69,6 +69,7 @@ const samples = {
   tunnelToken: [[]], tunnelSuggest: [[]],
   tunnelCreate: [[{}]], directOptions: [[]], directDefaults: [['iran']], directCreate: [[{}]],
   peerEnrollment: [['peer', 'auto', 'backpack://3.private']],
+  peerEnrollmentPreview: [['auto', 'backpack://3.private']],
   health: [[]], linkTestStatus: [[]], linkTestRun: [['t1']],
   logs: [['t1'], ['t1', 'peer']], history: [['t1'], ['t1', 30]],
   confHistory: [['t1']], confRestore: [['t1', 1790000000]],

@@ -431,7 +431,7 @@ func (s Spec) writePeerFeatures(b *strings.Builder) {
 
 // ValidatePeerFeatures shares the actual carrier/authority validators without
 // binding a listener or allocating a raw socket during a form review.
-func (s Spec) ValidatePeerFeatures() error {
+func (s Spec) ValidatePeerFeatures(publicOnly ...bool) error {
 	if s.Transport != "waticmp" && !s.Auto.Enabled {
 		return nil
 	}
@@ -440,6 +440,9 @@ func (s Spec) ValidatePeerFeatures() error {
 		return e
 	}
 	if s.Auto.Enabled {
+		if len(publicOnly) > 0 && publicOnly[0] {
+			return peerauto.ValidateEnrollment(&cfg)
+		}
 		return peerauto.Validate(&cfg)
 	}
 	x := s.WatICMP

@@ -10,6 +10,7 @@
 | 2026-10-13 | Execute audited Wat ICMP / peer coordination / intelligent Auto prompt | Opt-in native `waticmp`, preservation of xDi/manual/fallback defaults, immutable local WatTunnel reference, licensed source attribution and evidence gates |
 | 2026-10-13 | Publish to the user-created `firegoood/FullPack` repository | Git destination, application source/update URLs, installer, documentation, panel links and persistent reapply guards |
 | 2026-10-13 | Never upload the entire `11/` directory | Root Git ignore rule, persistent update guard and source/release publication exclusion; the local reference remains read-only |
+| 2026-10-13 | Audit the additions and complete Auto for Reverse **and Direct/L3** | Shared carrier registry, explicit connection direction, encrypted legacy adapters, managed HTTPS identities and a stable TUN with authenticated datagram forwarding; verification status is recorded separately |
 
 ## Approved Wat ICMP and peer Auto implementation
 
@@ -35,11 +36,22 @@
   that tunnel. Preserve the strict typed mutually authenticated protocol,
   explicit candidate/backend enrollment, fresh isolated probe sessions, durable
   fsync/rename generations, exclusive no-follow ownership locks, uncertain-
-  commit fencing and reverse-only pre-enrolled recovery. Peer failures remain
+  commit fencing and recovery through only the pre-enrolled directions. Peer failures remain
   independent; a slow/offline application backend is not a carrier failure.
-- Strong Auto adapters are Wat ICMP, Noise/stealth, QUIC, WSS and WSSMUX. Reject
-  unverified/plaintext adapters even if a plaintext opt-in field is posted.
-  Direct/L3 Wat and Auto remain explicitly unsupported in this version.
+- Preserve the original authenticated Wat ICMP, Noise/stealth, QUIC, WSS and
+  WSSMUX adapters. The approved Auto expansion covers every Reverse carrier,
+  explicit Direct initiation and the six existing L3 datagram carriers. Legacy
+  TCP/WebSocket/KCP/raw wrappers require Auto's authenticated encryption; never
+  enable plaintext fallback. Wat's native stream engine is not an L3 carrier.
+- The carrier registry must drive engine validation, CLI and web choices. The
+  pair explicitly enrolls at most four candidates; Iran remains the sole
+  authority even when Iran initiates a Direct connection. L3 owns its TUN once,
+  keeps IP traffic outside reliable stream retransmission, authenticates fresh
+  directional datagrams, bounds replay/reassembly and rejects retired generations.
+- Managed Auto candidates keep TLS/REALITY verification, restricted loopback
+  helper targets, role-specific executables and identities. Enrollment links
+  omit local paths, interfaces and private keys. Preserve existing fencing,
+  probe budgets and secret-preserving edit restrictions through source updates.
 - Preserve default-off Auto and default-off severe-degradation switching,
   observe-only, manual lock/disable/test actions, pressure SKIPPED results,
   global/per-pair probe budgets, jitter, debounce, quarantine, cooldown, dwell
@@ -52,7 +64,7 @@
   not as an already-connected peer requiring another enrollment handoff.
 - Connection Test option 0 includes actual normal/reverse native data tests
   when both explicit IPs are supplied; report missing prerequisites as SKIPPED.
-  Its existing TCP/UDP test coordinator is distinct from Auto's reverse-only
+  Its existing TCP/UDP test coordinator is distinct from Auto's pre-enrolled
   bootstrap and from TCP route Link Test diagnostics.
 - Preserve `tools/package-release.sh`, embedded `fullpack licenses` attribution,
   Linux raw/network-namespace fixtures and the final evidence in
@@ -65,7 +77,38 @@
   services stop. Never recursively follow a symlinked/public helper root or
   remove operator-supplied executable paths outside that dedicated namespace.
 
-## Native/Auto verification recorded on 2026-10-13
+## Auto completion approved on 2026-10-13
+
+- The shared eighteen-carrier registry covers Reverse and explicit Direct
+  initiation. L3 uses only UDP, QUIC, xDi, PCK, SPOOF and SNI with a stable TUN.
+  See `docs/auto-carrier-completion.md` for identities, packet security and
+  prerequisites; `docs/waticmp-verification.md` records acceptance separately.
+- Preserve SPOOF's authenticated bounded conversation demultiplexing on the
+  same enrolled raw receive endpoint, the concurrent bounded secure KCP accept
+  workers, and native Wat's optional Direct bidirectional stream namespaces.
+  Do not enable that optional namespace in the legacy manual adapter.
+- CLI/web imports collect destination-local helper identity and raw/TUN binds;
+  compatible Node rebuilds and CLI link updates retain that machine's private
+  identity. Never carry a redacted private key across the fleet API or inherit
+  it into an incompatible role, secret or enrollment. Blank redacted edits
+  preserve secrets; replacement keys/certificates must match public enrollment.
+- Keep QUIC unavailable on outer paths below its 1200-byte initial requirement.
+  A failed selection must retain the working route/generation. Preserve the
+  real small-path and full-MTU fixtures and the pinned HTTPS tests in CI.
+- This completion does not change installer signature policy, dependency
+  versions, manual wire identifiers, default-off Auto or WAN/release gates.
+- Expansion acceptance: whole-project Linux race passed at 58.4% total with
+  all fourteen existing floors unchanged; later CLI rebuild edits passed the
+  exact affected-package race suite. Final exact-source formatting, vet,
+  staticcheck and static amd64/arm64 builds passed. All 46 panel and nine
+  customization tests passed. Actual Reverse/Direct raw/helper and real-TUN
+  matrices, six SPOOF stream profiles, small-path rejection and optional L3
+  forwards passed. The online vulnerability DB returned HTTP403; the official
+  2026-10-08 snapshot reported no reached/imported-package vulnerabilities.
+  WAN, arbitrary NAT/anti-spoofing policy and the expansion's 24-hour soak
+  remain NOT VERIFIED. Preserve this evidence boundary through updates.
+
+## Original native/Auto verification recorded on 2026-10-13
 
 - Whole-project Linux race/coverage, formatting, vet and staticcheck passed
   with Go 1.27.2; final total coverage was 57.3% and all fourteen existing

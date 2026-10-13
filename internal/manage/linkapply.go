@@ -179,6 +179,13 @@ func updateReverseFromLink(link ShareLink, o LinkApplyOptions, existing string) 
 	if s.Role != "client" {
 		return LinkApplied{}, fmt.Errorf("%q is not a client tunnel", existing)
 	}
+	if paired.Auto.TunnelID != "" {
+		n := NewTunnel{Role: paired.Role, Token: paired.Token, Auto: &paired.Auto}
+		if err := carryAutoNodeLocal(&n, s); err != nil {
+			return LinkApplied{}, err
+		}
+		paired.Auto = *n.Auto
+	}
 	// Only the peer-owned wire settings come from the link. Local routing,
 	// retry timing, monitoring and capacity tuning belong to this machine.
 	s.Transport, s.RemoteAddr, s.Token = paired.Transport, paired.RemoteAddr, paired.Token

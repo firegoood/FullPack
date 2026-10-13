@@ -115,7 +115,8 @@
       "groups := cliTransportGroups()",
       "editedReverseSpec(s, e)",
       "selectedTransport(s)",
-      "applyManagedHTTPS(&s, chosenTransport, public, m)"
+      "applyManagedHTTPS(&s, chosenTransport, public, m)",
+      "carryAutoNodeLocal(&n, current)"
     ],
     "internal/manage/directwebapi.go": [
       "return DirectCarriers()"
@@ -145,7 +146,7 @@
     "internal/webui/panel/js/views/add.js": [
       "shapeManaged(root, t, chosen.side",
       "[name=\"managed.serverName\"]",
-      "api.peerEnrollment(peer.name, peer.transport, peer.peerEnrollment)",
+      "api.peerEnrollment(peer.name, peer.transport, peer.peerEnrollment, peer.peerLocal)",
       "Iran enrollment imported"
     ],
     "internal/webui/panel/js/views/edit.js": [
@@ -173,7 +174,8 @@
     "internal/webui/handlers_nodes.go": [
       "if t.Managed == nil {",
       "carryPeerManaged(&t, current)",
-      "host = settings.Managed.ServerName"
+      "host = settings.Managed.ServerName",
+      "if t.Auto != nil {"
     ],
     "internal/webui/nodes_test.go": [
       "TestManagedPeerRebuildKeepsLocalHelperAndUsesNaiveCertificateAddress",
@@ -209,13 +211,33 @@
     "tools/check-gofmt.sh": ["./11"],
     "tools/package-release.sh": ["licenses/waticmp", "ORIGIN.json"],
     "config/config.go": ["WATICMP TransportType = \"waticmp\""],
-    "config/auto.go": ["AllowPlaintextFallback", "AllowDegradationSwitch", "MaxSwitchesPerHour", "MaxConnections"],
+    "config/auto.go": ["AllowPlaintextFallback", "AllowDegradationSwitch", "MaxSwitchesPerHour", "MaxConnections", "PeerEnrollment()", "RedactSecrets()", "AutoL3Config", "AutoHelperConfig"],
+    "config/autocarriers.go": ["AutoCarriers()", "FindAutoCarrier", "ListenerIsIran", "Naive / HTTP2", "SNI Spoofing", "{TCP,", "{TCPMUX,", "{WS,", "{WSMUX,", "{WSS,", "{WSSMUX,", "{KCP,", "{STEALTH,", "{WATICMP,", "{UDP, \"UDP\", \"udp\", false, false, true}", "{XDI, \"xDi / ICMP\", \"icmp\", true, false, true}", "{PCK, \"PCK\", \"tcp\", true, false, true}", "{QUIC, \"QUIC\", \"udp\", false, false, true}", "{SPOOF, \"IP Spoofing\", \"raw\", true, false, true}", "{\"sni\", \"SNI Spoofing\", \"tcp\", true, false, true}", "{\"xhttp\",", "{\"reality\","],
+    "cmd/auto_mode_test.go": ["TestAutoPrimaryUsesEnrolledValidator", "ignored legacy socket mark accepted"],
+    "internal/tunnel/l3/adapter.go": ["OpenPacketDevice", "OpenDatagramCarrier", "cfg.Validate()"],
+    "internal/tunnel/peerauto/helper.go": ["validateHelper", "VerifyHostname", "leaf.Verify", "REALITY private key does not match", "fullpack-auto-trust-", "listenNoiseTCP"],
+    "internal/tunnel/peerauto/l3.go": ["validateAutoL3", "startL3", "validIPPacket", "packetIP", "device.Write"],
+    "internal/tunnel/peerauto/packet.go": ["chacha20poly1305", "replay", "generation", "sequence"],
+    "internal/tunnel/peerauto/packetcarrier.go": ["newPacketMux", "packet channel resource/identity limit", "openAutoPacket", "retiredSpoofConn"],
+    "internal/tunnel/peerauto/packetprobe.go": ["exchangePacketProbe", "respondPacketProbe", "packetProbe"],
+    "internal/tunnel/peerauto/spoofhub.go": ["hmac.Equal", "len(h.admitted) >= 8", "retiredSpoofConn", "Port: uint16(port)", "h.joined"],
+    "internal/tunnel/peerauto/spoofhub_test.go": ["TestSpoofConversationsAuthenticateBoundAndRetire", "forged MAC allocated", "retired session replay admitted"],
+    "internal/tunnel/peerauto/packet_test.go": ["TestAutoPacketIntegrityReplayAndGeneration", "TestAutoDatagramProbeCannotPassOnControlAlone", "9000"],
+    "internal/manage/autohelpers.go": ["prepareAutoHelpers", "applyManagedHTTPS", "applyAutoPeerLocal", "PeerLocalRequirements", "carryAutoNodeLocal", "reflect.DeepEqual(old, incoming)"],
+    "internal/manage/autohelpermenu.go": ["promptAutoHelper", "reality"],
+    "internal/manage/autohelpers_test.go": ["TestAutoHTTPSRolesLinksAndRedactedEdits", "TestAutoL3EnrollmentHasNoLocalInterfaceOrRequiredPorts", "reality", "TestAutoNodeRebuildPreservesOnlyCompatibleLocalIdentity"],
+    "internal/manage/linkapply.go": ["carryAutoNodeLocal(&n, s)"],
+    "internal/manage/reversesetup.go": ["specFromPeerNew(f.ToNewTunnel(), true)"],
+    "internal/manage/peermenu.go": ["config.AutoCarriers()", "Auto Traffic Mode", "Local Listener Bind For", "Matching Local REALITY Private Key"],
+    "internal/tunnel/peerauto/state_test.go": ["TestManifestKeepsLegacyHashAndIgnoresOnlyLocalOverrides", "TestSpoofUDPPortReservationUsesParsedProfile"],
+    "internal/e2e/peerauto_https_test.go": ["TestPeerAutoManagedHTTPSBothDirections", "FULLPACK_AUTO_HELPERS", "runtime.GOARCH"],
+    "internal/e2e/testdata/auto-carriers-netns.sh": ["FULLPACK_AUTO_NETNS", "FULLPACK_AUTO_OUTER_MTU", "FULLPACK_AUTO_L3_FORWARD", "FULLPACK_AUTO_WAT_DIRECTION", "8972", "test-now", "stable listener/TUN"],
     "cmd/defaults.go": ["checkWatICMP", "peerauto.Validate(cfg)", "native Wat ICMP does not implement legacy"],
     "cmd/cmd.go": ["peerauto.New", ".auto-state.json"],
     "internal/tunnel/waticmp/conn.go": ["crypto/ecdh", "IsMulticast()", "net.IPv4bcast", "github.com/backpack/backpack/waticmp/v1/enrollment:", "authenticated_payload"],
-    "internal/tunnel/waticmp/engine/session.go": ["maxSessionWin = 16 << 20", "fresh authenticated session key and ID", "AuthDropped", "ReplayDropped", "[4096]lateAckTime", "ipIcmpHdr = 52"],
+    "internal/tunnel/waticmp/engine/session.go": ["maxSessionWin = 16 << 20", "fresh authenticated session key and ID", "AuthDropped", "ReplayDropped", "[4096]lateAckTime", "ipIcmpHdr = 52", "BidirectionalStreams", "sid%2 == 0"],
     "internal/tunnel/waticmp/engine/cc.go": ["return unsampledRTT", "minRate = min(minRate, maxRate)"],
-    "internal/tunnel/waticmp/engine/safety_test.go": ["TestWindowRetirementMustNotUnderflow", "TestPumpSnapshotBeforeReceiveDoesNotOverflowAckDelay", "TestUnauthenticatedOrReplayedPacketCannotAllocateStreams", "TestFirstDelayedAckCanTeachTheSessionItsRTT", "TestLateAckLearnsAChangedRTTAfterPacketRetirement"],
+    "internal/tunnel/waticmp/engine/safety_test.go": ["TestWindowRetirementMustNotUnderflow", "TestPumpSnapshotBeforeReceiveDoesNotOverflowAckDelay", "TestUnauthenticatedOrReplayedPacketCannotAllocateStreams", "TestFirstDelayedAckCanTeachTheSessionItsRTT", "TestLateAckLearnsAChangedRTTAfterPacketRetirement", "TestEnrolledBidirectionalStreamsKeepDisjointIdentities"],
     "internal/tunnel/waticmp/engine/LICENSE": ["MIT License", "2026 Amirreza"],
     "internal/tunnel/waticmp/engine/ORIGIN.json": ["2.4.8", "b02cf1a38a42649f8066ca14573d5a98028e94ccf7e676460979808b5b7cf7a2"],
     "internal/tunnel/peerauto/config.go": ["plaintext Auto adapters are not verified", "Auto is the sole switching owner", "manifestHash", "candidate listeners conflict"],
@@ -230,7 +252,10 @@
     "internal/manage/conntest_waticmp.go": ["waticmp", "watEnrollment"],
     "internal/webui/handlers_peerauto.go": ["handlePeerAuto", "handlePeerEnrollment", "DisallowUnknownFields", "MaxBytesReader"],
     "internal/webui/server.go": ["/api/tunnel/auto", "/api/tunnel/peer-enrollment"],
-    "internal/webui/panel/js/ui/peerauto.js": ["Import an enrolled Kharej endpoint", "peerSetupPayload", "peerEditForm", "api.autoAction", "n.closest('.grp3')"],
+    "internal/webui/panel/js/ui/peerauto.js": ["Import an enrolled Kharej endpoint", "peerSetupPayload", "peerEditForm", "api.autoAction", "n.closest('.grp3')", "localAutoFields", "readLocalAuto"],
+    "internal/webui/paneltest/peerauto.test.js": ["Auto edit changes only local fields", "Auto Direct HTTPS", "Auto L3"],
+    ".github/workflows/ci.yml": ["FULLPACK_AUTO_HELPERS", "FULLPACK_AUTO_NETNS", "FULLPACK_AUTO_OUTER_MTU=1500"],
+    "docs/auto-carrier-completion.md": ["one to four", "4096-packet replay window", "NOT VERIFIED", "same explicitly enrolled receive port"],
     "internal/cli/licenses.go": ["wat.License", "wat.Origin"],
     "internal/menu/system.go": ["Configuration And Fencing State Were Kept", "manage.RemoveInstalledHelpers()", "Remaining Installation Files Were Kept"],
     "internal/manage/installedhelpers.go": ["/usr/local/lib/fullpack", "os.ModeSymlink", "os.RemoveAll(root)"],

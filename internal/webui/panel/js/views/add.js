@@ -130,7 +130,7 @@ export function addView(ctx) {
         const cn = drawer('cn');
         if (cn) cn.hidden = isManaged(t);
         shapeManaged(root, t, chosen.side, chosen.direction === 'direct');
-        shapePeerSetup(root, t, chosen.side, chosen.direction === 'direct');
+        shapePeerSetup(root, t, chosen.side, chosen.direction === 'direct', opts.autoCarriers || []);
       }
 
       /* Throughput is offered only where it applies — presetSuitsTransport. */
@@ -1112,7 +1112,7 @@ export function addView(ctx) {
         const peer = peerSetupPayload(root, payload);
         const r = chosen.direction === 'direct'
           ? await api.directCreate(payload)
-          : peer.peerEnrollment !== undefined ? await api.peerEnrollment(peer.name, peer.transport, peer.peerEnrollment)
+          : peer.peerEnrollment !== undefined ? await api.peerEnrollment(peer.name, peer.transport, peer.peerEnrollment, peer.peerLocal)
           : await api.tunnelCreate(peer);
         return { r, name: payload.name };
       }

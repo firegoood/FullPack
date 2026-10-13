@@ -13,6 +13,12 @@ import (
 	"github.com/backpack/backpack/internal/tunnel/peerauto"
 )
 
+func TestPeerAutoExistingCarriersDirect(t *testing.T) {
+	for _, carrier := range []config.TransportType{config.STEALTH, config.QUIC, config.WSS, config.WSSMUX} {
+		t.Run(string(carrier), func(t *testing.T) { testPeerCoordinatedSwitchKeepsUserListener(t, carrier, true, "direct") })
+	}
+}
+
 func TestPeerAutoSingleApprovedCarrierBootstrap(t *testing.T) {
 	for _, carrier := range []config.TransportType{config.STEALTH, config.QUIC, config.WSS, config.WSSMUX} {
 		t.Run(string(carrier), func(t *testing.T) {

@@ -36,16 +36,17 @@ const (
 // Settings is explicitly opt-in. PeerIP is a route hint; identity is proved
 // by the unique enrollment key and TunnelID, not by the source address.
 type Settings struct {
-	Enabled          bool
-	PeerIP           string
-	TunnelID         string
-	Direction        string // normal: Iran requests; reverse: Kharej requests
-	Token            string
-	Paths            int
-	MaxStreams       int
-	MaxPayload       int
-	MaxBps           int
-	HandshakeTimeout time.Duration
+	BidirectionalStreams bool // internal enrolled Auto Direct capability; manual defaults unchanged
+	Enabled              bool
+	PeerIP               string
+	TunnelID             string
+	Direction            string // normal: Iran requests; reverse: Kharej requests
+	Token                string
+	Paths                int
+	MaxStreams           int
+	MaxPayload           int
+	MaxBps               int
+	HandshakeTimeout     time.Duration
 }
 
 func (s Settings) Validate() error {
@@ -371,7 +372,7 @@ func Connect(parent context.Context, server bool, s Settings) (*Conn, error) {
 			if !stop() && ctx.Err() != nil {
 				return nil, ctx.Err()
 			}
-			engine, err := wat.NewSession(wat.Config{Server: server, Key: binding, SID: sid, Paths: s.Paths,
+			engine, err := wat.NewSession(wat.Config{Server: server, BidirectionalStreams: s.BidirectionalStreams, Key: binding, SID: sid, Paths: s.Paths,
 				MaxPayload: s.MaxPayload, MaxStreams: s.MaxStreams, InitBps: 200_000, MinBps: 32_000, MaxBps: float64(s.MaxBps)}, i)
 			if err != nil {
 				return nil, err

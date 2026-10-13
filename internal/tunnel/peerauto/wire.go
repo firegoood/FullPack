@@ -106,6 +106,7 @@ func readMessage(c net.Conn) (message, error) {
 }
 
 type wire struct {
+	packet           *packetPipe
 	c                net.Conn
 	key              []byte
 	base             message
@@ -161,6 +162,18 @@ func (w *wire) ask(m message, expect string) (message, error) {
 // Bilateral fresh challenges and carrier binding prevent old snapshot/replayed
 // HELLO material from admitting either control messages or production streams.
 func (m *Manager) authenticate(c net.Conn, s carrierSession, id, probeTx string) (*wire, message, error) {
+	var approved bool
+	var initiator bool
+	for _, candidate := range m.policy.Candidates {
+		if candidate.ID == id {
+			approved = true
+			initiator = m.iran != candidate.ListenerIsIran()
+			break
+		}
+	}
+	if !approved {
+		return nil, message{}, errors.New("unknown enrolled carrier")
+	}
 	_ = c.SetDeadline(time.Now().Add(10 * time.Second))
 	defer c.SetDeadline(time.Time{})
 	binding, e := s.Binding(m.token)
@@ -174,7 +187,7 @@ func (m *Manager) authenticate(c net.Conn, s carrierSession, id, probeTx string)
 	}
 	base := message{Version: wireVersion, Tunnel: m.policy.TunnelID, Sender: local, Receiver: remote, Manifest: m.manifest, Candidate: id, Incarnation: m.incarnation, Generation: m.store.snapshot().Generation, Nonce: fresh(), Transaction: probeTx}
 	var peer message
-	if !m.iran {
+	if initiator {
 		base.Op = "HELLO"
 		if e = writeMessage(c, base, key); e == nil {
 			peer, e = readMessage(c)
@@ -188,7 +201,7 @@ func (m *Manager) authenticate(c net.Conn, s carrierSession, id, probeTx string)
 	if !validMessage(peer, key) || peer.Tunnel != base.Tunnel || peer.Sender != remote || peer.Receiver != local || peer.Manifest != base.Manifest || peer.Candidate != id || len(peer.Nonce) != 64 || len(peer.Incarnation) != 64 {
 		return nil, peer, errors.New("peer enrollment/capabilities mismatch; upgrade and enroll both peers")
 	}
-	if m.iran {
+	if !initiator {
 		if peer.Op != "HELLO" || peer.PeerIncarnation != "" {
 			return nil, peer, errors.New("invalid initial HELLO")
 		}
@@ -216,6 +229,12 @@ func (m *Manager) authenticate(c net.Conn, s carrierSession, id, probeTx string)
 	}
 	base.PeerIncarnation = peer.Incarnation
 	w := &wire{c: c, base: base, key: keyed(key, "fresh-session:", first, second, m.policy.IranID, m.policy.KharejID)}
+	if m.policy.Mode == "l3" {
+		w.packet, e = newPacketPipe(s, w, m.iran)
+		if e != nil {
+			return nil, peer, e
+		}
+	}
 	if !m.iran {
 		e = w.send(message{Op: "STATE_SYNC", Generation: base.Generation, Active: m.store.snapshot().Active})
 		if e == nil {
@@ -229,6 +248,9 @@ func (m *Manager) authenticate(c net.Conn, s carrierSession, id, probeTx string)
 		if e == nil {
 			e = w.send(message{Op: "STATE_SYNC", Generation: base.Generation, Active: m.store.snapshot().Active})
 		}
+	}
+	if e != nil && w.packet != nil {
+		w.packet.close()
 	}
 	return w, peer, e
 }

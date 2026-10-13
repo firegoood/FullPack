@@ -48,6 +48,9 @@ const QUICInitialPacketSize = 1232
 // timeout, the keepalive that holds a NAT mapping open, and the datagram socket
 // buffers.
 type QUICSettings struct {
+	// DatagramMode is opt-in for the enrolled L3 adapter; manual stream
+	// transports retain their existing behavior and never gain a second mux.
+	DatagramMode bool
 	// IncomingStreamLimit is optional; zero preserves the manual engine limit.
 	// Enrolled peer endpoints use a small fixed resource budget instead.
 	IncomingStreamLimit int64
@@ -73,6 +76,7 @@ func (s QUICSettings) quicConfig() *quic.Config {
 		limit = 1 << 16
 	}
 	return &quic.Config{
+		EnableDatagrams: s.DatagramMode,
 		KeepAlivePeriod: s.KeepAlivePeriod,
 		MaxIdleTimeout:  s.MaxIdleTimeout,
 		// The pool pre-opens streams and every forwarded flow is one more, so the

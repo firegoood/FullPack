@@ -51,6 +51,9 @@ func ownedKCPSession(raddr net.Addr, block kcp.BlockCrypt, dataShards, paritySha
 // down to the socket. Both the server and the client side fill it from the
 // same preset, so the two ends of a tunnel always agree.
 type KCPSettings struct {
+	// EphemeralKey avoids retaining transaction-scoped probe secrets in the
+	// process-wide cache. It changes ownership only, never the KCP key domain.
+	EphemeralKey bool
 	MTU          int
 	Interval     int
 	Resend       int
@@ -221,6 +224,13 @@ func kcpCrypt(token string) (kcp.BlockCrypt, error) {
 // it holds one entry, or a few across a fallback chain.
 var kcpKeys sync.Map
 
+func kcpCipher(token string, s KCPSettings) (kcp.BlockCrypt, error) {
+	if s.EphemeralKey {
+		return kcp.NewAESBlockCrypt(pbkdf2.Key([]byte(token), []byte("backpack-kcp-v1"), 100_000, 32, sha256.New))
+	}
+	return kcpCrypt(token)
+}
+
 // ApplyKCPSettings pushes the tuning onto a live KCP session. It is called on
 // every accepted and dialled session, on both sides.
 func ApplyKCPSettings(session *kcp.UDPSession, s KCPSettings) {
@@ -267,7 +277,7 @@ func ApplyKCPSettings(session *kcp.UDPSession, s KCPSettings) {
 // close the returned Closer as well or the next restart cannot bind the port.
 // For the plain UDP path the Closer is a no-op — kcp owns that socket.
 func KCPListen(bindAddr, token string, s KCPSettings) (*kcp.Listener, io.Closer, error) {
-	block, err := kcpCrypt(token)
+	block, err := kcpCipher(token, s)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -340,6 +350,34 @@ func KCPDial(remoteAddr, token string, s KCPSettings) (*kcp.UDPSession, error) {
 	return KCPDialContext(context.Background(), remoteAddr, token, s)
 }
 
+// KCPListenOnPacketConn retains the legacy encrypted KCP framing over an
+// explicitly owned packet layer. Only control/stream data uses KCP; an Auto
+// L3 coordinator keeps user IP datagrams outside it. The caller owns conn.
+func KCPListenOnPacketConn(conn net.PacketConn, token string, s KCPSettings) (*kcp.Listener, error) {
+	block, err := kcpCipher(token, s)
+	if err != nil {
+		return nil, err
+	}
+	return kcp.ServeConn(block, s.DataShards, s.ParityShards, conn)
+}
+
+// KCPDialOnPacketConn uses the supplied resolved peer and closes the owned
+// packet layer when the session ends, just like the existing raw dial paths.
+func KCPDialOnPacketConn(peer net.Addr, conn net.PacketConn, token string, s KCPSettings) (*kcp.UDPSession, error) {
+	block, err := kcpCipher(token, s)
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+	session, err := ownedKCPSession(peer, block, s.DataShards, s.ParityShards, conn)
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+	ApplyKCPSettings(session, s)
+	return session, nil
+}
+
 // KCPDialContext bounds endpoint DNS by the caller's setup context. Established
 // sessions retain their normal lifetime after this function hands them off.
 func KCPDialContext(ctx context.Context, remoteAddr, token string, s KCPSettings) (*kcp.UDPSession, error) {
@@ -362,7 +400,7 @@ func KCPDialContext(ctx context.Context, remoteAddr, token string, s KCPSettings
 	if err != nil {
 		return nil, fmt.Errorf("kcp: resolve endpoint: %w", err)
 	}
-	block, err := kcpCrypt(token)
+	block, err := kcpCipher(token, s)
 	if err != nil {
 		return nil, err
 	}

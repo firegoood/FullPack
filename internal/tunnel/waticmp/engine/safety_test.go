@@ -4,9 +4,53 @@ import (
 	"encoding/binary"
 	"errors"
 	"os"
+	"sync"
 	"testing"
 	"time"
 )
+
+func TestEnrolledBidirectionalStreamsKeepDisjointIdentities(t *testing.T) {
+	for _, server := range []bool{false, true} {
+		s := memorySession()
+		s.cfg.Server = server
+		s.cfg.BidirectionalStreams = true
+		s.acceptC = sync.NewCond(&s.mu)
+		s.nextSID = 1
+		if server {
+			s.nextSID = 2
+		}
+		first, err := s.OpenStream()
+		if err != nil {
+			t.Fatal(err)
+		}
+		second, err := s.OpenStream()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if second.id != first.id+2 {
+			t.Fatal("stream initiator namespaces overlap")
+		}
+		s.cfg.MaxStreams = 4
+		peer := uint64(2)
+		if server {
+			peer = 1
+		}
+		s.onStream(peer, 0, []byte("peer"), false)
+		if len(s.acceptQ) != 1 || s.acceptQ[0].id != peer {
+			t.Fatal("peer cannot initiate enrolled stream")
+		}
+		s.onStream(first.id+8, 0, []byte("wrong namespace"), false)
+		if len(s.streams) != 3 {
+			t.Fatal("peer allocated a stream in our namespace")
+		}
+	}
+	manual := memorySession()
+	manual.acceptC = sync.NewCond(&manual.mu)
+	manual.onStream(2, 0, []byte("unrequested"), false)
+	if len(manual.streams) != 0 {
+		t.Fatal("manual client enabled unsolicited peer streams")
+	}
+}
 
 func TestUnauthenticatedOrReplayedPacketCannotAllocateStreams(t *testing.T) {
 	s := memorySession()

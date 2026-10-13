@@ -24,6 +24,9 @@ import "net"
 // symmetric tunnel they are equal. The carrier's own constructor picks which is
 // its send and which its receive from the side it is on.
 type SpoofCarrier struct {
+	// Port optionally fixes the enrolled Auto port/echo ID. Zero preserves the
+	// legacy token-derived identifier used by manual tunnels.
+	Port       uint16
 	Uplink     SpoofProfile
 	Downlink   SpoofProfile
 	SrcIP      string   // forged source address, empty to keep the real one
@@ -42,6 +45,7 @@ type SpoofCarrier struct {
 // options for one side of the tunnel.
 func (c SpoofCarrier) spoofOpts(token string, realPeer net.IP) spoofConnOpts {
 	return spoofConnOpts{
+		port:       c.Port,
 		token:      token,
 		uplink:     c.Uplink,
 		downlink:   c.Downlink,

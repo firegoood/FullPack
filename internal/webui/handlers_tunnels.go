@@ -3,6 +3,7 @@ package webui
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/backpack/backpack/config"
 	"net/http"
 	"strings"
 
@@ -48,6 +49,7 @@ func (s *server) handleTunnelOptions(w http.ResponseWriter, r *http.Request) {
 		"spoofProfiles": manage.SpoofProfiles(),
 		"pckFlags":      manage.PckFlagCycles(),
 		"interfaces":    manage.RoutableInterfaces(),
+		"autoCarriers":  config.AutoCarriers(),
 	})
 }
 

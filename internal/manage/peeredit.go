@@ -2,6 +2,7 @@ package manage
 
 import (
 	"fmt"
+	"github.com/backpack/backpack/config"
 	"reflect"
 	"strings"
 )
@@ -17,6 +18,25 @@ func editedPeerSpec(s TunnelSpec, e TunnelEdit) (TunnelSpec, bool, error) {
 	if s.Auto.TunnelID != "" || e.Auto != nil {
 		if e.Auto != nil {
 			s.Auto = *e.Auto
+			s.Auto.Candidates = append([]config.AutoCandidate(nil), s.Auto.Candidates...)
+			for i := range s.Auto.Candidates {
+				p := &s.Auto.Candidates[i]
+				if p.Helper == nil {
+					continue
+				}
+				h := *p.Helper
+				p.Helper = &h
+				for _, old := range before.Auto.Candidates {
+					if old.ID == p.ID && old.Transport == p.Transport && old.Mode == p.Mode && old.Helper != nil {
+						if h.Password == "" {
+							h.Password = old.Helper.Password
+						}
+						if h.PrivateKey == "" {
+							h.PrivateKey = old.Helper.PrivateKey
+						}
+					}
+				}
+			}
 		}
 		// Shared enrollment edits are refused by the state guard before mutation.
 		// Local observe/pressure choices remain editable without a new enrollment.

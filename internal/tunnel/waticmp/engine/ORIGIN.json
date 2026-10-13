@@ -78,6 +78,7 @@
     "one-second initial loss/PTO floor permits an authenticated first RTT sample on delayed paths",
     "explicit low pacing ceilings also bound initial rate and minimum rate",
     "bounded retired-packet timing metadata lets authenticated late ACKs repair RTT estimates after path delay changes",
-    "paced packet accounting includes the native enrollment envelope as well as IPv4/ICMP headers"
+    "paced packet accounting includes the native enrollment envelope as well as IPv4/ICMP headers",
+    "optional enrolled Auto Direct bidirectional stream admission with disjoint odd/even identities; default manual admission retained"
   ]
 }
