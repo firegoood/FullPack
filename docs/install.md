@@ -5,7 +5,7 @@
 One command as root on the VPS:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/firegoood/BackPack/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/firegoood/FullPack/main/install.sh)
 ```
 
 It downloads the prebuilt release archive for your architecture (amd64/arm64)
@@ -41,7 +41,7 @@ install it there. Nothing is fetched from the VPS.
 
 ![Offline install](../img/offline-install.gif)
 
-From the [releases page](https://github.com/firegoood/BackPack/releases/latest),
+From the [releases page](https://github.com/firegoood/FullPack/releases/latest),
 download the archive for the server's architecture — run `uname -m` on it:
 `x86_64` → `fullpack_linux_amd64.tar.gz`, `aarch64` → `fullpack_linux_arm64.tar.gz`.
 

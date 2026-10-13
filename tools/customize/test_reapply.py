@@ -74,12 +74,27 @@ class ReapplicationTests(unittest.TestCase):
         app = reapply.transform("internal/app/app.go", self.upstream("internal/app/app.go"))
         install = reapply.transform("install.sh", self.upstream("install.sh"))
         self.assertIn('RepoOwner = "firegoood"', app)
-        self.assertIn('RepoName  = "BackPack"', app)
-        self.assertIn('REPO="firegoood/BackPack"', install)
+        self.assertIn('RepoName  = "FullPack"', app)
+        self.assertIn('REPO="firegoood/FullPack"', install)
         self.assertIn('ASSET="fullpack_linux_${ARCH}.tar.gz"', install)
         extract = reapply.transform("internal/manage/update.go", self.upstream("internal/manage/update.go"))
         self.assertIn('filepath.Base(hdr.Name) != "fullpack"', extract)
         self.assertIn('"backpack", cfg.Server.Token', extract)
+
+    def test_repository_identity_comes_from_manifest_after_an_upstream_merge(self):
+        original = ('RepoOwner = "AminMGMT"\nRepoName  = "BackPack"\n'
+                    'module = "github.com/backpack/backpack"\n'
+                    'domain = "backpack-noise-v1"\n')
+        for repository in ["firegoood/FullPack", "another-owner/FullPack-source"]:
+            with self.subTest(repository=repository), \
+                 mock.patch.object(reapply, "SPEC", {**reapply.SPEC, "repository": repository}):
+                owner, name = repository.split("/", 1)
+                updated = reapply.transform("internal/app/app.go", original)
+                self.assertIn(f'RepoOwner = "{owner}"', updated)
+                self.assertIn(f'RepoName  = "{name}"', updated)
+                self.assertIn('module = "github.com/backpack/backpack"', updated)
+                self.assertIn('domain = "backpack-noise-v1"', updated)
+                self.assertEqual(updated, reapply.transform("internal/app/app.go", updated))
 
     def test_readme_preserves_the_authors_attribution_and_trademark_policy(self):
         for path in ["README.md", "README_FA.md"]:

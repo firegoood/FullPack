@@ -15,7 +15,7 @@ const (
 	// RepoOwner/RepoName identify the GitHub repository used by the installer
 	// and the release-based updater.
 	RepoOwner = "firegoood"
-	RepoName  = "BackPack"
+	RepoName  = "FullPack"
 
 	// SourceURL is where the source lives, printed with the version.
 	SourceURL = "https://github.com/" + RepoOwner + "/" + RepoName

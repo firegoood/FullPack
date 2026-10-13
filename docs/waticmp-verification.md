@@ -11,7 +11,7 @@ Target `E:/P_OX/back`; module `github.com/backpack/backpack`; implementation bas
 HTTPS and spoofing web changes were preserved. The implementation audit involved
 no upstream fetch, dependency upgrade, commit, push, tag, signed release or
 live-server change. The operator subsequently authorized a separate source
-commit/push to `firegoood/BackPack`; this does not authorize a binary release
+commit/push to `firegoood/FullPack`; this does not authorize a binary release
 or deployment. The baseline SHA and measurements below remain audit evidence.
 
 The read-only reference is `11/WatTunnel`, WatTunnel 2.4.8, MIT copyright

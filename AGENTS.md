@@ -41,8 +41,8 @@ updating this repository. These files record the user's persistent preferences.
   logic/checks in the same task. Do not invent additional customizations.
 - Product names, command examples, installation paths, systemd units and release
   asset names must agree. Keep release URLs pointed at the actual fork
-  `firegoood/BackPack` until the user changes the repository address; FullPack is
-  the product name, not evidence that a GitHub repository was renamed.
+  `firegoood/FullPack`, the new repository explicitly supplied by the user.
+  Preserve this destination until the user supplies a different address.
 - Never install official upstream binaries over FullPack: incorporate upstream
   **source**, reapply the customizations, and build FullPack release assets.
 - Keep upstream attribution, LICENSE, NOTICE and TRADEMARK.md intact. Keep the

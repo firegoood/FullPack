@@ -133,7 +133,7 @@ func Logo(version string) {
   ╚══════════════════════╝`)
 	fmt.Print(Reset)
 	fmt.Printf("%s FullPack  %s%s%s\n", Bold+White, Red, version, Reset)
-	fmt.Println(Gray + " GitHub : https://github.com/firegoood/BackPack" + Reset)
+	fmt.Println(Gray + " GitHub : https://github.com/firegoood/FullPack" + Reset)
 }
 
 // Prompt reads a trimmed line after printing label.

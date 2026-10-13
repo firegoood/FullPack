@@ -748,7 +748,7 @@ export function settingsView(ctx) {
       }));
 
       byText(/^changelog$/i).forEach(b => b.addEventListener('click', () =>
-        window.open('https://github.com/firegoood/BackPack/releases', '_blank', 'noopener')));
+        window.open('https://github.com/firegoood/FullPack/releases', '_blank', 'noopener')));
 
       byText(/^download$/i).forEach(b => b.addEventListener('click', () => {
         location.href = api.backupExportURL();

@@ -9,20 +9,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/firegoood/BackPack/releases/latest">
-    <img src="https://img.shields.io/github/v/release/firegoood/BackPack?logo=github&label=release&color=orange" alt="Latest release">
+  <a href="https://github.com/firegoood/FullPack/releases/latest">
+    <img src="https://img.shields.io/github/v/release/firegoood/FullPack?logo=github&label=release&color=orange" alt="Latest release">
   </a>
   <a href="go.mod">
-    <img src="https://img.shields.io/github/go-mod/go-version/firegoood/BackPack?logo=go&label=Go" alt="Go version">
+    <img src="https://img.shields.io/github/go-mod/go-version/firegoood/FullPack?logo=go&label=Go" alt="Go version">
   </a>
   <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/firegoood/BackPack?color=orange" alt="License">
+    <img src="https://img.shields.io/github/license/firegoood/FullPack?color=orange" alt="License">
   </a>
-  <a href="https://github.com/firegoood/BackPack/stargazers">
-    <img src="https://img.shields.io/github/stars/firegoood/BackPack?style=flat&logo=github&color=orange" alt="GitHub stars">
+  <a href="https://github.com/firegoood/FullPack/stargazers">
+    <img src="https://img.shields.io/github/stars/firegoood/FullPack?style=flat&logo=github&color=orange" alt="GitHub stars">
   </a>
-  <a href="https://github.com/firegoood/BackPack/releases">
-    <img src="https://img.shields.io/github/downloads/firegoood/BackPack/total?logo=github&label=downloads&color=orange" alt="Downloads">
+  <a href="https://github.com/firegoood/FullPack/releases">
+    <img src="https://img.shields.io/github/downloads/firegoood/FullPack/total?logo=github&label=downloads&color=orange" alt="Downloads">
   </a>
 </p>
 
@@ -234,7 +234,7 @@ See [Forwarded UDP](docs/forwarded-udp.md).
 On both servers:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/firegoood/BackPack/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/firegoood/FullPack/main/install.sh)
 ```
 
 Then:

@@ -2,7 +2,7 @@
 #
 # FullPack installer — one command on the VPS (as root):
 #
-#   bash <(curl -fsSL https://raw.githubusercontent.com/firegoood/BackPack/main/install.sh)
+#   bash <(curl -fsSL https://raw.githubusercontent.com/firegoood/FullPack/main/install.sh)
 #
 # It downloads the prebuilt release tar.gz for this architecture into
 # /root/FullPack and installs the binary, verifying it against the checksum
@@ -27,7 +27,7 @@ info() { echo -e "${WHITE}[*]${NC} $*"; }
 warn() { echo -e "${GRAY}[!]${NC} $*"; }
 err()  { echo -e "${RED}[x]${NC} $*" >&2; }
 
-REPO="firegoood/BackPack"
+REPO="firegoood/FullPack"
 BIN_PATH="/usr/local/bin/fullpack"
 INSTALL_DIR="/root/FullPack"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-/tmp}")" 2>/dev/null && pwd || echo /tmp)"

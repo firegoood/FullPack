@@ -5,11 +5,11 @@
 # FullPack 🎒
 
 <p align="center">
-  <a href="go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/firegoood/BackPack?logo=go&label=Go"></a>
-  <a href="https://github.com/firegoood/BackPack/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/firegoood/BackPack?logo=github&label=release&color=blue"></a>
-  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/firegoood/BackPack?color=green"></a>
-  <a href="https://github.com/firegoood/BackPack/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/firegoood/BackPack?style=flat&logo=github&color=yellow"></a>
-  <a href="https://github.com/firegoood/BackPack/releases"><img alt="Total downloads across all releases" src="https://img.shields.io/github/downloads/firegoood/BackPack/total?logo=github&label=total%20downloads&color=orange"></a>
+  <a href="go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/firegoood/FullPack?logo=go&label=Go"></a>
+  <a href="https://github.com/firegoood/FullPack/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/firegoood/FullPack?logo=github&label=release&color=blue"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/firegoood/FullPack?color=green"></a>
+  <a href="https://github.com/firegoood/FullPack/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/firegoood/FullPack?style=flat&logo=github&color=yellow"></a>
+  <a href="https://github.com/firegoood/FullPack/releases"><img alt="Total downloads across all releases" src="https://img.shields.io/github/downloads/firegoood/FullPack/total?logo=github&label=total%20downloads&color=orange"></a>
 </p>
 
 **FullPack** یک هستهٔ تونل با کارایی بالاست که کاملاً با **Go** نوشته شده و برای
@@ -146,7 +146,7 @@ replay، و **MTU خودش را اندازه می‌گیرد**. تنها چیز�
 </div>
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/firegoood/BackPack/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/firegoood/FullPack/main/install.sh)
 ```
 
 <div dir="rtl">

@@ -1,7 +1,7 @@
 {
   "display_name": "FullPack",
   "command": "fullpack",
-  "repository": "firegoood/BackPack",
+  "repository": "firegoood/FullPack",
   "upstream_repository": "AminMGMT/BackPack",
   "preserve_files": [
     "LICENSE",
@@ -55,7 +55,7 @@
   "required": {
     "internal/app/app.go": [
       "RepoOwner = \"firegoood\"",
-      "RepoName  = \"BackPack\"",
+      "RepoName  = \"FullPack\"",
       "InstallDir = \"/root/FullPack\"",
       "ConfigDir = \"/etc/fullpack\"",
       "BinPath = \"/usr/local/bin/fullpack\"",
@@ -66,7 +66,7 @@
       "release/fullpack_linux_$$a.tar.gz"
     ],
     "install.sh": [
-      "REPO=\"firegoood/BackPack\"",
+      "REPO=\"firegoood/FullPack\"",
       "BIN_PATH=\"/usr/local/bin/fullpack\"",
       "ASSET=\"fullpack_linux_${ARCH}.tar.gz\"",
       "got_major == 1 && got_minor == 27 && got_patch < 2"

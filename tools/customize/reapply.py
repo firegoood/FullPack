@@ -33,15 +33,18 @@ def transform(path, source):
         source = re.sub(r'"backpack"', hold, source)
     if path == "internal/manage/update.go":
         source = source.replace('"backpack", cfg.Server.Token', '"\x03username\x03", cfg.Server.Token')
-    # Keep an existing real repository address rather than inventing FullPack on GitHub.
+    # Use the repository explicitly approved in the persistent manifest.
+    owner, repository_name = SPEC["repository"].split("/", 1)
     source = source.replace(SPEC["upstream_repository"], SPEC["repository"])
-    source = source.replace('RepoOwner = "AminMGMT"', 'RepoOwner = "firegoood"')
-    source = re.sub(r'RepoName\s+= "(?:BackPack|FullPack)"', 'RepoName  = "\x03repository\x03"', source)
+    if path == "internal/app/app.go":
+        source = re.sub(r'RepoOwner\s+= "[^"]+"', 'RepoOwner = "\x03owner\x03"', source)
+        source = re.sub(r'RepoName\s+= "[^"]+"', 'RepoName  = "\x03repository\x03"', source)
     source = source.replace(SPEC["repository"], "\x03fork\x03")
     source = re.sub(r"\b(?:BackPack|Backpack|BACKPACK)\b", SPEC["display_name"], source)
     source = re.sub(r"(?<![A-Za-z])backpack(?![A-Za-z])", SPEC["command"], source)
     source = re.sub(r"بک[‌ -]?پک", SPEC["display_name"], source)
-    source = source.replace("\x03repository\x03", "BackPack").replace("\x03fork\x03", SPEC["repository"])
+    source = source.replace("\x03owner\x03", owner).replace("\x03repository\x03", repository_name)
+    source = source.replace("\x03fork\x03", SPEC["repository"])
     source = source.replace("\x03username\x03", "backpack")
     source = re.sub(r"\x01(\d+)\x02", lambda m: protected[int(m.group(1))], source)
     if path in {"README.md", "README_FA.md"}:

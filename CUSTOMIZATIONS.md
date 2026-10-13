@@ -8,6 +8,7 @@
 | 2026-10-12 | Preserve customizations through upstream updates | Repository instructions, versioned reapply manifest/tool and verification |
 | 2026-10-12 | Add CLI tunnel methods missing from the web panel | Reverse Naive/HTTP2, XHTTP/TLS, REALITY/Vision; direct IP and SNI spoofing |
 | 2026-10-13 | Execute audited Wat ICMP / peer coordination / intelligent Auto prompt | Opt-in native `waticmp`, preservation of xDi/manual/fallback defaults, immutable local WatTunnel reference, licensed source attribution and evidence gates |
+| 2026-10-13 | Publish to the user-created `firegoood/FullPack` repository | Git destination, application source/update URLs, installer, documentation, panel links and persistent reapply guards |
 
 ## Approved Wat ICMP and peer Auto implementation
 
@@ -90,6 +91,14 @@
 
 - After local acceptance, the operator requested committing and pushing the
   customized FullPack source to the existing `firegoood/BackPack` fork.
+- The operator then supplied the new repository
+  `https://github.com/firegoood/FullPack.git` and requested publication there.
+  Current source/install/update URLs use `firegoood/FullPack`; the earlier
+  push to `firegoood/BackPack` is a historical event, not the active destination.
+- Repository routing was checked with all nine customization tests, affected
+  Linux app/CLI/TUI/update/panel tests, 43 panel JavaScript tests and standalone
+  Linux amd64/arm64 builds using Go 1.27.2. The built version command prints
+  `https://github.com/firegoood/FullPack`; local archive version parsing passed.
 - This authorization covers this source publication. It does not authorize
   release tags, unsigned binary publication, live deployment or automatic
   publication of later work. The read-only reference and local audit artifacts
@@ -149,8 +158,8 @@
 - Display name: `FullPack`; executable: `fullpack`.
 - Installation: `/root/FullPack`, `/etc/fullpack`, `/usr/local/bin/fullpack`.
 - Services: `fullpack-*.service`; release assets: `fullpack_linux_<arch>.tar.gz`.
-- Source/update repository: <https://github.com/firegoood/BackPack>. The GitHub
-  repository has not been renamed. The updater must not download official
+- Source/update repository: <https://github.com/firegoood/FullPack>, a separate
+  repository created and supplied by the operator. The updater must not download official
   BackPack binaries, because they do not contain this customization layer.
 - Upstream source: <https://github.com/AminMGMT/BackPack>.
 - The Go module path, tunnel protocol labels, `backpack://` setup links, backup
