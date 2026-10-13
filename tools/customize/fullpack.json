@@ -264,6 +264,7 @@
     "internal/e2e/testdata/peerauto-netns.sh": ["WATICMP_NETNS", "NO_ROUTE", "WATICMP_DEGRADATION", "severe degradation"],
     "internal/e2e/testdata/icmp-coexist.sh": ["ReplayDropped", "AuthDropped"],
     "docs/waticmp-dual-server-design.md": ["خلاصهٔ فارسی", "11/WatTunnel"],
-    "docs/waticmp-verification.md": ["خلاصهٔ فارسی", "NOT VERIFIED"]
+    "docs/waticmp-verification.md": ["خلاصهٔ فارسی", "NOT VERIFIED", "fullpack-wan-verification.md"],
+    "docs/fullpack-wan-verification.md": ["PARTIAL WAN ACCEPTANCE", "24-hour soak", "NOT VERIFIED", "TestRealityAutomaticCoverScanWithInstalledXray", "existing raw-tunnel owner"]
   }
 }

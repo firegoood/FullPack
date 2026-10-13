@@ -11,6 +11,9 @@ updating this repository. These files record the user's persistent preferences.
   resource, ACK and stream repairs.
   Auto remains opt-in; never weaken enrollment, generation fencing or security
   floors to resolve an upstream merge, and never report pending gates as passed.
+  Preserve the bounded WAN evidence in `docs/fullpack-wan-verification.md`;
+  unavailable routes and pending soak gates must remain distinguished from
+  passing local tests and successful WAN routes.
 
 - Preserve the approved complete Auto carrier registry shared by CLI, web and
   engine. Stream Auto supports Reverse and Direct initiation; L3 Auto uses the

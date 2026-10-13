@@ -130,6 +130,9 @@ and Xray executables. Missing prerequisites are SKIPPED, not evidence of a
 passing carrier. `FULLPACK_AUTO_SPOOF_PROFILE` selects an existing raw profile
 for the namespace fixture. CI preserves the real helper and namespace checks.
 
-WAN/two live VPS, NAT/firewall combinations, production load and a 24-hour
-soak remain **NOT VERIFIED** for this expansion. No release, deployment or
-unattended default-on policy is implied by local acceptance.
+At local acceptance, WAN/two live VPS were NOT VERIFIED. Subsequent bounded
+operator-authorized tests are recorded in [the WAN report](fullpack-wan-verification.md);
+they passed only the listed routes and a TCP-to-WSS recovery on both pairs.
+Unavailable routes, arbitrary NAT/firewall combinations, production load and
+a 24-hour soak remain **NOT VERIFIED**. No release or unattended default-on
+policy is implied by either local or partial WAN acceptance.

@@ -11,6 +11,7 @@
 | 2026-10-13 | Publish to the user-created `firegoood/FullPack` repository | Git destination, application source/update URLs, installer, documentation, panel links and persistent reapply guards |
 | 2026-10-13 | Never upload the entire `11/` directory | Root Git ignore rule, persistent update guard and source/release publication exclusion; the local reference remains read-only |
 | 2026-10-13 | Audit the additions and complete Auto for Reverse **and Direct/L3** | Shared carrier registry, explicit connection direction, encrypted legacy adapters, managed HTTPS identities and a stable TUN with authenticated datagram forwarding; verification status is recorded separately |
+| 2026-10-13 | Test the supplied Iran and two Kharej servers | Bounded protocol and Auto recovery tests; preserve existing services and security checks, record partial WAN evidence and clean up audit resources |
 
 ## Approved Wat ICMP and peer Auto implementation
 
@@ -108,6 +109,27 @@
   WAN, arbitrary NAT/anti-spoofing policy and the expansion's 24-hour soak
   remain NOT VERIFIED. Preserve this evidence boundary through updates.
 
+## Bounded WAN verification on 2026-10-13
+
+- Preserve `docs/fullpack-wan-verification.md` and section 9 of the verification
+  ledger through source updates. They supplement the historical local gates;
+  they do not convert failed/unavailable carriers or a 24-hour soak into passes.
+- The 96-case stream/L3 matrix and selected retries passed 15/18 Reverse and
+  13/18 Direct stream routes on Kharej1, and 12/18 Reverse on Kharej2. Direct
+  Kharej2 did not qualify in the bounded tests. Existing BackPack raw ownership
+  blocked Kharej1 PCK/SNI; the guard was not weakened and services were retained.
+- The exact authenticated REALITY cover test rejected Microsoft on all three
+  machines; Apple passed and enabled the successful WAN retries. An ordinary
+  TLS response must not replace that authenticated test.
+- Controlled TCP failure recovered to enrolled WSS on both pairs in about
+  24 seconds with agreed generations, the same Iran listener and three minutes
+  of subsequent traffic. Normal Wat Echo, forged sources, automatic L3 WAN
+  recovery, production load and 24-hour acceptance remain NOT VERIFIED.
+- Audit binaries/configurations, processes, test interfaces and exact added
+  firewall rules were removed. Original rules, listener PIDs and routes were
+  verified. Passwords were kept in memory; no product source/security changes,
+  Git push, signed release or permanent installation occurred during WAN testing.
+
 ## Original native/Auto verification recorded on 2026-10-13
 
 - Whole-project Linux race/coverage, formatting, vet and staticcheck passed
@@ -149,6 +171,9 @@
   publication of later work. The entire `11/` directory and local audit
   artifacts remain excluded from Git. Neither tracked source nor the published
   commit history contains files from `11/`.
+- The operator subsequently requested publication of the bounded WAN report,
+  its ledger and preservation guards. This separate request authorizes the
+  current documentation/rules push to the same `firegoood/FullPack` repository.
 
 ## Web tunnel methods
 

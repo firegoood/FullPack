@@ -9,6 +9,10 @@ current registry restrictions. The current expansion is recorded separately
 in section 8 and `auto-carrier-completion.md`; no historical outage/soak result
 is silently extended to new carriers.
 
+The subsequent operator-authorized three-VPS tests are recorded in section 9
+and `fullpack-wan-verification.md`. They provide partial bounded WAN evidence,
+not a passing result for unavailable carriers or a 24-hour soak.
+
 ## 1. Source, attribution and preservation
 
 Target `E:/P_OX/back`; module `github.com/backpack/backpack`; implementation baseline HEAD
@@ -402,3 +406,33 @@ production load and a 24-hour expansion soak remain **NOT VERIFIED**. The
 original Wat/Noise outage and reachable-degradation timings are not results
 for every new carrier. QUIC cannot work on the 700-byte outer path. A passing
 local suite cannot guarantee absence of bugs or authorize a signed release.
+
+## 9. Bounded operator-authorized WAN tests
+
+After publication of source `3d29613b8c49ebb4e164035f8a3752e9a69d79e6`,
+the operator supplied an Iran VPS and two Kharej VPS for protocol tests.
+See [the complete WAN report](fullpack-wan-verification.md) for all 96 distinct
+stream/L3 cases, retries, exact acceptance criteria and teardown evidence.
+
+Stream carriers with actual traffic/probe acceptance numbered 15/18 Reverse
+and 13/18 Direct for Kharej1, and 12/18 Reverse and 0/18 Direct for Kharej2.
+Kharej1's PCK/SNI tests were blocked by existing raw-carrier ownership; this
+protective refusal was preserved. L3 passed UDP/xDi/SPOOF on Kharej1 in both
+directions and PCK/SNI on Kharej2 in Reverse. Unavailable cases are not passed.
+
+The actual authenticated REALITY cover test rejected Microsoft on all three
+machines. Apple passed and enabled the successful REALITY WAN retries. The
+independent UDP size test found no responses at 1024 bytes or larger on
+Kharej2, while 96/512-byte packets passed. Per-carrier causes remain unresolved
+where no diagnostic establishes them.
+
+Controlled Reverse TCP failure recovered to enrolled WSS on both pairs in
+approximately 24 seconds, preserving the Iran listener and agreed generation.
+Three minutes of subsequent traffic passed. This is not a 24-hour soak, L3
+WAN automatic-recovery test or a seamless migration claim.
+
+Audit resources were removed and original listener PIDs, firewall rules and
+routes verified. No product source or security floor changed. Normal Wat Echo,
+forged-source WAN profiles, production load and the 24-hour expansion soak
+remain **NOT VERIFIED**. Historical NOT VERIFIED entries above describe the
+earlier audit window and are retained with this later evidence separately.
