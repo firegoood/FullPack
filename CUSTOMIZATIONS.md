@@ -12,6 +12,7 @@
 | 2026-10-13 | Never upload the entire `11/` directory | Root Git ignore rule, persistent update guard and source/release publication exclusion; the local reference remains read-only |
 | 2026-10-13 | Audit the additions and complete Auto for Reverse **and Direct/L3** | Shared carrier registry, explicit connection direction, encrypted legacy adapters, managed HTTPS identities and a stable TUN with authenticated datagram forwarding; verification status is recorded separately |
 | 2026-10-13 | Test the supplied Iran and two Kharej servers | Bounded protocol and Auto recovery tests; preserve existing services and security checks, record partial WAN evidence and clean up audit resources |
+| 2026-10-14 | Review Auto availability, WAN failures, shutdown and capacity criticisms | Reproduce consecutive carrier failures, separate bounded emergency recovery from optional changes, classify diagnostics, preserve cleanup checks and record measured limits |
 
 ## Approved Wat ICMP and peer Auto implementation
 
@@ -130,6 +131,32 @@
   verified. Passwords were kept in memory; no product source/security changes,
   Git push, signed release or permanent installation occurred during WAN testing.
 
+## Auto criticism review approved on 2026-10-14
+
+- Preserve `docs/auto-policy-review.md` and its distinction between successful
+  bounded tests and pending 24-hour/1000-user acceptance. No carrier or core
+  architecture was added or replaced.
+- Confirmed debounced no-route recovery uses a five-second minimum and the
+  existing absolute twelve-commit rolling-hour ceiling. All commits share the
+  original durable timestamp history and continue to constrain optional
+  Cooldown/MinimumDwell/MaxSwitchesPerHour. Preserve locks, observe-only,
+  integrity/pressure gates and uncertain-commit generation fencing.
+- Preserve the actual three-carrier/two-failure regression and restart/flapping
+  checks. Both supplied WAN pairs passed the consecutive recovery scenario;
+  UDP to xDi passed actual automatic WAN L3 recovery on Kharej1 with one TUN.
+- Keep safe typed `errorCode`/`errorStage` diagnostics, role-specific debug
+  logging and distinct timeout/rejection/closed/bind/local-denial categories.
+  A timeout must not be called bad enrollment or proof of filtering.
+- Keep bounded xtables-lock waits for scoped ICMP/MSS operations and joined
+  Auto cancellation cleanup. Test direct engine TERM separately from supervisor
+  KILL/group forwarding; never report interrupted cleanup as passed.
+- Default connection admission stays 64, maximum 192. Preserve the opt-in
+  100/192-socket admission/integrity test and CI invocation. These are application
+  connections, not independent users or proven WAN/1000-user capacity.
+- Preserve the corrected historical QUIC bind-conflict and stop-grace evidence.
+  Valid QUIC Auto/manual retries and smaller normal-Echo Wat on Kharej2 still
+  did not qualify; transport security was not weakened to turn them into passes.
+
 ## Original native/Auto verification recorded on 2026-10-13
 
 - Whole-project Linux race/coverage, formatting, vet and staticcheck passed
@@ -174,6 +201,10 @@
 - The operator subsequently requested publication of the bounded WAN report,
   its ledger and preservation guards. This separate request authorizes the
   current documentation/rules push to the same `firegoood/FullPack` repository.
+- On 2026-10-14, the operator separately requested publication of the Auto
+  policy, diagnostic and shutdown fixes, their regression/admission tests and
+  bounded audit report to the same repository. This authorizes this source
+  push; the remaining acceptance gates and publication exclusions still apply.
 
 ## Web tunnel methods
 

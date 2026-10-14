@@ -90,9 +90,9 @@ func installEchoRule(g *icmpEchoGuard) *icmpEchoGuard {
 	// A rule already there is one a crashed run left behind — the process
 	// died before it could remove it. It is adopted rather than doubled, so
 	// crash after crash does not stack copies, and this run's exit removes it.
-	if exec.Command("iptables", append([]string{"-C"}, g.rule...)...).Run() == nil {
+	if _, err := runScopedIptables(append([]string{"-C"}, g.rule...)...); err == nil {
 		g.active = true
-	} else if exec.Command("iptables", append([]string{"-I"}, g.rule...)...).Run() == nil {
+	} else if _, err := runScopedIptables(append([]string{"-I"}, g.rule...)...); err == nil {
 		g.active = true
 	}
 	if g.active {
@@ -121,7 +121,7 @@ func (g *icmpEchoGuard) remove() {
 		return
 	}
 	delete(echoRules.users, key)
-	_ = exec.Command("iptables", append([]string{"-D"}, g.rule...)...).Run()
+	_, _ = runScopedIptables(append([]string{"-D"}, g.rule...)...)
 }
 
 // Installed reports whether the rule is in place, so the carrier can log which

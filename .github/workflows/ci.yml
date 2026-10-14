@@ -67,6 +67,11 @@ jobs:
         # corrupts traffic rather than crashing loudly, so this must stay clean.
         run: go test ./... -race -timeout 20m
 
+      - name: Verify bounded Auto application connection admission
+        env:
+          FULLPACK_AUTO_LOAD: '1'
+        run: go test ./internal/e2e -run '^TestPeerAutoBoundedApplicationConnectionCapacity$' -race -count=1 -timeout 4m
+
       - name: Coverage
         # Measured with -coverpkg, which is the only way this number means
         # anything here.

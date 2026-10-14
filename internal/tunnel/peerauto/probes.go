@@ -133,7 +133,7 @@ func (m *Manager) respondIsolatedProbe(ctx context.Context, e *candidate, tx str
 			s.Close()
 			return "", nil, err
 		}
-		stop := context.AfterFunc(ctx, func() { w.c.Close(); s.Close() })
+		stop := afterFuncJoined(ctx, func() { w.c.Close(); s.Close() })
 		cleanup = func() {
 			stop()
 			if w.packet != nil {

@@ -127,7 +127,10 @@ random datagrams per size in each direction. Kharej1 returned all three at
 consistent with these measurements, but the exact cutoff and device are not
 identified. QUIC's mandatory 1200-byte Initial cannot qualify on the measured
 Kharej2 path. QUIC also failed on Kharej1; its cause remains unresolved. Sole
-Reverse QUIC retries on UDP443 failed on both pairs.
+Reverse QUIC on Kharej2 also failed on UDP443. The initial Kharej1 UDP443
+retry was invalid because a simultaneous test occupied Iran's listener;
+its bind conflict must not be counted as a valid route test. The independent,
+exclusive-port follow-up is recorded in `auto-policy-review.md`.
 
 The original Microsoft REALITY cover failed on all three machines despite
 ordinary TLS reachability. We ran the repository's exact opt-in
@@ -163,10 +166,11 @@ been tested for recovery.
 
 ## Teardown and remaining gates
 
-The external supervisor allowed five seconds after TERM before forcing KILL.
-Some interrupted raw/L3 teardown left 14 scoped firewall rules in total. This
-short supervisor grace is not evidence that native graceful shutdown always
-finishes within five seconds. After confirming no audit processes remained,
+The active-stop helper waited one second after TERM before forcing KILL; the
+five-second setting applied only to its separate lifetime timeout. This
+distinction was corrected during the later source/harness review. Some
+interrupted raw/L3 teardown left 14 scoped firewall rules in total. That
+short supervisor grace is not evidence of graceful shutdown. After confirming no audit processes remained,
 only the exact audit-added rules were removed; original rules were preserved.
 
 Final evidence (`*-final-cleanup.json`) confirms the private audit directories,
@@ -183,3 +187,8 @@ arbitrary NAT/firewall behavior, production load, current helper security and
 a 24-hour soak. During WAN testing, no signed release, Git push or permanent
 deployment was performed. These bounded results supplement, not replace, the local
 race/security/namespace evidence in `waticmp-verification.md`.
+
+The subsequent [policy and criticism review](auto-policy-review.md) records
+consecutive default-policy recovery, bounded L3 automatic failover, independent
+QUIC/UDP443 checks, refined diagnostics, cleanup repairs and socket-load tests.
+It preserves the original matrix and its unpassed routes as historical evidence.

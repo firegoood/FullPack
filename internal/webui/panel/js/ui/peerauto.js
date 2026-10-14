@@ -60,10 +60,10 @@ function autoFields(a = {}, registry = []) {
     + field('observeOnly', 'Observe only', a.observeOnly ?? true, 'checkbox', 'Bootstrap the first approved carrier; automatic cross-carrier selection stays off.')
     + field('allowDegradationSwitch', 'Switch on sustained severe degradation', a.allowDegradationSwitch || false, 'checkbox')
     + field('probeInterval', 'Full probe interval (seconds)', a.probeInterval || 600, 'number')
-    + field('cooldown', 'Switch cooldown (seconds)', a.cooldown || 300, 'number')
+    + field('cooldown', 'Optional switch cooldown (seconds)', a.cooldown || 300, 'number')
     + field('minimumDwell', 'Minimum dwell (seconds)', a.minimumDwell || 600, 'number')
-    + field('maxSwitchesPerHour', 'Maximum switches per hour', a.maxSwitchesPerHour || 2, 'number')
-    + field('maxConnections', 'Maximum user connections', a.maxConnections || 64, 'number')
+    + field('maxSwitchesPerHour', 'Optional switches per hour', a.maxSwitchesPerHour || 2, 'number', 'Confirmed outages use a separate recovery gate: at least 5 seconds between changes, at most 12 committed changes per hour. Locks and observe-only still apply.')
+    + field('maxConnections', 'Maximum concurrent application connections', a.maxConnections || 64, 'number', 'Default 64, maximum 192. Connections are not a measured user capacity.')
     + field('maxMemoryMb', 'Probe memory pressure threshold (MB)', a.maxMemoryMb || 256, 'number')
     + `<div data-peer-candidates>${(a.candidates?.length ? a.candidates : [{}]).map((p, i) => candidateMarkup(p, i, registry)).join('')}</div><button type="button" data-peer-add>Add approved carrier (up to four)</button>`;
 }

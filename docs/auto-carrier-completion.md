@@ -106,6 +106,13 @@ drain for up to thirty seconds or be interrupted; there is no promise of
 seamless TCP migration. Stable L3 addresses similarly do not eliminate packet
 loss during a failed route or switching interval.
 
+Confirmed, debounced no-route recovery uses a separate five-second gate and
+the absolute twelve-commit rolling-hour ceiling. All commits retain the shared
+durable history and extend the full configured optional cooldown/hourly policy.
+Healthy optional quality switching keeps Cooldown/MinimumDwell/MaxSwitchesPerHour;
+locks, pressure skips and observe-only remain enforced. See
+`auto-policy-review.md` for the consecutive-outage tests and limits.
+
 ## Repeatable checks
 
 Use the patched toolchain and the existing unchanged coverage floors. Tests

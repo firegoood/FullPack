@@ -14,6 +14,12 @@ updating this repository. These files record the user's persistent preferences.
   Preserve the bounded WAN evidence in `docs/fullpack-wan-verification.md`;
   unavailable routes and pending soak gates must remain distinguished from
   passing local tests and successful WAN routes.
+  Preserve `docs/auto-policy-review.md`: debounced no-route recovery has its
+  bounded five-second/twelve-commit gate, while optional changes retain their
+  configured cooldown/dwell/hourly policy and shared durable history. Keep
+  typed diagnostics, joined cancellation, scoped lock-waiting cleanup and
+  bounded connection-admission tests. Do not equate sockets with users or
+  bounded WAN recovery with production/24-hour acceptance.
 
 - Preserve the approved complete Auto carrier registry shared by CLI, web and
   engine. Stream Auto supports Reverse and Direct initiation; L3 Auto uses the

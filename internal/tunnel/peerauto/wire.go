@@ -9,6 +9,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"time"
@@ -88,7 +89,7 @@ func readMessage(c net.Conn) (message, error) {
 	}
 	size := binary.BigEndian.Uint32(n[:])
 	if size == 0 || size > 4096 {
-		return m, errors.New("invalid coordination size")
+		return m, errControlProtocol
 	}
 	b := make([]byte, size)
 	if _, e := io.ReadFull(c, b); e != nil {
@@ -97,10 +98,10 @@ func readMessage(c net.Conn) (message, error) {
 	d := json.NewDecoder(bytes.NewReader(b))
 	d.DisallowUnknownFields()
 	if e := d.Decode(&m); e != nil {
-		return m, e
+		return m, fmt.Errorf("%w: %v", errControlProtocol, e)
 	}
 	if d.Decode(new(any)) != io.EOF {
-		return m, errors.New("trailing coordination data")
+		return m, errControlProtocol
 	}
 	return m, nil
 }
@@ -135,7 +136,7 @@ func (w *wire) receive() (message, error) {
 		return m, e
 	}
 	if w.recvSeq >= 1<<62 || !validMessage(m, w.key) || m.Sequence != w.recvSeq+1 || m.Tunnel != w.base.Tunnel || m.Manifest != w.base.Manifest || m.Candidate != w.base.Candidate || m.Sender != w.base.Receiver || m.Receiver != w.base.Sender || m.Incarnation != w.base.PeerIncarnation || m.PeerIncarnation != w.base.Incarnation {
-		return m, errors.New("coordination identity, version, policy or replay check failed")
+		return m, errControlRejected
 	}
 	w.recvSeq++
 	return m, nil
@@ -199,11 +200,11 @@ func (m *Manager) authenticate(c net.Conn, s carrierSession, id, probeTx string)
 		return nil, peer, e
 	}
 	if !validMessage(peer, key) || peer.Tunnel != base.Tunnel || peer.Sender != remote || peer.Receiver != local || peer.Manifest != base.Manifest || peer.Candidate != id || len(peer.Nonce) != 64 || len(peer.Incarnation) != 64 {
-		return nil, peer, errors.New("peer enrollment/capabilities mismatch; upgrade and enroll both peers")
+		return nil, peer, errEnrollmentRejected
 	}
 	if !initiator {
 		if peer.Op != "HELLO" || peer.PeerIncarnation != "" {
-			return nil, peer, errors.New("invalid initial HELLO")
+			return nil, peer, errControlProtocol
 		}
 		if peer.Transaction != "" {
 			m.mu.Lock()
@@ -211,7 +212,7 @@ func (m *Manager) authenticate(c net.Conn, s carrierSession, id, probeTx string)
 			allowed := p != nil && p.candidate == id && p.peerIncarnation == peer.Incarnation
 			m.mu.Unlock()
 			if !allowed {
-				return nil, peer, errors.New("probe session was not authorized by this enrolled peer")
+				return nil, peer, errControlRejected
 			}
 			base.Transaction = peer.Transaction
 		}
@@ -221,7 +222,7 @@ func (m *Manager) authenticate(c net.Conn, s carrierSession, id, probeTx string)
 			return nil, peer, e
 		}
 	} else if peer.Op != "CAPABILITIES" || peer.PeerIncarnation != base.Incarnation || peer.Transaction != probeTx {
-		return nil, peer, errors.New("invalid peer challenge")
+		return nil, peer, errControlProtocol
 	}
 	first, second := base.Nonce, peer.Nonce
 	if m.iran {
@@ -243,7 +244,7 @@ func (m *Manager) authenticate(c net.Conn, s carrierSession, id, probeTx string)
 	} else {
 		peer, e = w.receive()
 		if e == nil && peer.Op != "STATE_SYNC" {
-			e = errors.New("missing challenge confirmation")
+			e = errControlProtocol
 		}
 		if e == nil {
 			e = w.send(message{Op: "STATE_SYNC", Generation: base.Generation, Active: m.store.snapshot().Active})

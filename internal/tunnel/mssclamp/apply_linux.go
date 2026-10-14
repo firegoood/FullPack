@@ -3,8 +3,10 @@
 package mssclamp
 
 import (
+	"context"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -30,7 +32,7 @@ func Apply(kind, iface string, mtu, configured int, log *logrus.Logger) {
 		// Swept first, so a rule left behind by a process that was killed is
 		// replaced rather than duplicated.
 		sweep(r)
-		if out, err := exec.Command(r.Cmd, r.Args("-A")...).CombinedOutput(); err != nil {
+		if out, err := runClampRule(r, "-A"); err != nil {
 			// Loud, not debug. A clamp that fails to install leaves exactly the
 			// fault it exists to prevent — a tunnel that passes small packets
 			// and stalls large ones — and a silent failure here once meant it
@@ -60,10 +62,17 @@ func Remove(kind, iface string, mtu, configured int) {
 // left" looks like. The bound is there so a kernel that somehow always succeeds
 // cannot spin forever.
 func sweep(r Rule) {
-	args := r.Args("-D")
 	for i := 0; i < 1024; i++ {
-		if err := exec.Command(r.Cmd, args...).Run(); err != nil {
+		if _, err := runClampRule(r, "-D"); err != nil {
 			return
 		}
 	}
+}
+
+// Parallel tunnel shutdown shares the namespace's xtables lock. Without -w,
+// a transient lock conflict looks like an absent rule and leaves it behind.
+func runClampRule(r Rule, operation string) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	return exec.CommandContext(ctx, r.Cmd, append([]string{"-w", "5"}, r.Args(operation)...)...).CombinedOutput()
 }

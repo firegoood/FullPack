@@ -189,7 +189,7 @@ func (m *Manager) serveData(e *candidate, c net.Conn, consumed chan<- struct{}) 
 	}
 }
 func relayDatagrams(ctx context.Context, stream, backend net.Conn) {
-	stop := context.AfterFunc(ctx, func() { stream.Close(); backend.Close() })
+	stop := afterFuncJoined(ctx, func() { stream.Close(); backend.Close() })
 	defer stop()
 	done := make(chan struct{}, 2)
 	go func() {
@@ -271,7 +271,7 @@ func (m *Manager) claim(ctx context.Context, slot int, udp bool) (net.Conn, erro
 		c.Close()
 		return nil, errors.New("peer backend unavailable (carrier remains healthy)")
 	}
-	stop := context.AfterFunc(r.ctx, func() { c.Close() })
+	stop := afterFuncJoined(r.ctx, func() { c.Close() })
 	b := &boundConn{Conn: c, stop: stop, finish: m.trackFlow(r)}
 	if h, ok := c.(interface{ CloseWrite() error }); ok {
 		return &halfBoundConn{boundConn: b, half: h}, nil
@@ -325,7 +325,7 @@ func (m *Manager) bindUsers() error {
 		listeners = append(listeners, l)
 		slot := slot
 		m.launch(func() {
-			stop := context.AfterFunc(m.ctx, func() { l.Close() })
+			stop := afterFuncJoined(m.ctx, func() { l.Close() })
 			defer stop()
 			defer l.Close()
 			for {
@@ -369,7 +369,7 @@ type udpSource struct {
 }
 
 func (m *Manager) serveUDP(pc net.PacketConn, slot int) {
-	stop := context.AfterFunc(m.ctx, func() { pc.Close() })
+	stop := afterFuncJoined(m.ctx, func() { pc.Close() })
 	defer stop()
 	defer pc.Close()
 	var mu sync.Mutex
@@ -418,7 +418,7 @@ func (m *Manager) udpSource(pc net.PacketConn, peer net.Addr, slot int, f *udpSo
 	defer c.Close()
 	ctx, cancel := context.WithCancel(m.ctx)
 	defer cancel()
-	stop := context.AfterFunc(ctx, func() { c.Close() })
+	stop := afterFuncJoined(ctx, func() { c.Close() })
 	defer stop()
 	done := make(chan struct{})
 	go func() {

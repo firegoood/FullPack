@@ -436,3 +436,26 @@ routes verified. No product source or security floor changed. Normal Wat Echo,
 forged-source WAN profiles, production load and the 24-hour expansion soak
 remain **NOT VERIFIED**. Historical NOT VERIFIED entries above describe the
 earlier audit window and are retained with this later evidence separately.
+
+## 10. Auto policy and criticism review, 2026-10-14
+
+The [follow-up review](auto-policy-review.md) reproduced the default cooldown
+delaying a second outage despite pretested standbys. The source now separates
+debounced no-route recovery's bounded five-second/twelve-commit gate from
+optional cooldown/dwell/configured hourly changes, retaining shared durable
+history, locks, observe-only and authenticated generation fencing. Both WAN
+pairs passed TCP to WSS to WSSMUX under the default policy. Kharej1 passed
+actual automatic UDP-to-xDi L3 recovery with unchanged TUN indices.
+
+Typed safe diagnostics separate timeouts from enrollment/protocol rejection.
+Scoped ICMP/MSS commands now wait for the xtables lock with bounded command
+timeouts, and Auto joins cancellation cleanup. Direct engine TERM and clean
+inventories are recorded separately from group-signal/forced-stop artifacts.
+
+The historical Kharej1 UDP443 retry was a bind conflict; a new exclusive retry
+and manual QUIC still failed, while authenticated ordinary UDP/DF passed the
+same port and 1232-byte payload. A smaller normal-Echo Wat retry on Kharej2 also
+did not qualify. Filtering mechanisms remain unresolved; no verification or
+encryption floor was weakened to claim success. A bounded 100/192-application-
+socket test is distinct from users, WAN throughput and sustained capacity.
+Production/1000-user/24-hour acceptance remains **NOT VERIFIED**.

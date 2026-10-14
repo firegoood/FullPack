@@ -202,7 +202,7 @@ func listenWSS(ctx context.Context, p config.AutoCandidate, token string, settin
 			}
 		})
 	}
-	stop := context.AfterFunc(ctx, closeServer)
+	stop := afterFuncJoined(ctx, closeServer)
 	return func(c context.Context) (carrierSession, error) {
 		select {
 		case s := <-accepted:

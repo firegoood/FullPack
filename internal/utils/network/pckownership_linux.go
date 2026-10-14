@@ -93,7 +93,7 @@ func CleanupPckGuards(tokens ...string) {
 	}
 	if len(tokens) == 0 {
 		for _, table := range []string{"filter", "raw"} {
-			out, err := pckIptables("-t", table, "-S")
+			out, err := runScopedIptables("-t", table, "-S")
 			if err != nil {
 				continue
 			}

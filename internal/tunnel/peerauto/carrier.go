@@ -64,7 +64,7 @@ func (s noiseCarrier) Open(ctx context.Context) (net.Conn, error) {
 	return s.s.OpenStream()
 }
 func (s noiseCarrier) Accept(ctx context.Context) (net.Conn, error) {
-	stop := context.AfterFunc(ctx, func() { s.s.Close() })
+	stop := afterFuncJoined(ctx, func() { s.s.Close() })
 	defer stop()
 	return s.s.AcceptStream()
 }
@@ -200,7 +200,7 @@ func dialCarrier(ctx context.Context, a config.AutoConfig, p config.AutoCandidat
 		if e != nil {
 			return nil, e
 		}
-		stop := context.AfterFunc(ctx, func() { r.Close() })
+		stop := afterFuncJoined(ctx, func() { r.Close() })
 		defer stop()
 		n, e := network.NoiseClientConn(r, token, 10*time.Second)
 		if e != nil {
@@ -217,7 +217,7 @@ func carrierSecret(a config.AutoConfig, p config.AutoCandidate, token string) st
 }
 
 func secureStream(ctx context.Context, raw net.Conn, token string, listen bool) (carrierSession, error) {
-	stop := context.AfterFunc(ctx, func() { raw.Close() })
+	stop := afterFuncJoined(ctx, func() { raw.Close() })
 	defer stop()
 	var secured net.Conn
 	var err error
@@ -286,7 +286,7 @@ func securedAcceptor(parent context.Context, acceptRaw func() (net.Conn, error),
 	ready := make(chan carrierSession, 2)
 	permits := make(chan struct{}, 8)
 	var wg sync.WaitGroup
-	stop := context.AfterFunc(ctx, closeRaw)
+	stop := afterFuncJoined(ctx, closeRaw)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()

@@ -142,6 +142,33 @@ func (m *Manager) nextSwitch(st durableState, now time.Time, degradation bool) t
 	}
 	return next
 }
+
+// Only the debounced no-route branch may use this emergency gate. A healthy
+// route, optional quality changes, observe-only and locks retain their policy.
+// All commits share the existing durable history: restarting cannot replenish
+// the budget, and recoveries still suppress optional changes for the full
+// configured cooldown. Twelve is the existing absolute persisted switch cap.
+func nextRecoverySwitch(st durableState, now time.Time) time.Time {
+	var next time.Time
+	if st.LastChange != 0 {
+		next = time.Unix(st.LastChange, 0).Add(5 * time.Second)
+	}
+	count := 0
+	oldest := now
+	for _, stamp := range st.Switches {
+		at := time.Unix(stamp, 0)
+		if now.Sub(at) < time.Hour {
+			count++
+			if at.Before(oldest) {
+				oldest = at
+			}
+		}
+	}
+	if count >= 12 {
+		next = maxTime(next, oldest.Add(time.Hour))
+	}
+	return next
+}
 func maxTime(a, b time.Time) time.Time {
 	if a.After(b) {
 		return a
@@ -276,7 +303,7 @@ func (m *Manager) leaderLoop() error {
 				if m.policy.ObserveOnly {
 					continue
 				}
-				next := m.nextSwitch(st, time.Now(), false)
+				next := nextRecoverySwitch(st, time.Now())
 				m.mu.Lock()
 				m.status.NextSwitch = next
 				m.mu.Unlock()

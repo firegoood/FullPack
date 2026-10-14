@@ -243,9 +243,9 @@
     "internal/tunnel/peerauto/config.go": ["plaintext Auto adapters are not verified", "Auto is the sole switching owner", "manifestHash", "candidate listeners conflict"],
     "internal/tunnel/peerauto/store.go": ["Generation++", "f.Sync()", "os.Rename", "d.Sync()"],
     "internal/tunnel/peerauto/lock_linux.go": ["unix.O_NOFOLLOW", "unix.O_NONBLOCK", "unix.LOCK_EX|unix.LOCK_NB"],
-    "internal/tunnel/peerauto/manager.go": ["PREPARE_SWITCH", "COMMIT_ACK", "fenceLocked", "FlowStatus", "stateStore"],
+    "internal/tunnel/peerauto/manager.go": ["PREPARE_SWITCH", "COMMIT_ACK", "fenceLocked", "FlowStatus", "stateStore", "ErrorCode", "ErrorStage", "afterFuncJoined"],
     "internal/tunnel/peerauto/probes.go": ["pendingProbe", "RespondPaced", "probe"],
-    "internal/tunnel/peerauto/policy.go": ["errProbePressure", "errProbeBusy", "recordCommit", "MinimumDwell", "NO_ROUTE"],
+    "internal/tunnel/peerauto/policy.go": ["errProbePressure", "errProbeBusy", "recordCommit", "MinimumDwell", "NO_ROUTE", "nextRecoverySwitch", "Add(5 * time.Second)", "count >= 12"],
     "internal/tunnel/peerauto/router.go": ["requestHeader", "trackFlow", "peer backend unavailable (carrier remains healthy)"],
     "internal/manage/peerlink.go": ["peer-enrollment/v3:", "encodePeerLink", "enrollment from Iran"],
     "internal/manage/peerenrollment.go": ["PeerNewTunnel", "matching trusted version-3 Iran enrollment link"],
@@ -254,7 +254,7 @@
     "internal/webui/server.go": ["/api/tunnel/auto", "/api/tunnel/peer-enrollment"],
     "internal/webui/panel/js/ui/peerauto.js": ["Import an enrolled Kharej endpoint", "peerSetupPayload", "peerEditForm", "api.autoAction", "n.closest('.grp3')", "localAutoFields", "readLocalAuto"],
     "internal/webui/paneltest/peerauto.test.js": ["Auto edit changes only local fields", "Auto Direct HTTPS", "Auto L3"],
-    ".github/workflows/ci.yml": ["FULLPACK_AUTO_HELPERS", "FULLPACK_AUTO_NETNS", "FULLPACK_AUTO_OUTER_MTU=1500"],
+    ".github/workflows/ci.yml": ["FULLPACK_AUTO_HELPERS", "FULLPACK_AUTO_NETNS", "FULLPACK_AUTO_OUTER_MTU=1500", "FULLPACK_AUTO_LOAD", "TestPeerAutoBoundedApplicationConnectionCapacity"],
     "docs/auto-carrier-completion.md": ["one to four", "4096-packet replay window", "NOT VERIFIED", "same explicitly enrolled receive port"],
     "internal/cli/licenses.go": ["wat.License", "wat.Origin"],
     "internal/menu/system.go": ["Configuration And Fencing State Were Kept", "manage.RemoveInstalledHelpers()", "Remaining Installation Files Were Kept"],
@@ -265,6 +265,15 @@
     "internal/e2e/testdata/icmp-coexist.sh": ["ReplayDropped", "AuthDropped"],
     "docs/waticmp-dual-server-design.md": ["خلاصهٔ فارسی", "11/WatTunnel"],
     "docs/waticmp-verification.md": ["خلاصهٔ فارسی", "NOT VERIFIED", "fullpack-wan-verification.md"],
-    "docs/fullpack-wan-verification.md": ["PARTIAL WAN ACCEPTANCE", "24-hour soak", "NOT VERIFIED", "TestRealityAutomaticCoverScanWithInstalledXray", "existing raw-tunnel owner"]
+    "docs/fullpack-wan-verification.md": ["PARTIAL WAN ACCEPTANCE", "24-hour soak", "NOT VERIFIED", "TestRealityAutomaticCoverScanWithInstalledXray", "existing raw-tunnel owner"],
+    "internal/tunnel/peerauto/diagnostics.go": ["classifyCandidateError", "context.DeadlineExceeded", "errEnrollmentRejected", "local_denied"],
+    "internal/tunnel/peerauto/cancellation.go": ["afterFuncJoined", "<-done", "close(done)"],
+    "internal/tunnel/peerauto/recovery_policy_test.go": ["TestRecoveryBudgetDoesNotRemoveQualityCooldownOrRestartFencing", "TestRecoveryStillBoundsFlappingAndExpiresTheOldestCommit"],
+    "internal/e2e/peerauto_recovery_test.go": ["TestPeerAutoConsecutiveFailuresKeepDefaultsAndReachThirdCarrier", "defaults.Cooldown != 300", "proxies[i].fail()"],
+    "internal/e2e/peerauto_capacity_test.go": ["FULLPACK_AUTO_LOAD", "[]int{100, 192}", "193rd connection"],
+    "internal/utils/network/icmpguard_linux.go": ["runScopedIptables", "installXdiEchoGuard"],
+    "internal/utils/network/pckguard_linux.go": ["runScopedIptables", "context.WithTimeout", "\"-w\", \"5\""],
+    "internal/tunnel/mssclamp/apply_linux.go": ["runClampRule", "context.WithTimeout", "\"-w\", \"5\""],
+    "docs/auto-policy-review.md": ["NOT VERIFIED", "1000-user", "three-carrier", "five-second", "UDP443"]
   }
 }

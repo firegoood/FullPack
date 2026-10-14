@@ -110,7 +110,7 @@ them both ends have to agree on. This says what exists.
 | `allow_degradation_switch` | `bool` | AllowDegradationSwitch optionally permits changing a reachable path after sustained severe measured degradation. |
 | `allow_plaintext_fallback` | `bool` | AllowPlaintextFallback must remain false: plaintext Auto adapters are unsupported in this version. |
 | `candidates` | `[]AutoCandidate` | Candidates lists 1-4 explicitly approved endpoints, independent of the active carrier. |
-| `cooldown` | `int` | Cooldown is seconds between cross-carrier changes, default 300, minimum 5. |
+| `cooldown` | `int` | Cooldown is seconds between optional cross-carrier changes, default 300, minimum 5. Debounced no-route recovery uses a separate 5-second gate; all commits still extend this cooldown. |
 | `enabled` | `bool` | Enabled opts into the enrolled coordinator; false/absent keeps the manual engine and legacy fallback. |
 | `failure_threshold` | `int` | FailureThreshold debounces carrier failure, default 3, range 3-20; skipped probes do not count. |
 | `iran_id` | `string` | IranID identifies the sole switching authority, independent of packet direction. |
@@ -119,7 +119,7 @@ them both ends have to agree on. This says what exists.
 | `manual_lock` | `string` | ManualLock fixes the allowed active candidate ID; runtime unlock cannot weaken an enrolled lock. |
 | `max_connections` | `int` | MaxConnections bounds simultaneous user connections, default 64, maximum 192; probes reserve separate streams. |
 | `max_memory_mb` | `int` | MaxMemoryMB skips probes above this local process RSS pressure threshold, default 256 MB; it is not a hard memory limit. |
-| `max_switches_per_hour` | `int` | MaxSwitchesPerHour limits persisted cross-carrier commits, default 2, range 1-12. |
+| `max_switches_per_hour` | `int` | MaxSwitchesPerHour limits optional changes using all persisted cross-carrier commits, default 2, range 1-12. Debounced no-route recovery retains the absolute persisted ceiling of 12 changes per hour. |
 | `minimum_dwell` | `int` | MinimumDwell is seconds before optional degradation switching, default 600, minimum 5. |
 | `mode` | `string` | Mode is empty/stream for stable port forwarding, or l3 for an owned TUN. |
 | `observe_only` | `bool` | ObserveOnly bootstraps the primary/last-good route and measures candidates without automatic cross-carrier changes. |

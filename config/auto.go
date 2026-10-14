@@ -30,11 +30,13 @@ type AutoConfig struct {
 	AllowDegradationSwitch bool `toml:"allow_degradation_switch" json:"allowDegradationSwitch"`
 	// ProbeInterval is seconds between paced bulk tests, default 600, minimum 30; schedules include jitter.
 	ProbeInterval int `toml:"probe_interval" json:"probeInterval"` // seconds, default 600
-	// Cooldown is seconds between cross-carrier changes, default 300, minimum 5.
+	// Cooldown is seconds between optional cross-carrier changes, default 300, minimum 5.
+	// Debounced no-route recovery uses a separate 5-second gate; all commits still extend this cooldown.
 	Cooldown int `toml:"cooldown" json:"cooldown"` // seconds, default 300
 	// MinimumDwell is seconds before optional degradation switching, default 600, minimum 5.
 	MinimumDwell int `toml:"minimum_dwell" json:"minimumDwell"` // seconds, default 600
-	// MaxSwitchesPerHour limits persisted cross-carrier commits, default 2, range 1-12.
+	// MaxSwitchesPerHour limits optional changes using all persisted cross-carrier commits, default 2, range 1-12.
+	// Debounced no-route recovery retains the absolute persisted ceiling of 12 changes per hour.
 	MaxSwitchesPerHour int `toml:"max_switches_per_hour" json:"maxSwitchesPerHour"` // default 2
 	// FailureThreshold debounces carrier failure, default 3, range 3-20; skipped probes do not count.
 	FailureThreshold int `toml:"failure_threshold" json:"failureThreshold"` // consecutive actual path failures, default 3

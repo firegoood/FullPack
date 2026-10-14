@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -59,6 +60,8 @@ type CandidateStatus struct {
 	Direction       string    `json:"direction,omitempty"`
 	Ready           bool      `json:"ready"`
 	Reason          string    `json:"reason,omitempty"`
+	ErrorCode       string    `json:"errorCode,omitempty"`
+	ErrorStage      string    `json:"errorStage,omitempty"`
 	UsefulMbps      float64   `json:"usefulMbps"`
 	RTTms           float64   `json:"rttMs"`
 	LastProbe       time.Time `json:"lastProbe,omitempty"`
@@ -148,6 +151,16 @@ func New(ctx context.Context, cfg *config.Config, statePath string) (*Manager, e
 	m := &Manager{ctx: mctx, cancel: cancel, policy: a, iran: cfg.Server.BindAddr != "", manifest: h, incarnation: fresh(), store: store,
 		log: logrus.New(), endpoints: map[string]*candidate{}, recentTx: map[string]time.Time{}, connections: make(chan struct{}, a.MaxConnections), actions: make(chan actionRequest, 8), pendingProbes: map[string]*pendingProbe{}}
 	m.token = cfg.Client.Token
+	level, format := cfg.Client.LogLevel, cfg.Client.LogFormat
+	if m.iran {
+		level, format = cfg.Server.LogLevel, cfg.Server.LogFormat
+	}
+	if parsed, err := logrus.ParseLevel(level); err == nil {
+		m.log.SetLevel(parsed)
+	}
+	if strings.EqualFold(strings.TrimSpace(format), "json") {
+		m.log.SetFormatter(&logrus.JSONFormatter{})
+	}
 	m.openPacketDevice = l3.OpenPacketDevice
 	m.tls = tlsSettings(cfg)
 	m.runtimeLock = a.ManualLock
@@ -184,6 +197,9 @@ func (m *Manager) Snapshot() Status {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	s := m.status
+	if st.LastGood != "" && (m.active == nil || m.active.endpoint.ctx.Err() != nil) {
+		next = nextRecoverySwitch(st, time.Now())
+	}
 	s.Mode = m.policy.Mode
 	if m.device != nil {
 		s.Packets = &PacketStatus{Sent: m.packets.sent.Load(), Received: m.packets.received.Load(), Dropped: m.packets.dropped.Load(), Interface: m.device.Name()}
@@ -283,7 +299,7 @@ func (m *Manager) endpointLoop(p config.AutoCandidate) {
 		var e error
 		accept, closeListener, e = listenCarrier(epctx, m.policy, p, m.token, m.tls)
 		if e != nil {
-			m.candidateStatus(p.ID, func(s *CandidateStatus) { s.Reason = "endpoint unavailable: " + e.Error() })
+			m.candidateFailure(p.ID, "endpoint_bind", "endpoint unavailable", e)
 			return
 		}
 		defer closeListener()
@@ -306,7 +322,7 @@ func (m *Manager) endpointLoop(p config.AutoCandidate) {
 			s, err := accept(epctx)
 			if err != nil {
 				<-permits
-				m.candidateStatus(p.ID, func(s *CandidateStatus) { s.Reason = "carrier accept unavailable: " + err.Error() })
+				m.candidateFailure(p.ID, "carrier_accept", "carrier accept unavailable", err)
 				if !pause(epctx, time.Second) {
 					return
 				}
@@ -322,7 +338,7 @@ func (m *Manager) endpointLoop(p config.AutoCandidate) {
 		var err error
 		s, err = dialCarrier(epctx, m.policy, p, m.token)
 		if err != nil {
-			m.candidateStatus(p.ID, func(s *CandidateStatus) { s.Ready = false; s.Reason = "carrier handshake unavailable: " + err.Error() })
+			m.candidateFailure(p.ID, "carrier_handshake", "carrier handshake unavailable", err)
 			if !pause(epctx, backoff) {
 				return
 			}
@@ -342,7 +358,7 @@ func (m *Manager) endpointLoop(p config.AutoCandidate) {
 func (m *Manager) runSession(p config.AutoCandidate, s carrierSession) {
 	ctx, cancel := context.WithCancel(m.ctx)
 	defer cancel()
-	stop := context.AfterFunc(ctx, func() { s.Close() })
+	stop := afterFuncJoined(ctx, func() { s.Close() })
 	defer stop()
 	var ctrl net.Conn
 	var err error
@@ -353,6 +369,7 @@ func (m *Manager) runSession(p config.AutoCandidate, s carrierSession) {
 		ctrl, err = s.Open(ctx)
 	}
 	if err != nil {
+		m.candidateFailure(p.ID, "control_open", "control stream unavailable", err)
 		return
 	}
 	defer ctrl.Close()
@@ -363,16 +380,16 @@ func (m *Manager) runSession(p config.AutoCandidate, s carrierSession) {
 		var b [1]byte
 		_, err = io.ReadFull(ctrl, b[:])
 		if err == nil && b[0] != 0 {
-			err = errors.New("expected typed peer control stream")
+			err = errControlProtocol
 		}
 	}
 	if err != nil {
+		m.candidateFailure(p.ID, "control_type", "control stream type unavailable", err)
 		return
 	}
 	w, peer, err := m.authenticate(ctrl, s, p.ID, "")
 	if err != nil {
-		m.log.WithField("candidate", p.ID).WithError(err).Debug("carrier control authentication failed")
-		m.candidateStatus(p.ID, func(s *CandidateStatus) { s.Ready = false; s.Reason = "peer identity/version/policy rejected" })
+		m.candidateFailure(p.ID, "control_auth", "peer control authentication unavailable", err)
 		return
 	}
 	if w.packet != nil {
@@ -412,7 +429,11 @@ func (m *Manager) runSession(p config.AutoCandidate, s carrierSession) {
 	m.peerIncarnation = w.base.PeerIncarnation
 	m.endpoints[p.ID] = e
 	m.mu.Unlock()
-	m.candidateStatus(p.ID, func(s *CandidateStatus) { s.Ready = true; s.Reason = "authenticated enrolled endpoint" })
+	m.candidateStatus(p.ID, func(s *CandidateStatus) {
+		s.Ready = true
+		s.ErrorCode, s.ErrorStage = "", ""
+		s.Reason = "authenticated enrolled endpoint"
+	})
 	defer func() {
 		m.mu.Lock()
 		if m.endpoints[p.ID] == e {
@@ -421,6 +442,7 @@ func (m *Manager) runSession(p config.AutoCandidate, s carrierSession) {
 				if m.status.Candidates[i].ID == p.ID {
 					m.status.Candidates[i].Ready = false
 					m.status.Candidates[i].Reason = "peer control path disconnected"
+					m.status.Candidates[i].ErrorCode, m.status.Candidates[i].ErrorStage = "connection_closed", "control_session"
 				}
 			}
 		}

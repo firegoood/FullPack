@@ -234,9 +234,11 @@ quarantine, jittered backoff, cooldown, minimum dwell, hysteresis and a switch
 budget. Severe degradation switching requires explicit policy. No config rewrite
 on probe failure; no competing monitor/systemd restart authority.
 
-Defaults: 600 s bulk retest with jitter, 300 s cross-carrier cooldown, 600 s
-degradation dwell, three actual failed health probes and two cross-carrier
-commits/hour. Small liveness checks run separately. Severe-degradation policy
+Defaults: 600 s bulk retest with jitter, 300 s optional cross-carrier cooldown,
+600 s degradation dwell, three actual failed health probes and two optional
+changes/hour. The later approved no-route recovery policy uses a separate
+five-second gate with the shared durable twelve-commit hourly ceiling; see
+`auto-policy-review.md`. Small liveness checks run separately. Severe-degradation policy
 requires three sustained low scores below 40% of the initial three-sample
 median and an alternative at least 1.5 times better, after dwell/cooldown/budget.
 The reachable-degradation case passed in two Linux namespaces after repairing

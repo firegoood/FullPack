@@ -113,7 +113,7 @@ func installPckGuard(id string, legacy [][][]string, rules [][]string) (*pckGuar
 		// process that did not exit cleanly. See sweepPckRule.
 		sweepPckRule(table, body)
 		args := append([]string{"-t", table, "-I"}, body...)
-		if _, err := pckIptables(args...); err == nil {
+		if _, err := runScopedIptables(args...); err == nil {
 			g.added = append(g.added, r)
 		}
 	}
@@ -121,7 +121,7 @@ func installPckGuard(id string, legacy [][][]string, rules [][]string) (*pckGuar
 	return g, nil
 }
 
-func pckIptables(args ...string) ([]byte, error) {
+func runScopedIptables(args ...string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	return exec.CommandContext(ctx, "iptables", append([]string{"-w", "5"}, args...)...).Output()
@@ -147,7 +147,7 @@ func pckIptables(args ...string) ([]byte, error) {
 func sweepPckRule(table string, body []string) {
 	args := append([]string{"-t", table, "-D"}, body...)
 	for i := 0; i < 1024; i++ {
-		if _, err := pckIptables(args...); err != nil {
+		if _, err := runScopedIptables(args...); err != nil {
 			return // no more copies, which is the ordinary first-start case
 		}
 	}
@@ -158,12 +158,12 @@ func sweepPckRule(table string, body []string) {
 func sweepTunnelRules(id string) {
 	prefix := pckRulePrefix(id)
 	for _, table := range []string{"filter", "raw"} {
-		out, err := pckIptables("-t", table, "-S")
+		out, err := runScopedIptables("-t", table, "-S")
 		if err != nil {
 			continue
 		}
 		for _, del := range tunnelRuleDeletions(string(out), prefix) {
-			_, _ = pckIptables(append([]string{"-t", table}, del...)...)
+			_, _ = runScopedIptables(append([]string{"-t", table}, del...)...)
 		}
 	}
 }
@@ -189,7 +189,7 @@ func (g *pckGuard) remove() {
 	for _, r := range g.added {
 		table, body := r[0], r[1:]
 		args := append([]string{"-t", table, "-D"}, body...)
-		_, _ = pckIptables(args...)
+		_, _ = runScopedIptables(args...)
 	}
 	if g.owned {
 		releasePckOwnership(g.id)
