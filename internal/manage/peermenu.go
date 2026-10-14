@@ -25,7 +25,7 @@ func askWatDirection(current string) string {
 func setupPeerServer(transport string) {
 	if transport == "auto" {
 		pick := tui.ChooseOpt("Auto Setup", []tui.Option{
-			{Title: "Quick TCP/UDP Setup", Desc: "Two IPs and forwarded ports; reviewed TCP/WSS/Noise Reverse and Noise Direct endpoints"},
+			{Title: "Quick TCP/UDP Setup", Desc: "All protocols in both directions; four stable paths with automatic replenishment"},
 			{Title: "Advanced Setup", Desc: "Choose any approved carrier, custom endpoint, Wat, managed HTTPS or Layer 3"},
 		})
 		if pick < 0 {
@@ -271,12 +271,12 @@ func editPeerMenu(name string, s TunnelSpec) {
 	}
 	b, _ := json.MarshalIndent(status, "", "  ")
 	fmt.Println(string(b))
-	choices := []tui.Option{{Title: "Run Protocol Tests Now"}, {Title: "Manual Carrier Override"}, {Title: "Lock To A Carrier"}, {Title: "Disable A Standby Carrier Until Restart"}, {Title: "Remove Runtime Lock"}, {Title: "Observe Only"}, {Title: "Resume Auto Decisions"}}
+	choices := []tui.Option{{Title: "Run Protocol Tests Now"}, {Title: "Manual Carrier Override"}, {Title: "Lock To A Carrier"}, {Title: "Disable A Standby Carrier Until Restart"}, {Title: "Remove Runtime Lock"}, {Title: "Observe Only"}, {Title: "Resume Auto Decisions"}, {Title: "Rescan Enrolled Reserve Pool"}}
 	pick := tui.ChooseOpt("Auto Operations", choices)
 	if pick < 0 {
 		return
 	}
-	op := []string{"test-now", "switch", "lock", "disable-carrier", "unlock", "observe", "resume"}[pick]
+	op := []string{"test-now", "switch", "lock", "disable-carrier", "unlock", "observe", "resume", "rescan"}[pick]
 	a := peerauto.Action{Operation: op}
 	if pick < 4 {
 		a.Candidate = tui.Prompt("Enrolled Candidate ID: ")

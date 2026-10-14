@@ -58,9 +58,20 @@ updating this repository. These files record the user's persistent preferences.
   peer-address rejection and foreign backend ports distinct from local Iran
   listeners. Never stop unrelated port owners merely because FullPack's tunnel
   list is empty; preserve skipped HTTPS helper prerequisite diagnostics.
-- Preserve CLI/web Quick Auto setup and its shared reviewed four-endpoint
-  builder. Quick mode creates fresh stream pairs with explicit automatic
-  failover; advanced carriers/Wat/HTTPS/L3 and observe-only remain available.
+- Preserve CLI/web Quick Auto setup and its shared full-registry pool builder
+  approved on 2026-10-15. Explicit opt-in Selection permits at most 48 approved
+  endpoints, with at most four measured selected paths; legacy enrollment keeps
+  its four-candidate limit. Stream pools cover every carrier in Reverse/Direct
+  and both Wat Echo directions. L3 pools remain a separate six-datagram mode.
+  Replenish at two confirmed healthy selected paths, retaining the active route,
+  immutable pool authorization, durable generation/history and pressure skips.
+  Require three separated full data probes, bounded scans/handshakes, both-peer
+  subset agreement and truthful insufficient-route/prerequisite reporting.
+  Fresh-pair generated helper identities are scoped to the shared pair secret;
+  preserve public trust/key matching, TLS and authenticated REALITY cover checks.
+  Never export existing operator keys or local generated private material, adopt
+  unrelated binaries, download helpers implicitly or claim guaranteed availability.
+  Advanced carriers/Wat/HTTPS/L3 and observe-only remain available.
   Never overwrite an existing manifest or fencing state with a quick preset.
   Keep native/Auto role-marker checks separate from real socket/user ports,
   and retain the CLI's full engine enrollment validation.

@@ -19,6 +19,8 @@ var errControlProtocol = errors.New("invalid coordination protocol")
 func classifyCandidateError(err error) (code, summary string) {
 	var timeout net.Error
 	switch {
+	case errors.Is(err, errPoolPrerequisite):
+		return "prerequisite_missing", "SKIPPED: receiver-local helper or authenticated cover is unavailable"
 	case errors.Is(err, context.DeadlineExceeded), errors.Is(err, os.ErrDeadlineExceeded), errors.As(err, &timeout) && timeout.Timeout():
 		return "timeout", "exchange timed out; network filtering is not established"
 	case errors.Is(err, context.Canceled):

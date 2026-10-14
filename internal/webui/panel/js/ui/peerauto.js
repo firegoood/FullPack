@@ -69,27 +69,27 @@ function autoFields(a = {}, registry = []) {
 }
 
 function quickAutoFields() {
-  return `<label class="f3"><span>Auto setup</span><select data-peer-field="setupMode"><option value="quick">Quick TCP/UDP setup</option><option value="advanced">Advanced: custom carriers or L3</option></select></label>
-    <div data-peer-quick>${field('quick.iranIp', 'Iran IPv4')}${field('quick.kharejIp', 'Kharej IPv4')}
-      <details><summary>Change data listener ports</summary>${field('quick.basePort', 'First Reverse data port', 24443, 'number', 'TCP, WSS and Noise use this port and the next two on Iran.')}${field('quick.directPort', 'Direct Noise data port', 24445, 'number', 'This listener belongs to Kharej.')}</details>
-      <p>Automatic failover is enabled. Creating this tunnel approves all four endpoints below. Forwarded user ports remain on Iran.</p>
-      <div data-peer-quick-review></div><p>Uses built-in authenticated carriers. Wat, HTTPS helpers and Layer 3 are available in Advanced setup.</p></div>`;
+  return `<label class="f3"><span>Auto setup</span><select data-peer-field="setupMode"><option value="quick">Quick: all protocols</option><option value="advanced">Advanced: custom carriers or L3</option></select></label>
+    <div data-peer-quick><label class="f3"><span>Traffic</span><select data-peer-field="quick.mode"><option value="stream">TCP/UDP ports · all 18 protocols</option><option value="l3">IP network · all six datagram protocols</option></select></label>${field('quick.iranIp', 'Iran IPv4')}${field('quick.kharejIp', 'Kharej IPv4')}
+      <details><summary>Change data listener ports</summary>${field('quick.basePort', 'First Reverse data port', 24443, 'number', 'First port of the reviewed Reverse pool on Iran.')}${field('quick.directPort', 'First Direct data port', 24475, 'number', 'First port of the reviewed Direct pool on Kharej.')}</details>
+      <p>Auto tests the approved pool, selects up to four stable paths and rescans at two healthy paths. Creating this pair approves the reviewed endpoints. Missing helpers or Raw privileges are SKIPPED; tools are not downloaded automatically.</p>
+      <details><summary>Review approved endpoints and ports</summary><div data-peer-quick-review></div></details><p>The selected four paths depend on measured data integrity, stability and quality. Advanced setup remains available.</p></div>`;
 }
 
-function wireQuickAuto(group, choices, registry) {
+function wireQuickAuto(group, choices, registry, l3Choices) {
   const update = () => {
     const quick = get(group, 'setupMode') === 'quick';
     group.querySelector('[data-peer-quick]').hidden = !quick;
     group.querySelector('[data-peer-advanced]').hidden = quick;
-    const base = num(group, 'quick.basePort') || 24443, direct = num(group, 'quick.directPort') || base + 2;
+    const base = num(group, 'quick.basePort') || 24443, direct = num(group, 'quick.directPort') || base + 32;
     const iran = get(group, 'quick.iranIp') || 'Iran IPv4', kharej = get(group, 'quick.kharejIp') || 'Kharej IPv4';
-    group.querySelector('[data-peer-quick-review]').innerHTML = `<ul>${choices.map(c => {
+    group.querySelector('[data-peer-quick-review]').innerHTML = `<ul>${(get(group, 'quick.mode') === 'l3' ? l3Choices : choices).map(c => {
       const label = registry.find(r => r.value === c.transport)?.label || c.transport;
-      const address = c.mode === 'direct' ? `${kharej}:${direct}` : `${iran}:${base + c.portOffset}`;
+      const address = c.transport === 'waticmp' ? `ICMP ${c.direction} · ${iran} ↔ ${kharej}` : c.mode === 'direct' ? `${kharej}:${direct + c.portOffset}` : `${iran}:${base + c.portOffset}`;
       return `<li>${esc(label)} · ${esc(c.mode)} · <b>${esc(address)}</b></li>`;
     }).join('')}</ul>`;
   };
-  for (const key of ['setupMode', 'quick.iranIp', 'quick.kharejIp', 'quick.basePort', 'quick.directPort']) {
+  for (const key of ['setupMode', 'quick.mode', 'quick.iranIp', 'quick.kharejIp', 'quick.basePort', 'quick.directPort']) {
     group.querySelector(`[data-peer-field="${key}"]`).addEventListener('input', update);
     group.querySelector(`[data-peer-field="${key}"]`).addEventListener('change', update);
   }
@@ -99,7 +99,7 @@ export function resetPeerSetup(root) {
   root.querySelectorAll('[data-peer-hidden]').forEach(n => { n.hidden = false; delete n.dataset.peerHidden; });
   root.querySelectorAll('.peer-settings').forEach(n => { n.hidden = true; });
 }
-export function shapePeerSetup(root, transport, role, direct = false, registry = [], quickChoices = []) {
+export function shapePeerSetup(root, transport, role, direct = false, registry = [], quickChoices = [], l3Choices = []) {
   const enabled = !direct && isPeerTransport(transport);
   resetPeerSetup(root);
   const here = root.querySelector('.here-card');
@@ -142,7 +142,7 @@ export function shapePeerSetup(root, transport, role, direct = false, registry =
       root.querySelector(`[data-fn="setSide"][data-args*="${role === 'client' ? 'server' : 'client'}"]`)?.click();
     };
     if (transport === 'auto' && role === 'server') {
-      wireQuickAuto(group, quickChoices, registry);
+      wireQuickAuto(group, quickChoices, registry, l3Choices);
       wireCandidates(group, registry);
       const reshapeMode = () => {
         const l3 = get(group, 'autoMode') === 'l3'; group.querySelector('[data-peer-l3]').hidden = !l3;
@@ -175,12 +175,13 @@ function wireLocalEnrollment(group, transport) {
       if (!input.value.trim()) return;
       try {
         const result = await api.peerEnrollmentPreview(transport, input.value.trim()); if (revision !== mine) return;
-        box.innerHTML = (result.l3 ? `<div data-peer-local="">${field('interface', 'Local TUN interface (optional)')}</div>` : '') + result.candidates.map(c => `<fieldset data-peer-local="${esc(c.id)}"><legend>${esc(c.id)} · ${esc(c.transport)} · local settings</legend>`
+        const localFields = (result.l3 ? `<div data-peer-local="">${field('interface', 'Local TUN interface (optional)')}</div>` : '') + result.candidates.map(c => `<fieldset data-peer-local="${esc(c.id)}"><legend>${esc(c.id)} · ${esc(c.transport)} · local settings</legend>`
           + (c.listener ? field('localBind', 'Kharej listener bind (optional)', c.defaultBind || '') : '')
           + (c.raw ? field('interface', 'Local raw interface (optional)') : '')
           + (c.helper ? field('binary', 'Local helper executable (optional)', '', 'text', 'Blank uses the installed role-specific helper.')
             + (c.listener ? c.transport === 'reality' ? field('privateKey', 'Matching local REALITY private key', '', 'password') : field('certificate', 'Matching local certificate path') + field('key', 'Local certificate key path') : field('caFile', 'Local CA file (optional)')) : '') + '</fieldset>').join('');
-        status.textContent = 'Enrollment checked. Complete any required local helper identity before creating this peer.';
+        box.innerHTML = result.candidates.length > 4 ? `<details><summary>Optional local listener and interface settings</summary>${localFields}</details>` : localFields;
+        status.textContent = result.candidates.length > 4 ? 'Pool enrollment checked. Default local settings are ready; optional adjustments are below.' : 'Enrollment checked. Complete any required local helper identity before creating this peer.';
       } catch (e) { if (revision === mine) status.textContent = e.message; }
     }, 400);
   });
@@ -218,7 +219,7 @@ export function peerSetupPayload(root, payload) {
   if (payload.transport === 'waticmp') result.waticmp = nativePayload(group);
   else if (get(group, 'setupMode') === 'quick') {
     const basePort = num(group, 'quick.basePort') || 24443;
-    result.quickAuto = {iranIp: get(group, 'quick.iranIp'), kharejIp: get(group, 'quick.kharejIp'), basePort, directPort: num(group, 'quick.directPort') || basePort + 2};
+    result.quickAuto = {iranIp: get(group, 'quick.iranIp'), kharejIp: get(group, 'quick.kharejIp'), basePort, directPort: num(group, 'quick.directPort') || basePort + 32, mode: get(group, 'quick.mode') || 'stream'};
   }
   else {
     const candidates = [...group.querySelectorAll('.peer-candidate')].map(autoCandidatePayload);
@@ -244,7 +245,7 @@ function localAutoFields(a, role) {
       return `<fieldset><legend>${esc(p.id)} · ${esc(p.transport)} · local settings</legend>`
         + (listener && p.transport !== 'waticmp' ? field(`local.${i}.bind`, 'Local listener bind (same enrolled port)', p.localBind || '') : '')
         + (['pck', 'spoof', 'sni'].includes(p.transport) ? field(`local.${i}.interface`, 'Local raw interface (optional)', p.packet?.interface || '') : '')
-        + (p.helper ? field(`local.${i}.binary`, 'Local helper executable', h.binary || '')
+        + (p.helper && !h.generated ? field(`local.${i}.binary`, 'Local helper executable', h.binary || '')
           + (listener ? p.transport === 'reality' ? field(`local.${i}.privateKey`, 'Local REALITY private key', '', 'password', 'Blank keeps the current key. A replacement must match the enrolled public key.')
             : field(`local.${i}.certificate`, 'Matching local certificate path', h.certificate || '') + field(`local.${i}.key`, 'Local certificate key path', h.key || '')
           : p.transport !== 'reality' ? field(`local.${i}.caFile`, 'Local CA file (optional)', h.caFile || '') : '') : '') + '</fieldset>';
@@ -257,7 +258,7 @@ function readLocalAuto(group, a, role) {
     const listener = (role === 'server') === (p.mode !== 'direct');
     if (listener && p.transport !== 'waticmp') p.localBind = get(group, `local.${i}.bind`);
     if (['pck', 'spoof', 'sni'].includes(p.transport)) p.packet = {...p.packet, interface: get(group, `local.${i}.interface`)};
-    if (p.helper) {
+    if (p.helper && !p.helper.generated) {
       p.helper.binary = get(group, `local.${i}.binary`);
       if (listener) {
         if (p.transport === 'reality') p.helper.privateKey = get(group, `local.${i}.privateKey`);
@@ -283,22 +284,24 @@ export function peerEditForm(root, settings, name) {
     const actions = group.querySelector('[data-peer-actions]');
     const paint = s => {
       output.innerHTML = `<p><b>${esc(s.state)}</b> · Active: ${esc(s.active || 'none')} · Last good: ${esc(s.lastGood || 'none')} · Generation: ${esc(String(s.generation))}</p>
-        <p>${esc(s.reason || '')}</p><p>Observe: ${s.observeOnly ? 'on' : 'off'} · Lock: ${esc(s.manualLock || 'none')}</p>
+        <p>${esc(s.reason || '')}</p>${s.selection ? `<p><b>Stable selected paths: ${Number(s.selection.healthy || 0)}/4</b> · Enrolled: ${(s.candidates || []).length} · ${s.selection.scanning ? 'Rescanning reserve pool' : esc(s.selection.reason || '')}</p>` : ''}<p>Observe: ${s.observeOnly ? 'on' : 'off'} · Lock: ${esc(s.manualLock || 'none')}</p>
         <p>Last commit: ${esc(s.lastSwitch || 'none')} · Next eligible switch: ${esc(s.nextEligibleSwitch || 'policy permits')}</p>
         <p>Flows: ${Number(s.flows?.live || 0)} live, ${Number(s.flows?.drained || 0)} drained, ${Number(s.flows?.interrupted || 0)} interrupted, ${Number(s.flows?.rejected || 0)} refused; UDP queue drops: ${Number(s.flows?.udpQueueDrops || 0)}.</p>
         ${s.packets ? `<p>TUN ${esc(s.packets.interface || '')}: ${Number(s.packets.sent || 0)} IP packets sent, ${Number(s.packets.received || 0)} received, ${Number(s.packets.dropped || 0)} dropped.</p>` : ''}
-        <table><thead><tr><th>Carrier / direction</th><th>Readiness</th><th>Probe Mbps / RTT ms</th></tr></thead><tbody>${(s.candidates || []).map(c => `<tr><td>${esc(c.id)} · ${esc(c.transport)} ${esc(c.mode || 'reverse')} ${esc(c.direction || '')}</td><td>${esc(c.ready ? 'ready' : c.reason || 'unavailable')}</td><td>${c.lastProbe && !c.lastProbe.startsWith('0001-') ? `${Number(c.usefulMbps || 0).toFixed(3)} / ${Number(c.rttMs || 0).toFixed(1)}` : 'not measured here'}</td></tr>`).join('')}</tbody></table>
+        <table><thead><tr><th>Carrier / direction</th><th>Readiness</th><th>Probe Mbps / RTT ms</th></tr></thead><tbody>${(s.candidates || []).map(c => `<tr><td>${esc(c.id)} · ${esc(c.transport)} ${esc(c.mode || 'reverse')} ${esc(c.direction || '')}</td><td>${esc(c.stable ? (c.selected ? 'stable · selected' : 'stable · reserve') : c.ready ? 'authenticated · awaiting stable data tests' : c.reason || 'unavailable')}</td><td>${c.lastProbe && !c.lastProbe.startsWith('0001-') ? `${Number(c.usefulMbps || 0).toFixed(3)} / ${Number(c.rttMs || 0).toFixed(1)}` : 'not measured here'}</td></tr>`).join('')}</tbody></table>
         <small>Probe application traffic is capped at 128 KB/s. Reported throughput is a bounded lower-bound measurement.</small>
         <ul>${(s.history || []).slice(-8).map(e => `<li>${esc(e.at)} ${esc(e.candidate || '')} ${esc(e.result)}: ${esc(e.reason)}</li>`).join('')}</ul>`;
       actions.innerHTML = '';
       if (settings.role !== 'server') { actions.textContent = 'Switching actions are available on the enrolled Iran authority.'; return; }
       for (const [op, label] of [['observe', 'Observe only'], ['resume', 'Resume Auto'], ['unlock', 'Release runtime lock']]) addButton(op, '', label);
+      if (s.selection) addButton('rescan', '', 'Rescan approved reserve pool');
+      const reserves = document.createElement('details'); reserves.innerHTML = '<summary>Manual controls for reserve protocols</summary>'; if (s.selection) actions.append(reserves);
       for (const c of s.candidates || []) {
-        for (const [op, label] of [['test-now', 'Test'], ['switch', 'Select'], ['lock', 'Lock'], ['disable-carrier', 'Disable until restart']]) addButton(op, c.id, `${label} ${c.id}`);
+        for (const [op, label] of [['test-now', 'Test'], ['switch', 'Select'], ['lock', 'Lock'], ['disable-carrier', 'Disable until restart']]) addButton(op, c.id, `${label} ${c.id}`, s.selection && !c.selected ? reserves : actions);
       }
     };
-    const addButton = (op, candidate, label) => {
-      const b = document.createElement('button'); b.type = 'button'; b.textContent = label; actions.append(b);
+    const addButton = (op, candidate, label, target = actions) => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = label; target.append(b);
       b.onclick = async () => {
         actions.querySelectorAll('button').forEach(x => { x.disabled = true; }); output.textContent = 'Waiting for the peer-coordinated action…';
         try { paint(await api.autoAction(name, op, candidate)); }

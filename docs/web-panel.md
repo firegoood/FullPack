@@ -12,10 +12,11 @@ documented local prerequisites.
 ## Quick Auto setup
 
 In **Add tunnel → Iran → Reverse → Auto**, Quick setup asks for the Iran and
-Kharej IPv4 addresses and forwarded ports. It shows the four TCP/WSS/Noise
-Reverse and Noise Direct endpoints before creation; carrier ports can be
-changed in the port options. Apply the resulting private setup link on Kharej.
-Switch to **Advanced** for custom carriers, Wat, managed HTTPS or L3.
+Kharej IPv4 addresses and forwarded ports. Choose stream or separate L3 mode;
+the collapsed review lists all approved endpoints in both directions. Auto
+selects four measured paths and rescans at two healthy paths. Carrier base
+ports can be changed in the port options. Apply the private link on Kharej.
+Switch to **Advanced** for custom enrollment, identities or observe-only.
 Both forms use the CLI's enrollment validators and occupied-port preflight.
 See [Quick Auto](quick-auto-setup.md) for the complete procedure.
 

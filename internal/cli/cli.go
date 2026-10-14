@@ -79,7 +79,7 @@ const usage = `fullpack — non-interactive commands
   fullpack check -c <file>              validate a config without starting it
   fullpack auto status <name> [--json]  live peer decision, scores and history
   fullpack auto <test-now|switch|lock|disable-carrier> <name> <candidate>
-  fullpack auto <unlock|observe|resume> <name>
+  fullpack auto <unlock|observe|resume|rescan> <name>
   fullpack link apply [--name N] [--host IP] '<setup link>'
                                         build and start the tunnel a setup link describes
   fullpack proxy enable <socks5|http> <port> [--user U --pass P]
@@ -159,7 +159,7 @@ func runAuto(args []string) Result {
 		if a.Candidate == "" {
 			return fail(CodeUsage, "operation requires an enrolled candidate\n")
 		}
-	case "unlock", "observe", "resume":
+	case "unlock", "observe", "resume", "rescan":
 		if a.Candidate != "" {
 			return fail(CodeUsage, "operation takes no candidate\n")
 		}

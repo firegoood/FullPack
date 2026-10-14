@@ -18,7 +18,44 @@
 | 2026-10-14 | Inspect the operator's offline Auto and add approved Reverse/Direct endpoints | Re-enroll a fresh four-candidate pair, preserve retired configuration/fencing and verify TCP/WSS passes separately from Direct/Wat failures |
 | 2026-10-14 | Simplify Auto setup and publish an updated release | Shared CLI/web Quick Auto builder, explicit endpoint review, private peer link, advanced setup preservation and signed v1.9.2 source/tag/assets |
 
-## Quick Auto and live setup review approved on 2026-10-14
+| 2026-10-15 | Include every protocol in easy Auto and replenish selected routes | Explicit complete stream/L3 pools, four measured stable paths, authenticated reserve replenishment at two healthy paths, unchanged generation and bounded recovery policy |
+
+## Full protocol pool and replenishment approved on 2026-10-15
+
+The operator asked the easy setup to evaluate every protocol/direction, select
+four stable routes and rescan/replenish when only two remain healthy. This
+supersedes the four-endpoint Quick preset below, without changing existing
+four-candidate pairs or granting runtime authority to invent new endpoints.
+
+- A fresh explicitly approved stream pool includes the eighteen registry
+  carriers in both initiation directions, plus both Wat Echo directions (38
+  candidates). A separate quick L3 mode includes all six datagrams in both
+  directions (12); never route IP through reliable stream carriers.
+- At most four paths are selected from a bounded pool of at most 48. Require
+  three separated successful full integrity probes, retain the healthy active
+  route during reserve selection and use the authenticated peer acknowledgment
+  and private durable state without deleting generation/switch history.
+- Reaching two healthy selected paths triggers a reserve sweep. Genuine data
+  failures/disconnection reduce availability; budget/pressure skips do not.
+  Repeated shortfalls use bounded retry/backoff and report insufficient routes;
+  the network may provide fewer than three or four usable paths.
+- Generated HTTPS credentials are new pair-scoped identities derived with
+  purpose-separated HKDF from the fresh shared secret. They are computable by
+  both enrolled peers, who already share switching/authentication authority;
+  they are not independent secrets from the counterpart. Existing operator
+  keys are untouched. Public CA/REALITY keys must match the local material,
+  private values/paths never enter peer exports, TLS verification stays on and
+  REALITY still needs the actual authenticated cover probe. Missing pinned
+  helper executables/raw privileges are SKIPPED, never silently downloaded or
+  borrowed from unrelated applications.
+- Preserve registry parity, CLI/web pool counts and rescan actions, bounded
+  handshake/control polling, existing manual/observe/lock policy, connection
+  bounds and joined cleanup. No arbitrary upstream binary or signing change.
+- Acceptance remains pending until the actual four-to-two-to-four data,
+  helper/raw/L3, race and full release gates pass. Model/unit tests do not imply
+  real-hour/24-hour or 1000-user acceptance.
+
+## Historical four-endpoint Quick implementation (2026-10-14)
 
 - Preserve `docs/auto-live-setup-review.md`: the original pair had only Wat
   Normal; adding arbitrary protocols was never implicit runtime enrollment.

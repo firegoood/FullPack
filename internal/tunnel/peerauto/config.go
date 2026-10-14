@@ -27,6 +27,22 @@ var candidateID = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,16}$`)
 var localInterface = regexp.MustCompile(`^[a-zA-Z0-9_.-]{1,15}$`)
 
 func Defaults(a config.AutoConfig) config.AutoConfig {
+	if a.Selection != nil {
+		v := *a.Selection
+		if v.Target == 0 {
+			v.Target = 4
+		}
+		if v.RefillAt == 0 {
+			v.RefillAt = 2
+		}
+		if v.StableSamples == 0 {
+			v.StableSamples = 3
+		}
+		if v.RetryInterval == 0 {
+			v.RetryInterval = 60
+		}
+		a.Selection = &v
+	}
 	if a.L3 != nil {
 		local := *a.L3
 		if local.MTU == 0 {
@@ -143,8 +159,15 @@ func validate(c *config.Config, local bool) error {
 	if a.MaxConnections < 1 || a.MaxConnections > 192 || a.ProbeInterval < 30 || a.ProbeInterval > 86400 || a.Cooldown < 5 || a.MinimumDwell < 5 || a.MaxSwitchesPerHour < 1 || a.MaxSwitchesPerHour > 12 || a.FailureThreshold < 3 || a.FailureThreshold > 20 {
 		return fmt.Errorf("Auto resource/timing policy outside its conservative bounds")
 	}
-	if len(a.Candidates) < 1 || len(a.Candidates) > 4 {
-		return fmt.Errorf("Auto needs 1-4 explicitly enrolled candidates")
+	limit := 4
+	if a.Selection != nil {
+		limit = 48
+		if a.Selection.Target != 4 || a.Selection.RefillAt != 2 || a.Selection.StableSamples != 3 || a.Selection.RetryInterval < 30 || a.Selection.RetryInterval > 600 {
+			return fmt.Errorf("Auto pool requires target 4, refill at 2, three stable samples and a 30-600 second retry interval")
+		}
+	}
+	if len(a.Candidates) < 1 || len(a.Candidates) > limit {
+		return fmt.Errorf("Auto needs 1-%d explicitly enrolled candidates", limit)
 	}
 	seen, endpoints, enabled := map[string]bool{}, map[string]bool{}, 0
 	lockFound := a.ManualLock == ""
@@ -167,7 +190,16 @@ func validate(c *config.Config, local bool) error {
 			return fmt.Errorf("candidate %s needs matching HTTPS helper settings", p.ID)
 		}
 		if p.Helper != nil {
-			if err := validateHelper(p, c.Server.BindAddr != "", local && !p.Disabled); err != nil {
+			generated := p.Helper.Generated
+			if generated {
+				if a.Selection == nil {
+					return fmt.Errorf("generated identities require an explicitly enrolled pool")
+				}
+				if err := validatePoolHelperIdentity(a, p, token); err != nil {
+					return fmt.Errorf("candidate %s: %w", p.ID, err)
+				}
+			}
+			if err := validateHelper(p, c.Server.BindAddr != "", local && !p.Disabled && !generated); err != nil {
 				return fmt.Errorf("candidate %s: %w", p.ID, err)
 			}
 		}

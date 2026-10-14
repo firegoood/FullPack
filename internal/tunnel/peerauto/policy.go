@@ -185,8 +185,14 @@ func (m *Manager) probeFailure(e *candidate, err error) {
 	if probeSkipped(err) {
 		result = "SKIPPED"
 	} else {
+		if m.policy.Selection != nil {
+			m.mu.Lock()
+		}
 		e.failedProbes++
 		e.quarantineUntil = time.Now().Add(min(time.Minute, time.Duration(5*(1<<min(e.failedProbes-1, 3)))*time.Second))
+		if m.policy.Selection != nil {
+			m.mu.Unlock()
+		}
 	}
 	m.candidateStatus(e.spec.ID, func(s *CandidateStatus) {
 		s.Reason = result + ": " + err.Error()
@@ -222,7 +228,7 @@ func (m *Manager) leaderLoop() error {
 		// Independent streams can be pinged concurrently. This is liveness only;
 		// no goroutine may propose/commit a transport change.
 		var wg sync.WaitGroup
-		for _, e := range eps {
+		for _, e := range m.poolControlBatch(eps, active) {
 			e := e
 			wg.Add(1)
 			go func() {
@@ -244,6 +250,7 @@ func (m *Manager) leaderLoop() error {
 		m.mu.Lock()
 		active = m.active
 		m.mu.Unlock()
+		m.refreshPool(active)
 		if active != nil && active.endpoint.ctx.Err() == nil {
 			m.unavailableSince = time.Time{}
 			if time.Since(m.lastHealth) >= 10*time.Second {
@@ -278,6 +285,7 @@ func (m *Manager) leaderLoop() error {
 		}
 		// Same-candidate recovery does not consume a cross-carrier switch budget.
 		// Prefer last good only while reachable; a dead path cannot veto recovery.
+		eps = m.poolRecoveryOrder(eps)
 		slices.SortStableFunc(eps, func(a, b *candidate) int {
 			if a.spec.ID == st.LastGood {
 				return -1
@@ -333,6 +341,17 @@ func (m *Manager) leaderLoop() error {
 }
 
 func (m *Manager) periodicProbe(eps []*candidate, active *route) {
+	if m.policy.Selection != nil {
+		m.mu.Lock()
+		selected := make([]*candidate, 0, 4)
+		for _, e := range eps {
+			if slices.Contains(m.pool.selected, e.spec.ID) || e == active.endpoint {
+				selected = append(selected, e)
+			}
+		}
+		m.mu.Unlock()
+		eps = selected
+	}
 	now := time.Now()
 	if m.pressure() {
 		return
@@ -354,7 +373,9 @@ func (m *Manager) periodicProbe(eps []*candidate, active *route) {
 			m.probeFailure(e, err)
 			return
 		}
-		e.failedProbes = 0
+		if m.policy.Selection == nil {
+			e.failedProbes = 0
+		}
 		if e.baseline == 0 && len(e.samples) >= 3 {
 			e.baseline = median(e.samples)
 		}

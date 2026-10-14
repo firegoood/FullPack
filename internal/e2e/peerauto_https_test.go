@@ -99,3 +99,16 @@ func TestPeerAutoManagedHTTPSBothDirections(t *testing.T) {
 		}
 	}
 }
+
+func TestPeerAutoPoolGeneratedHTTPSBothDirections(t *testing.T) {
+	if os.Getenv("FULLPACK_AUTO_HELPERS") != "1" {
+		t.Skip("opt-in pinned helper pool identity integration")
+	}
+	for _, tr := range []string{"naive", "xhttp", "reality"} {
+		for _, mode := range []string{"reverse", "direct"} {
+			t.Run(tr+"/"+mode, func(t *testing.T) {
+				testPeerCoordinatedSwitchKeepsUserListener(t, config.TransportType(tr), true, mode, "generated")
+			})
+		}
+	}
+}

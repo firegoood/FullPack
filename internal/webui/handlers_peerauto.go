@@ -44,7 +44,7 @@ func (s *server) handlePeerAuto(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		switch action.Operation {
-		case "test-now", "switch", "lock", "unlock", "observe", "resume", "disable-carrier":
+		case "test-now", "switch", "lock", "unlock", "observe", "resume", "disable-carrier", "rescan":
 		default:
 			http.Error(w, "unknown Auto action", 400)
 			return

@@ -19,27 +19,28 @@ const wireVersion = 1
 
 var errPeerRejected = errors.New("peer rejected coordination transaction")
 
-var operations = map[string]bool{"HELLO": true, "CAPABILITIES": true, "STATE_SYNC": true, "STATUS": true, "PROBE_OFFER": true, "PROBE_READY": true, "PROBE_START": true, "PROBE_RESULT": true, "PREPARE_SWITCH": true, "READY": true, "REJECT": true, "COMMIT": true, "COMMIT_ACK": true, "ABORT": true, "DRAIN": true, "RECOVER": true}
+var operations = map[string]bool{"HELLO": true, "CAPABILITIES": true, "STATE_SYNC": true, "STATUS": true, "PROBE_OFFER": true, "PROBE_READY": true, "PROBE_START": true, "PROBE_RESULT": true, "PREPARE_SWITCH": true, "READY": true, "REJECT": true, "COMMIT": true, "COMMIT_ACK": true, "ABORT": true, "DRAIN": true, "RECOVER": true, "POOL_SELECT": true, "POOL_ACK": true}
 
 type message struct {
-	Version         int    `json:"version"`
-	Op              string `json:"op"`
-	Tunnel          string `json:"tunnel"`
-	Sender          string `json:"sender"`
-	Receiver        string `json:"receiver"`
-	Manifest        string `json:"manifest"`
-	Candidate       string `json:"candidate"`
-	Incarnation     string `json:"incarnation"`
-	PeerIncarnation string `json:"peerIncarnation"`
-	Nonce           string `json:"nonce,omitempty"`
-	Sequence        uint64 `json:"sequence"`
-	Generation      uint64 `json:"generation"`
-	Transaction     string `json:"transaction,omitempty"`
-	Active          string `json:"active,omitempty"`
-	Bytes           int    `json:"bytes,omitempty"`
-	Digest          string `json:"digest,omitempty"`
-	Reason          string `json:"reason,omitempty"`
-	MAC             string `json:"mac"`
+	Selected        []string `json:"selected,omitempty"`
+	Version         int      `json:"version"`
+	Op              string   `json:"op"`
+	Tunnel          string   `json:"tunnel"`
+	Sender          string   `json:"sender"`
+	Receiver        string   `json:"receiver"`
+	Manifest        string   `json:"manifest"`
+	Candidate       string   `json:"candidate"`
+	Incarnation     string   `json:"incarnation"`
+	PeerIncarnation string   `json:"peerIncarnation"`
+	Nonce           string   `json:"nonce,omitempty"`
+	Sequence        uint64   `json:"sequence"`
+	Generation      uint64   `json:"generation"`
+	Transaction     string   `json:"transaction,omitempty"`
+	Active          string   `json:"active,omitempty"`
+	Bytes           int      `json:"bytes,omitempty"`
+	Digest          string   `json:"digest,omitempty"`
+	Reason          string   `json:"reason,omitempty"`
+	MAC             string   `json:"mac"`
 }
 
 func keyed(key []byte, parts ...string) []byte {

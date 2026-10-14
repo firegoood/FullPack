@@ -39,6 +39,7 @@
     "X-Backpack-Proof",
     "X-Backpack-Fix",
     "backpack release ",
+    "github.com/backpack/backpack/auto-pool/identity/v1:",
     "conntest.backpack.invalid"
   ],
   "preserve_patterns": [
@@ -242,7 +243,7 @@
     "internal/manage/reversesetup.go": ["specFromPeerNew(f.ToNewTunnel(), true)", "if err := refuseBusyForwards(s); err != nil"],
     "internal/manage/peermenu.go": ["config.AutoCarriers()", "Auto Traffic Mode", "Local Listener Bind For", "Matching Local REALITY Private Key", "setupQuickAutoServer()"],
     "internal/tunnel/peerauto/state_test.go": ["TestManifestKeepsLegacyHashAndIgnoresOnlyLocalOverrides", "TestSpoofUDPPortReservationUsesParsedProfile"],
-    "internal/e2e/peerauto_https_test.go": ["TestPeerAutoManagedHTTPSBothDirections", "FULLPACK_AUTO_HELPERS", "runtime.GOARCH"],
+    "internal/e2e/peerauto_https_test.go": ["TestPeerAutoPoolGeneratedHTTPSBothDirections"],
     "internal/e2e/testdata/auto-carriers-netns.sh": ["FULLPACK_AUTO_NETNS", "FULLPACK_AUTO_OUTER_MTU", "FULLPACK_AUTO_L3_FORWARD", "FULLPACK_AUTO_WAT_DIRECTION", "8972", "test-now", "stable listener/TUN"],
     "cmd/defaults.go": ["checkWatICMP", "peerauto.Validate(cfg)", "native Wat ICMP does not implement legacy"],
     "cmd/cmd.go": ["peerauto.New", ".auto-state.json"],
@@ -266,7 +267,7 @@
     "internal/webui/server.go": ["/api/tunnel/auto", "/api/tunnel/peer-enrollment"],
     "internal/webui/panel/js/ui/peerauto.js": ["Import an enrolled Kharej endpoint", "peerSetupPayload", "peerEditForm", "api.autoAction", "n.closest('.grp3')", "localAutoFields", "readLocalAuto", "quickAutoFields()", "wireQuickAuto", "result.quickAuto"],
     "internal/webui/paneltest/peerauto.test.js": ["Auto edit changes only local fields", "Auto Direct HTTPS", "Auto L3", "Quick Auto sends only the reviewed IP/port inputs"],
-    ".github/workflows/ci.yml": ["Verify FullPack customizations", "FULLPACK_AUTO_HELPERS", "FULLPACK_AUTO_NETNS", "FULLPACK_AUTO_OUTER_MTU=1500", "FULLPACK_AUTO_LOAD", "TestPeerAutoBoundedApplicationConnectionCapacity", "go-version: '1.27.2'", "mode: [normal, race, coverage]", "fail-fast: false"],
+    ".github/workflows/ci.yml": ["Verify FullPack customizations", "FULLPACK_AUTO_HELPERS", "FULLPACK_AUTO_NETNS", "FULLPACK_AUTO_OUTER_MTU=1500", "FULLPACK_AUTO_LOAD", "TestPeerAutoBoundedApplicationConnectionCapacity", "go-version: '1.27.2'", "mode: [normal, race, coverage]", "fail-fast: false", "TestPeerAutoPoolGeneratedHTTPSBothDirections", "bash internal/e2e/testdata/auto-pool-netns.sh"],
     "docs/auto-carrier-completion.md": ["one to four", "4096-packet replay window", "NOT VERIFIED", "same explicitly enrolled receive port"],
     "internal/cli/licenses.go": ["wat.License", "wat.Origin"],
     "internal/menu/system.go": ["Configuration And Fencing State Were Kept", "manage.RemoveInstalledHelpers()", "Remaining Installation Files Were Kept"],
@@ -296,10 +297,15 @@
     "internal/manage/quickauto.go": ["QuickAutoCarriers()", "expandQuickAuto", "ObserveOnly: false", "Approve These Endpoints And Create Quick Auto"],
     "internal/manage/quickauto_test.go": ["TestQuickAutoBuildsReviewedEndpointsAndTrustedPeerLink", "TestQuickAutoRejectsMissingAddressesConflictingPortsAndMixedEnrollment"],
     "internal/manage/spec/peercheck_test.go": ["TestPeerConfigRoleMarkersDoNotRequireSocketPorts", "legacy-server-zero", "auto-user-port-zero"],
-    "docs/quick-auto-setup.md": ["Quick TCP/UDP", "one-to-four", "خلاصهٔ فارسی"],
+    "docs/quick-auto-setup.md": ["Quick TCP/UDP", "four selected", "خلاصهٔ فارسی"],
     "docs/auto-live-setup-review.md": ["generation 2", "NOT VERIFIED", "No generation history was erased", "probe replay budget exhausted"],
     "internal/tunnel/peerauto/probes.go": ["maxRecentTransactions = 4096", "now.Sub(at) > time.Hour", "rememberProbeTransaction", "errProbeReplayBudget"],
     "internal/tunnel/peerauto/probe_budget_test.go": ["TestProbeReplayWindowAllowsAnHourOfPacedHealthChecks", "TestProbeReplayBudgetStaysBoundedAndDoesNotQuarantineACarrier", "TestProbeBudgetRejectKeepsProductionControlUsable"],
-    "internal/tunnel/peerauto/wire.go": ["errProbePressure, errProbeBusy, errProbeReplayBudget"]
+    "internal/tunnel/peerauto/wire.go": ["errProbePressure, errProbeBusy, errProbeReplayBudget", "POOL_SELECT", "POOL_ACK"],
+    "internal/tunnel/peerauto/pool.go": ["poolStableLocked", "e.stablePasses >= 3", "acceptPoolSelectionLocked", "fellToRefill", "m.store.save(st)"],
+    "internal/tunnel/peerauto/poolcredentials.go": ["hkdf.Key", "validatePoolHelperIdentity", "PoolHelperIdentity", "identity/v1:", "ed25519.NewKeyFromSeed"],
+    "internal/e2e/peerauto_pool_test.go": ["TestPeerAutoPoolReplenishesFourAfterTwoStandbyFailures", "failed path retained", "two-route shortfall"],
+    "internal/e2e/testdata/auto-pool-netns.sh": ["FULLPACK_AUTO_NETNS", "same active generation and TUN", "ifindex"],
+    "internal/e2e/testdata/auto-pool-config.go": ["QuickAutoL3Carriers()", "peerauto.Validate(c)"]
   }
 }

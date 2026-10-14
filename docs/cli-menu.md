@@ -33,9 +33,10 @@ long form. For *how to set a tunnel up*, use the
 Choose **Setup Iran → Reverse → Auto → Quick TCP/UDP Setup**. Enter the two
 server IPv4 addresses and forwarded ports, review the four enrolled endpoints,
 then create the pair. On Kharej, apply the private setup link printed by Iran.
-Quick setup enables automatic failover with TCP, WSS and Noise Reverse plus
-Noise Direct. **Advanced Setup** retains custom ports, Wat, managed HTTPS and
-L3 enrollment. Existing pairs are unchanged. See [Quick Auto](quick-auto-setup.md)
+Quick setup reviews the complete stream pool in Reverse/Direct or a separate
+L3 datagram pool, selects four measured paths and rescans at two healthy paths.
+**Advanced Setup** retains custom enrollment and observe-only. Existing pairs
+are unchanged. See [Quick Auto](quick-auto-setup.md)
 for endpoint ports, firewall requirements and the setup-link procedure.
 
 Connection Test includes **Naive / HTTP2**, **XHTTP / TLS** and **REALITY / Vision**.

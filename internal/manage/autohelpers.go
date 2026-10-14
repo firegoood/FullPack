@@ -74,6 +74,9 @@ func carryAutoNodeLocal(n *NewTunnel, current TunnelSpec) error {
 func prepareAutoHelpers(s *TunnelSpec) error {
 	for i := range s.Auto.Candidates {
 		p := &s.Auto.Candidates[i]
+		if p.Helper != nil && p.Helper.Generated {
+			continue
+		}
 		if p.Helper == nil || p.Disabled {
 			continue
 		}
@@ -233,7 +236,7 @@ func PeerLocalRequirements(raw, transport string) (any, error) {
 		out.L3 = f.Auto.L3 != nil
 		for _, p := range f.Auto.Candidates {
 			v, _ := config.FindAutoCarrier(p.Transport)
-			r := PeerLocalRequirement{ID: p.ID, Transport: string(p.Transport), Helper: v.Helper, Raw: p.Transport == config.PCK || p.Transport == config.SPOOF || p.Transport == "sni", Listener: !p.ListenerIsIran()}
+			r := PeerLocalRequirement{ID: p.ID, Transport: string(p.Transport), Helper: v.Helper && (p.Helper == nil || !p.Helper.Generated), Raw: p.Transport == config.PCK || p.Transport == config.SPOOF || p.Transport == "sni", Listener: p.Transport != config.WATICMP && !p.ListenerIsIran()}
 			if r.Listener {
 				r.DefaultBind = net.JoinHostPort("0.0.0.0", addrPort(p.Endpoint))
 			}

@@ -2,6 +2,24 @@
 
 All notable changes to Backpack are documented here.
 
+## v1.9.3 — 2026-10-15 (FullPack)
+
+- Quick Auto enrolls all eighteen stream carriers in Reverse/Direct, including
+  both Wat Echo modes (38 candidates), or all six L3 datagrams in both directions
+  (12). It selects at most four measured paths and rescans the approved reserves
+  when only two selected paths remain healthy. Three separated integrity probes
+  qualify a path; reserve selection requires peer acknowledgment and preserves
+  the active generation, listeners/TUN and durable switching history.
+- Generated HTTPS identities carry matching public trust and fresh pair-scoped
+  credentials. Local private material is never exported. TLS verification and
+  the authenticated REALITY cover check remain required; unavailable pinned
+  helpers/raw privileges are SKIPPED and retried without implicit downloads.
+- Add pool status and manual rescan, bounded handshake/control work, legacy
+  enrollment compatibility checks and real network-fault/TUN/helper tests.
+  Existing pairs require a fresh explicit enrollment to approve the wider pool.
+  Fewer usable network paths are reported honestly; this is not a 24-hour or
+  1000-user production acceptance claim.
+
 ## v1.9.2 — 2026-10-14 (FullPack)
 
 - Add Quick Auto setup to CLI and web: enter the two peer IPv4 addresses and

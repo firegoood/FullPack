@@ -115,13 +115,14 @@ For the complete explanation, see [Before you start](tutorial/before-you-start.m
 
 # Enrolled Auto
 
-For a quick port-forwarding pair, choose **Setup Iran → Auto → Quick TCP/UDP
-Setup** in the CLI, or **Auto → Quick TCP/UDP setup** in the panel. Enter both
-peer IPv4 addresses and the forwarded ports. Review the four proposed endpoints,
-create Iran, then apply its private setup link on Kharej. The quick preset uses
-TCP, WSS and Noise Reverse plus Noise Direct, with automatic failover enabled.
-It needs no optional HTTPS helper. See [Quick Auto setup](docs/quick-auto-setup.md)
-for listener ports and the advanced Wat/HTTPS/L3 path.
+For a quick pair, choose **Setup Iran → Reverse → Auto → Quick TCP/UDP Setup**
+in the CLI, or **Auto → Quick: all protocols** in the panel. Enter the two IPs
+and ports, review the full approved pool and apply its private link on Kharej.
+Auto selects up to four data-tested paths and rescans at two healthy paths.
+Stream setup includes all eighteen protocols in both directions; separate L3
+setup includes all six datagrams. Missing prerequisites remain SKIPPED and
+existing pairs are not rewritten. See [Quick Auto](docs/quick-auto-setup.md).
+
 
 Opt-in Auto supports eighteen stream carriers with Reverse or Direct initiation
 and six datagram carriers for a stable L3 TUN. Select one to four explicitly

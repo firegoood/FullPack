@@ -145,6 +145,34 @@ func validateHelper(p config.AutoCandidate, iran, local bool) error {
 }
 
 func listenHelperCarrier(ctx context.Context, a config.AutoConfig, p config.AutoCandidate, token string) (acceptCarrier, func(), error) {
+	var identityCleanup func()
+	var identityErr error
+	p, identityCleanup, identityErr = generatedHelperLocal(a, p, token, true)
+	if identityErr != nil {
+		return nil, nil, identityErr
+	}
+	keepIdentity := false
+	defer func() {
+		if !keepIdentity {
+			identityCleanup()
+		}
+	}()
+	if p.Helper.Generated {
+		if err := validateHelper(p, p.ListenerIsIran(), true); err != nil {
+			return nil, nil, err
+		}
+		if p.Transport == "reality" {
+			attempt, cancel := context.WithTimeout(ctx, 8*time.Second)
+			err := naive.ProbeRealityTLS(attempt, p.Helper.Target, p.Helper.ServerName, nil)
+			if err == nil {
+				err = naive.ProbeRealityTransport(attempt, p.Helper.Target, p.Helper.ServerName, p.Helper.Binary)
+			}
+			cancel()
+			if err != nil {
+				return nil, nil, fmt.Errorf("%w: authenticated REALITY cover unavailable", errPoolPrerequisite)
+			}
+		}
+	}
 	s, _ := helperConfigs(p)
 	accept, closeListener, err := listenNoiseTCP(ctx, s.BindAddr, carrierSecret(a, p, token))
 	if err != nil {
@@ -161,7 +189,8 @@ func listenHelperCarrier(ctx context.Context, a config.AutoConfig, p config.Auto
 		closeListener()
 		return nil, nil, err
 	}
-	return accept, func() { h.Close(); closeListener() }, nil
+	keepIdentity = true
+	return accept, func() { h.Close(); closeListener(); identityCleanup() }, nil
 }
 
 type helperCarrier struct {
@@ -177,6 +206,11 @@ func (h *helperCarrier) Close() error {
 	return err
 }
 func dialHelperCarrier(ctx context.Context, a config.AutoConfig, p config.AutoCandidate, token string) (carrierSession, error) {
+	var err error
+	p, _, err = generatedHelperLocal(a, p, token, false)
+	if err != nil {
+		return nil, err
+	}
 	_, c := helperConfigs(p)
 	cleanup := func() {}
 	if p.Helper.CAPEM != "" {
@@ -198,7 +232,6 @@ func dialHelperCarrier(ctx context.Context, a config.AutoConfig, p config.AutoCa
 	}
 	logger := logrus.New()
 	var h *naive.Helper
-	var err error
 	if p.Transport == "naive" {
 		h, err = naive.StartClient(ctx, &c, logger)
 	} else {

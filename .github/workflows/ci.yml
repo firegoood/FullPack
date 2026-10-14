@@ -168,7 +168,7 @@ jobs:
       - name: Enrolled Auto HTTPS in both physical directions
         env:
           FULLPACK_AUTO_HELPERS: '1'
-        run: go test ./internal/e2e -run '^TestPeerAutoManagedHTTPSBothDirections$' -race -count=1 -timeout 5m
+        run: go test ./internal/e2e -run '^(TestPeerAutoManagedHTTPSBothDirections|TestPeerAutoPoolGeneratedHTTPSBothDirections)$' -race -count=1 -timeout 8m
 
   native-peer:
     name: Native ICMP and enrolled peer recovery
@@ -211,6 +211,8 @@ jobs:
         run: sudo env "PATH=$PATH" FULLPACK_AUTO_NETNS=1 FULLPACK_AUTO_PLANES=stream FULLPACK_AUTO_RAW_CARRIERS=waticmp FULLPACK_AUTO_WAT_DIRECTION=normal bash internal/e2e/testdata/auto-carriers-netns.sh
       - name: Optional enrolled TCP and UDP forwarding through TUN
         run: sudo env "PATH=$PATH" FULLPACK_AUTO_NETNS=1 FULLPACK_AUTO_PLANES=l3 FULLPACK_AUTO_L3_CARRIERS=udp FULLPACK_AUTO_L3_FORWARD=1 bash internal/e2e/testdata/auto-carriers-netns.sh
+      - name: Complete L3 pool replenishes reserves without replacing TUN
+        run: sudo env "PATH=$PATH" FULLPACK_AUTO_NETNS=1 bash internal/e2e/testdata/auto-pool-netns.sh
 
   audit:
     name: Vulnerabilities and static analysis

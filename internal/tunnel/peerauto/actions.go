@@ -42,6 +42,19 @@ func (m *Manager) handleAction(a actionRequest) {
 		a.result <- a.ctx.Err()
 		return
 	}
+	if a.action.Operation == "rescan" {
+		if m.policy.Selection == nil {
+			a.result <- errors.New("this pair has no enrolled reserve pool")
+			return
+		}
+		m.mu.Lock()
+		m.pool.force = true
+		m.pool.scanning = false
+		m.pool.nextSweep = time.Time{}
+		m.mu.Unlock()
+		a.result <- nil
+		return
+	}
 	if a.action.Operation == "unlock" {
 		m.runtimeLock = m.policy.ManualLock
 		m.mu.Lock()

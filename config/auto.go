@@ -3,6 +3,9 @@ package config
 // AutoConfig is an enrolled pair's policy. It never infers public endpoints
 // from fallback addresses or creates an unapproved management listener.
 type AutoConfig struct {
+	// Selection opts into a larger explicitly enrolled pool with four measured
+	// paths and replenishment when only two healthy selected paths remain.
+	Selection *AutoSelectionConfig `toml:"selection" json:"selection,omitempty"`
 	// Mode is empty/stream for stable port forwarding, or l3 for an owned TUN.
 	Mode string `toml:"mode" json:"mode,omitempty"`
 	// L3 enrolls the shared addresses and MTU. Interface is a local setting.
@@ -22,7 +25,7 @@ type AutoConfig struct {
 	Ports []string `toml:"ports" json:"ports"`
 	// AcceptUDP permits framed UDP forwarding on the enrolled Iran user ports.
 	AcceptUDP bool `toml:"accept_udp" json:"acceptUdp"`
-	// Candidates lists 1-4 explicitly approved endpoints, independent of the active carrier.
+	// Candidates lists 1-4 approved endpoints, or up to 48 with opt-in Selection.
 	Candidates []AutoCandidate `toml:"candidates" json:"candidates"`
 	// AllowPlaintextFallback must remain false: plaintext Auto adapters are unsupported in this version.
 	AllowPlaintextFallback bool `toml:"allow_plaintext_fallback" json:"allowPlaintextFallback"`
@@ -46,6 +49,20 @@ type AutoConfig struct {
 	ManualLock string `toml:"manual_lock" json:"manualLock"`
 	// MaxMemoryMB skips probes above this local process RSS pressure threshold, default 256 MB; it is not a hard memory limit.
 	MaxMemoryMB int `toml:"max_memory_mb" json:"maxMemoryMb"` // default 256
+}
+
+// AutoSelectionConfig never authorizes an endpoint outside Candidates.
+type AutoSelectionConfig struct {
+	// Target is the selected set size, fixed at four in this version.
+	Target int `toml:"target" json:"target"`
+	// RefillAt restarts a full pool sweep at two healthy selected paths.
+	RefillAt int `toml:"refill_at" json:"refillAt"`
+	// StableSamples requires three separated successful full data probes.
+	StableSamples int `toml:"stable_samples" json:"stableSamples"`
+	// RetryInterval bounds repeated sweeps when fewer than three routes qualify.
+	RetryInterval int `toml:"retry_interval" json:"retryInterval"`
+	// HelperEpoch binds the validity period of newly generated pool identities.
+	HelperEpoch int64 `toml:"helper_epoch" json:"helperEpoch,omitempty"`
 }
 
 type AutoCandidate struct {
@@ -92,6 +109,9 @@ type AutoL3Config struct {
 // Local helper executables, certificate/key paths and private keys are never
 // exported. CAPEM, public key and credentials are the peer's approved identity.
 type AutoHelperConfig struct {
+	// Generated materializes fresh-pair credentials locally from its secret;
+	// no existing operator key or receiver-local private material is exported.
+	Generated bool `toml:"generated" json:"generated,omitempty"`
 	// Binary is the local helper executable; blank uses the managed installation.
 	Binary string `toml:"binary" json:"binary,omitempty"`
 	// ReversePort is the restricted loopback engine port, distinct from public and user ports.
@@ -142,6 +162,10 @@ type AutoPacketConfig struct {
 // PeerEnrollment copies the paired policy without receiver-local paths,
 // interface overrides or helper private keys. Credentials remain paired secrets.
 func (a AutoConfig) PeerEnrollment() AutoConfig {
+	if a.Selection != nil {
+		v := *a.Selection
+		a.Selection = &v
+	}
 	a.Candidates = append([]AutoCandidate(nil), a.Candidates...)
 	a.MaxMemoryMB = 0
 	if a.L3 != nil {

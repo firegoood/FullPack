@@ -1,6 +1,7 @@
 package manage
 
 import (
+	"github.com/backpack/backpack/config"
 	"reflect"
 	"strings"
 	"testing"
@@ -17,14 +18,22 @@ func TestQuickAutoBuildsReviewedEndpointsAndTrustedPeerLink(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(s.Token) != 64 || !s.Auto.Enabled || s.Auto.ObserveOnly || len(s.Auto.Candidates) != 4 || s.Auto.MaxConnections != 64 || s.Auto.Cooldown != 300 || s.Auto.MinimumDwell != 600 || s.Auto.MaxSwitchesPerHour != 2 {
+	if len(s.Token) != 64 || !s.Auto.Enabled || s.Auto.ObserveOnly || len(s.Auto.Candidates) != 38 || s.Auto.Selection == nil || s.Auto.Selection.Target != 4 || s.Auto.Selection.RefillAt != 2 || s.Auto.MaxConnections != 64 || s.Auto.Cooldown != 300 || s.Auto.MinimumDwell != 600 || s.Auto.MaxSwitchesPerHour != 2 {
 		t.Fatalf("quick setup lost opt-in/security/policy bounds: %#v", s.Auto)
 	}
-	want := []string{"192.0.2.1:24443", "192.0.2.1:24444", "192.0.2.1:24445", "192.0.2.2:24445"}
-	for i, p := range s.Auto.Candidates {
-		if p.Endpoint != want[i] {
-			t.Fatalf("endpoint %d: %s want %s", i, p.Endpoint, want[i])
+	seen := map[string]bool{}
+	for _, p := range s.Auto.Candidates {
+		seen[string(p.Transport)+":"+p.Mode] = true
+	}
+	for _, c := range config.AutoCarriers() {
+		for _, mode := range []string{"reverse", "direct"} {
+			if !seen[string(c.Value)+":"+mode] {
+				t.Fatalf("registry transport/direction omitted: %s %s", c.Value, mode)
+			}
 		}
+	}
+	if s.Auto.Candidates[0].Endpoint != "192.0.2.1:24443" || s.Auto.Candidates[1].Endpoint != "192.0.2.2:24475" {
+		t.Fatal("reviewed direction-specific port bases changed")
 	}
 	raw := pendingReverseLink(s, n.QuickAuto.IranIP, linkExtras{})
 	if raw == "" {
@@ -43,6 +52,28 @@ func TestQuickAutoBuildsReviewedEndpointsAndTrustedPeerLink(t *testing.T) {
 	other, err := specFromNew(quickTestNew())
 	if err != nil || other.Auto.TunnelID == s.Auto.TunnelID || other.Token == s.Token {
 		t.Fatal("fresh quick setups reused enrollment identity/secret")
+	}
+}
+
+func TestQuickAutoL3BuildsAllDatagramsAndKeepsItsStableTunEnrollment(t *testing.T) {
+	n := quickTestNew()
+	n.QuickAuto.Mode = "l3"
+	n.Ports = ""
+	s, err := specFromNew(n)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if s.Auto.L3 == nil || s.Auto.Mode != "l3" || len(s.Auto.Candidates) != 12 {
+		t.Fatal("quick L3 pool incomplete")
+	}
+	for _, p := range s.Auto.Candidates {
+		c, _ := config.FindAutoCarrier(p.Transport)
+		if !c.L3 {
+			t.Fatal("IP routed over reliable stream")
+		}
+	}
+	if s.Auto.L3.IranIP == s.Auto.L3.KharejIP || s.Auto.L3.Interface != "" {
+		t.Fatal("invalid shared/local TUN enrollment")
 	}
 }
 

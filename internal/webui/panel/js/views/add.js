@@ -130,7 +130,7 @@ export function addView(ctx) {
         const cn = drawer('cn');
         if (cn) cn.hidden = isManaged(t);
         shapeManaged(root, t, chosen.side, chosen.direction === 'direct');
-        shapePeerSetup(root, t, chosen.side, chosen.direction === 'direct', opts.autoCarriers || [], opts.autoQuickCarriers || []);
+        shapePeerSetup(root, t, chosen.side, chosen.direction === 'direct', opts.autoCarriers || [], opts.autoQuickCarriers || [], opts.autoQuickL3Carriers || []);
       }
 
       /* Throughput is offered only where it applies — presetSuitsTransport. */

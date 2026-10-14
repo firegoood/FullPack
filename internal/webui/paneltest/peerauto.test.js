@@ -45,7 +45,7 @@ test('Quick Auto sends only the reviewed IP/port inputs and skips advanced enrol
   const group = controls({setupMode:'quick', 'quick.iranIp':'192.0.2.1', 'quick.kharejIp':'192.0.2.2', 'quick.basePort':25000, 'quick.directPort':25003, acceptUdp:true, observeOnly:true, tunnelId:'stale', iranId:'stale', kharejId:'stale'});
   group.querySelectorAll = () => { throw new Error('quick setup must not read advanced candidates'); };
   const result = peerSetupPayload({querySelector:()=>group}, {name:'quick', role:'server', transport:'auto', token:'secret', ports:'2052,8880', managed:{privateKey:'stale'}, preset:'stale'});
-  assert.deepEqual(result.quickAuto, {iranIp:'192.0.2.1', kharejIp:'192.0.2.2', basePort:25000, directPort:25003});
+  assert.deepEqual(result.quickAuto, {iranIp:'192.0.2.1', kharejIp:'192.0.2.2', basePort:25000, directPort:25003, mode:'stream'});
   assert.equal(result.tune.acceptUDP, true);
   for (const key of ['auto', 'managed', 'preset']) assert.equal(key in result,false);
 });
@@ -53,7 +53,13 @@ test('Quick Auto sends only the reviewed IP/port inputs and skips advanced enrol
 test('Quick Auto shows consistent default ports when custom port fields are blank', () => {
   const group=controls({setupMode:'quick', 'quick.iranIp':'192.0.2.1', 'quick.kharejIp':'192.0.2.2', 'quick.basePort':'', 'quick.directPort':''});
   const result=peerSetupPayload({querySelector:()=>group}, {role:'server',transport:'auto'});
-  assert.equal(result.quickAuto.basePort,24443); assert.equal(result.quickAuto.directPort,24445);
+  assert.equal(result.quickAuto.basePort,24443); assert.equal(result.quickAuto.directPort,24475);
+});
+
+test('Quick Auto L3 requests the separate datagram pool without advanced hidden fields', () => {
+  const group=controls({setupMode:'quick', 'quick.mode':'l3', 'quick.iranIp':'192.0.2.1', 'quick.kharejIp':'192.0.2.2'});
+  const result=peerSetupPayload({querySelector:()=>group}, {role:'server',transport:'auto',ports:''});
+  assert.equal(result.quickAuto.mode,'l3'); assert.equal(result.ports,''); assert.equal('auto' in result,false);
 });
 
 test('peer setup links use the visible form after switching between Quick Auto and Wat', () => {

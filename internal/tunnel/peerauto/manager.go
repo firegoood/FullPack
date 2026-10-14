@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -37,6 +38,9 @@ type candidate struct {
 	failedProbes    int
 	nextProbe       time.Time
 	baseline        float64
+	stablePasses    int
+	lastDataPass    time.Time
+	lastPoolSample  time.Time
 }
 type route struct {
 	endpoint   *candidate
@@ -54,6 +58,8 @@ type preparation struct {
 }
 
 type CandidateStatus struct {
+	Selected        bool      `json:"selected,omitempty"`
+	Stable          bool      `json:"stable,omitempty"`
 	Mode            string    `json:"mode,omitempty"`
 	ID              string    `json:"id"`
 	Transport       string    `json:"transport"`
@@ -69,6 +75,7 @@ type CandidateStatus struct {
 	Native          any       `json:"native,omitempty"`
 }
 type Status struct {
+	Selection   *PoolStatus       `json:"selection,omitempty"`
 	Version     int               `json:"version"`
 	TunnelID    string            `json:"tunnelId"`
 	PeerID      string            `json:"peerId"`
@@ -127,6 +134,8 @@ type Manager struct {
 	runtimeDisabled                                                                        map[string]bool
 	endpointCancel                                                                         map[string]context.CancelFunc
 	degradedSamples                                                                        int
+	pool                                                                                   poolRuntime
+	poolDials                                                                              chan struct{}
 	tls                                                                                    network.TLSSettings
 	device                                                                                 l3.PacketDevice
 	openPacketDevice                                                                       func(l3.Config, *logrus.Logger) (l3.PacketDevice, error)
@@ -165,6 +174,8 @@ func New(ctx context.Context, cfg *config.Config, statePath string) (*Manager, e
 	m.tls = tlsSettings(cfg)
 	m.runtimeLock = a.ManualLock
 	m.runtimeDisabled = map[string]bool{}
+	m.poolDials = make(chan struct{}, 2)
+	m.pool.selected = append([]string(nil), store.snapshot().Selected...)
 	m.endpointCancel = map[string]context.CancelFunc{}
 	if m.iran {
 		m.token = cfg.Server.Token
@@ -197,6 +208,18 @@ func (m *Manager) Snapshot() Status {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	s := m.status
+	if m.policy.Selection != nil {
+		v := m.pool.status
+		v.Selected = append([]string(nil), m.pool.selected...)
+		v.Healthy = 0
+		for i := range m.status.Candidates {
+			c := m.status.Candidates[i]
+			if slices.Contains(m.pool.selected, c.ID) && m.poolStableLocked(m.endpoints[c.ID], time.Now()) {
+				v.Healthy++
+			}
+		}
+		s.Selection = &v
+	}
 	if st.LastGood != "" && (m.active == nil || m.active.endpoint.ctx.Err() != nil) {
 		next = nextRecoverySwitch(st, time.Now())
 	}
@@ -215,6 +238,10 @@ func (m *Manager) Snapshot() Status {
 	s.Flows = FlowStatus{len(m.connections), m.flowAdmitted.Load(), m.flowCompleted.Load(), m.flowDrained.Load(), m.flowInterrupted.Load(), m.flowRejected.Load(), m.udpQueueDrops.Load()}
 	s.Candidates = append([]CandidateStatus(nil), s.Candidates...)
 	for i := range s.Candidates {
+		if m.policy.Selection != nil {
+			s.Candidates[i].Selected = slices.Contains(m.pool.selected, s.Candidates[i].ID)
+			s.Candidates[i].Stable = m.poolStableLocked(m.endpoints[s.Candidates[i].ID], time.Now())
+		}
 		if e := m.endpoints[s.Candidates[i].ID]; e != nil {
 			if native, ok := e.session.(watCarrier); ok {
 				s.Candidates[i].Native = native.c.Diagnostic(e.spec.Direction)
@@ -269,7 +296,17 @@ func (m *Manager) Start() error {
 			continue
 		}
 		p := p
-		m.launch(func() { m.endpointLoop(p) })
+		m.launch(func() {
+			for m.ctx.Err() == nil {
+				m.endpointLoop(p)
+				m.mu.Lock()
+				disabled := m.runtimeDisabled[p.ID]
+				m.mu.Unlock()
+				if m.policy.Selection == nil || disabled || !pause(m.ctx, time.Duration(m.policy.Selection.RetryInterval)*time.Second) {
+					return
+				}
+			}
+		})
 	}
 	if m.iran {
 		return m.leaderLoop()
@@ -334,10 +371,21 @@ func (m *Manager) endpointLoop(p config.AutoCandidate) {
 	}
 	backoff := time.Second
 	for epctx.Err() == nil {
+		releaseDial := func() {}
+		if m.policy.Selection != nil {
+			select {
+			case m.poolDials <- struct{}{}:
+			case <-epctx.Done():
+				return
+			}
+			var once sync.Once
+			releaseDial = func() { once.Do(func() { <-m.poolDials }) }
+		}
 		var s carrierSession
 		var err error
 		s, err = dialCarrier(epctx, m.policy, p, m.token)
 		if err != nil {
+			releaseDial()
 			m.candidateFailure(p.ID, "carrier_handshake", "carrier handshake unavailable", err)
 			if !pause(epctx, backoff) {
 				return
@@ -348,14 +396,19 @@ func (m *Manager) endpointLoop(p config.AutoCandidate) {
 		backoff = time.Second
 		// Serial sessions per accepting endpoint bound authentication/raw sockets.
 		// A failed peer reconnects after liveness fencing releases its session.
-		m.runSession(p, s)
+		m.runSession(p, s, releaseDial)
 		s.Close()
 		if !pause(m.ctx, time.Second) {
 			return
 		}
 	}
 }
-func (m *Manager) runSession(p config.AutoCandidate, s carrierSession) {
+func (m *Manager) runSession(p config.AutoCandidate, s carrierSession, dialRelease ...func()) {
+	release := func() {}
+	if len(dialRelease) > 0 {
+		release = dialRelease[0]
+	}
+	defer release()
 	ctx, cancel := context.WithCancel(m.ctx)
 	defer cancel()
 	stop := afterFuncJoined(ctx, func() { s.Close() })
@@ -392,6 +445,7 @@ func (m *Manager) runSession(p config.AutoCandidate, s carrierSession) {
 		m.candidateFailure(p.ID, "control_auth", "peer control authentication unavailable", err)
 		return
 	}
+	release()
 	if w.packet != nil {
 		defer w.packet.close()
 	}
@@ -498,6 +552,9 @@ func (m *Manager) follow(e *candidate) {
 		e.lastSeen.Store(time.Now().UnixNano())
 		if r.Op == "PROBE_OFFER" {
 			if err = m.followProbe(e, r); err != nil {
+				if m.policy.Selection != nil {
+					m.probeFailure(e, err)
+				}
 				m.log.WithField("candidate", e.spec.ID).WithError(err).Warn("enrolled probe responder stopped")
 				// A separately isolated probe failure cannot close a healthy
 				// production session. The authority consumes this typed rejection.
@@ -527,6 +584,9 @@ func (m *Manager) transition(e *candidate, r message) message {
 	out := message{Op: "REJECT", Generation: st.Generation, Transaction: r.Transaction, Active: st.Active, Reason: "invalid or stale transition"}
 	if e.ctx.Err() != nil || m.endpoints[e.spec.ID] != e {
 		return out
+	}
+	if r.Op == "POOL_SELECT" {
+		return m.acceptPoolSelectionLocked(e, r, st)
 	}
 	if r.Op == "STATUS" || r.Op == "STATE_SYNC" || r.Op == "RECOVER" {
 		if p := m.prepared; p != nil && time.Now().After(p.expires) {
@@ -674,7 +734,12 @@ func (m *Manager) followProbe(e *candidate, r message) error {
 		return errors.New("bidirectional probe result not confirmed")
 	}
 	if r.Bytes == 32768 {
-		e.probeAt = time.Now()
+		if m.policy.Selection == nil {
+			e.probeAt = time.Now()
+		}
+		m.poolProbePassed(e, true)
+	} else {
+		m.poolProbePassed(e, false)
 	}
 	return e.w.send(message{Op: "PROBE_RESULT", Transaction: r.Transaction, Digest: digest, Bytes: r.Bytes})
 }
@@ -811,10 +876,13 @@ func (m *Manager) exchangeProbe(e *candidate, probeBytes int) (err error) {
 		return fmt.Errorf("control probe result: %w", askErr)
 	}
 	e.lastSeen.Store(time.Now().UnixNano())
+	m.poolProbePassed(e, probeBytes == 32768)
 	if probeBytes == 512 {
 		return nil
 	}
-	e.probeAt = time.Now()
+	if m.policy.Selection == nil {
+		e.probeAt = time.Now()
+	}
 	mbps := float64(32768*8) / elapsed.Seconds() / 1e6
 	e.probeScore = mbps / max(float64(rtt.Milliseconds())/3, 1)
 	e.samples = append(e.samples, e.probeScore)

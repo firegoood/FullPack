@@ -11,15 +11,16 @@ import (
 )
 
 type durableState struct {
-	Version     int     `json:"version"`
-	Manifest    string  `json:"manifest"`
-	Generation  uint64  `json:"generation"`
-	Active      string  `json:"active"`
-	LastGood    string  `json:"lastGood"`
-	Intent      string  `json:"intent,omitempty"`
-	Transaction string  `json:"transaction,omitempty"`
-	Switches    []int64 `json:"switches,omitempty"`
-	LastChange  int64   `json:"lastChange,omitempty"`
+	Selected    []string `json:"selected,omitempty"`
+	Version     int      `json:"version"`
+	Manifest    string   `json:"manifest"`
+	Generation  uint64   `json:"generation"`
+	Active      string   `json:"active"`
+	LastGood    string   `json:"lastGood"`
+	Intent      string   `json:"intent,omitempty"`
+	Transaction string   `json:"transaction,omitempty"`
+	Switches    []int64  `json:"switches,omitempty"`
+	LastChange  int64    `json:"lastChange,omitempty"`
 }
 type stateStore struct {
 	mu    sync.Mutex
@@ -54,7 +55,7 @@ func openStore(path, manifest string) (*stateStore, error) {
 		}
 		b, e := io.ReadAll(io.LimitReader(f, 8193))
 		f.Close()
-		if e != nil || len(b) > 8192 || json.Unmarshal(b, &s.state) != nil || s.state.Version != 1 || s.state.Generation >= 1<<62 || len(s.state.Switches) > 12 {
+		if e != nil || len(b) > 8192 || json.Unmarshal(b, &s.state) != nil || s.state.Version != 1 || s.state.Generation >= 1<<62 || len(s.state.Switches) > 12 || len(s.state.Selected) > 4 {
 			s.Close()
 			return nil, errors.New("invalid Auto state; restore a verified backup or re-enroll both peers")
 		}
@@ -86,6 +87,7 @@ func (s *stateStore) snapshot() durableState {
 	defer s.mu.Unlock()
 	st := s.state
 	st.Switches = append([]int64(nil), st.Switches...)
+	st.Selected = append([]string(nil), st.Selected...)
 	return st
 }
 func (s *stateStore) save(st durableState) error {

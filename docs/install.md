@@ -24,8 +24,8 @@ sudo fullpack
 
 For a new Auto pair, choose **Setup Iran → Reverse → Auto → Quick TCP/UDP
 Setup**, enter both server IPs and the forwarded ports, and apply the private
-setup link on Kharej. The [Quick Auto guide](quick-auto-setup.md) lists its four
-endpoints and the corresponding web form.
+setup link on Kharej. The [Quick Auto guide](quick-auto-setup.md) lists the full
+approved pool, four-path selection, replenishment and corresponding web form.
 
 When this installer updates an existing installation, it reloads an active
 FullPack panel/monitor service so the new embedded form is available. Tunnel

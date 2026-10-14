@@ -58,7 +58,8 @@ func testPeerCoordinatedSwitchKeepsUserListener(t *testing.T, transport config.T
 	if transport == config.WATICMP {
 		primary.IranIP, primary.KharejIP, primary.Direction = "127.0.0.1", "127.0.0.1", "reverse"
 	}
-	if transport == "naive" || transport == "xhttp" || transport == "reality" {
+	generated := len(modes) > 1 && modes[1] == "generated"
+	if !generated && (transport == "naive" || transport == "xhttp" || transport == "reality") {
 		primary.Helper = autoHTTPSIdentity(t, string(transport))
 	}
 	maps := []string{fmt.Sprintf("127.0.0.1:%d=%s", entry, backend.addr), fmt.Sprintf("127.0.0.1:%d=%s", udpEntry, udpBackend)}
@@ -68,6 +69,15 @@ func testPeerCoordinatedSwitchKeepsUserListener(t *testing.T, transport config.T
 		a.Candidates = a.Candidates[:1]
 	}
 	token := "0123456789abcdef0123456789abcdef"
+	if generated {
+		a.Selection = &config.AutoSelectionConfig{HelperEpoch: time.Now().Unix(), RetryInterval: 30}
+		h, err := peerauto.PoolHelperIdentity(a, primary, token, freePort(t))
+		if err != nil {
+			t.Fatal(err)
+		}
+		primary.Helper = h
+		a.Candidates[0] = primary
+	}
 	srv := &config.Config{Auto: a, Server: config.ServerConfig{Transport: transport, BindAddr: endpoint, Token: token, Ports: maps}}
 	cli := &config.Config{Auto: a, Client: config.ClientConfig{Transport: transport, RemoteAddr: endpoint, Token: token}}
 	if primary.Helper != nil {
@@ -120,7 +130,11 @@ func testPeerCoordinatedSwitchKeepsUserListener(t *testing.T, transport config.T
 			}
 		}
 	})
-	deadline := time.Now().Add(30 * time.Second)
+	bootstrapWait := 30 * time.Second
+	if generated {
+		bootstrapWait = 90 * time.Second
+	}
+	deadline := time.Now().Add(bootstrapWait)
 	for m.Snapshot().Active != primary.ID && time.Now().Before(deadline) {
 		time.Sleep(100 * time.Millisecond)
 	}

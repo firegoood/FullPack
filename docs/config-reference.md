@@ -20,6 +20,7 @@ them both ends have to agree on. This says what exists.
 | `ca_file` | `string` | CAFile optionally supplies a dialer's local CA bundle without disabling TLS verification. |
 | `ca_pem` | `string` | CAPEM is the public CA certificate enrolled for HTTPS peer verification. |
 | `certificate` | `string` | Certificate is the listener's local TLS certificate path matching its enrolled hostname and CA. |
+| `generated` | `bool` | Generated materializes fresh-pair credentials locally from its secret; no existing operator key or receiver-local private material is exported. |
 | `host` | `string` | Host optionally overrides the enrolled XHTTP HTTP Host header. |
 | `key` | `string` | Key is the listener's local TLS private-key path; never exported in enrollment. |
 | `password` | `string` | Password is the paired Naive account secret; settings responses redact it. |
@@ -51,6 +52,16 @@ them both ends have to agree on. This says what exists.
 | `kharej_source` | `string` | KharejSource is Kharej's enrolled forged unicast source address for SPOOF. |
 | `sni_domain` | `string` | SNIDomain is the enrolled hostname embedded by the direct SNI carrier. |
 | `spoof_profile` | `string` | SpoofProfile selects an existing SPOOF packet profile; Auto adds independent authentication. |
+
+## AutoSelectionConfig
+
+| Key | Type | Description |
+|---|---|---|
+| `helper_epoch` | `int64` | HelperEpoch binds the validity period of newly generated pool identities. |
+| `refill_at` | `int` | RefillAt restarts a full pool sweep at two healthy selected paths. |
+| `retry_interval` | `int` | RetryInterval bounds repeated sweeps when fewer than three routes qualify. |
+| `stable_samples` | `int` | StableSamples requires three separated successful full data probes. |
+| `target` | `int` | Target is the selected set size, fixed at four in this version. |
 
 ## Config
 
@@ -109,7 +120,7 @@ them both ends have to agree on. This says what exists.
 | `accept_udp` | `bool` | AcceptUDP permits framed UDP forwarding on the enrolled Iran user ports. |
 | `allow_degradation_switch` | `bool` | AllowDegradationSwitch optionally permits changing a reachable path after sustained severe measured degradation. |
 | `allow_plaintext_fallback` | `bool` | AllowPlaintextFallback must remain false: plaintext Auto adapters are unsupported in this version. |
-| `candidates` | `[]AutoCandidate` | Candidates lists 1-4 explicitly approved endpoints, independent of the active carrier. |
+| `candidates` | `[]AutoCandidate` | Candidates lists 1-4 approved endpoints, or up to 48 with opt-in Selection. |
 | `cooldown` | `int` | Cooldown is seconds between optional cross-carrier changes, default 300, minimum 5. Debounced no-route recovery uses a separate 5-second gate; all commits still extend this cooldown. |
 | `enabled` | `bool` | Enabled opts into the enrolled coordinator; false/absent keeps the manual engine and legacy fallback. |
 | `failure_threshold` | `int` | FailureThreshold debounces carrier failure, default 3, range 3-20; skipped probes do not count. |
@@ -125,6 +136,7 @@ them both ends have to agree on. This says what exists.
 | `observe_only` | `bool` | ObserveOnly bootstraps the primary/last-good route and measures candidates without automatic cross-carrier changes. |
 | `ports` | `[]string` | These exact maps are authenticated as part of the manifest. The follower dials only this enrolled backend allowlist, indexed by mapping number. |
 | `probe_interval` | `int` | ProbeInterval is seconds between paced bulk tests, default 600, minimum 30; schedules include jitter. |
+| `selection` | `*AutoSelectionConfig` | Selection opts into a larger explicitly enrolled pool with four measured paths and replenishment when only two healthy selected paths remain. |
 | `tunnel_id` | `string` | TunnelID is the immutable 16-64 safe-character pair identity. |
 
 ## [client.naive]
@@ -393,4 +405,4 @@ them both ends have to agree on. This says what exists.
 
 ---
 
-*Generated from `config/` on 2026-10-14. Last verified against FullPack v1.9.2.*
+*Generated from `config/` on 2026-10-15. Last verified against FullPack v1.9.2.*
