@@ -52,6 +52,12 @@
   increment data failures/quarantine. Preserve the paced-hour, hard-cap,
   replay/expiry and subsequent-control regression tests. A clock-model test is
   distinct from real-hour/24-hour acceptance.
+- v1.9.2 was published at immutable source `28bd07f6445b958107fc8f310c8a40de20185104`
+  after all eleven CI verification jobs and the public signed-install check
+  passed in run `38626831074`. Seven public archives, exact legal contents,
+  tag-bound signature and binary Go 1.27.2 build information were independently
+  verified. Keep these release results separate from the remaining WAN/24-hour/
+  1000-user limits in `docs/fullpack-release-verification.md`.
 
 ## Peer setup port ownership review on 2026-10-14
 

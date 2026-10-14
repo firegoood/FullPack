@@ -73,6 +73,14 @@ changing enrollment, generations, endpoints or cryptographic verification.
 The modelled-hour regression does not establish a real-hour/24-hour soak.
 The production servers still ran v1.9.1 during this observation.
 
+A subsequent read found both peers HEALTHY on TCP at generation 3 after old
+replay entries expired, without a restart or state reset. That recovery does
+not repair the old cache limit: the two installed engines remained v1.9.1 and
+need the v1.9.2 update on both sides plus a tunnel restart. The corrected source's
+Linux budget/control regressions and isolated carrier/recovery tests passed;
+their temporary executables/directories were removed from both servers. No
+production fault injection or unrelated service change occurred in this phase.
+
 The operator then requested a simpler setup and a new signed release. Quick
 setup selects built-in TCP/WSS/Noise Reverse plus Noise Direct and retains the
 advanced Wat/HTTPS/L3 path; it does not rewrite this deployed pair. See

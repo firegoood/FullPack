@@ -55,8 +55,12 @@ preserve a verified backup of the old config/state before retiring it.
 The shared builder/peer-link and invalid-input Linux tests and the panel payload
 tests passed during development. The isolated browser form showed the same four
 reviewed endpoints, preserved inputs across quick/advanced switching and omitted
-advanced settings from the quick payload. Full release CI and signed installer
-verification remain required before publication.
+advanced settings from the quick payload. All eleven full Linux CI gates and
+the signed public installer passed for the immutable v1.9.2 release in
+[run 38626831074](https://github.com/firegoood/FullPack/actions/runs/38626831074).
+Independent downloads verified every release archive, tag-bound signature and
+patched toolchain. See [release verification](fullpack-release-verification.md)
+for the retained WAN and long-duration acceptance limits.
 
 <div dir="rtl">
 

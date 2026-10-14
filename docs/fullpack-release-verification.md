@@ -1,4 +1,52 @@
-# FullPack v1.9.1 release verification
+# FullPack signed release verification
+
+## v1.9.2 — Quick Auto and probe uptime repair
+
+Date: 2026-10-14. Status: **PUBLISHED; FULL CI AND SIGNED PUBLIC INSTALL PASSED**.
+
+[v1.9.2](https://github.com/firegoood/FullPack/releases/tag/v1.9.2) is bound to
+source commit `28bd07f6445b958107fc8f310c8a40de20185104`. All eleven verification
+jobs and the release job passed in
+[run 38626831074](https://github.com/firegoood/FullPack/actions/runs/38626831074).
+The public raw `main/install.sh` matched the source installer, downloaded the
+published signed release and installed the declared version successfully.
+
+- Whole-project Linux normal/race tests, 58.0% total coverage and all fourteen
+  unchanged package floors passed. The bounded 100/192-connection admission,
+  native raw/namespace recovery, reachable degradation, Direct/L3, actual managed
+  HTTPS, parser fuzz and existing short soak gates also passed.
+- The online source vulnerability scan reported no vulnerabilities; static
+  analysis, formatting, patched amd64/arm64 builds and actual interoperability
+  with the previously published v1.9.1 passed. This is not a security audit of
+  every third-party helper or proof of sustained WAN capacity.
+- All 49 panel JavaScript and ten customization tests passed. Quick builder,
+  trusted peer import, invalid input and occupied-listener preflight passed on
+  Linux. The visible-form regression prevents cached Auto IPs from contaminating
+  Wat setup links. The isolated browser form reviewed the four expected ports
+  and retained values when changing to Advanced.
+- A real v1.9.1 uptime failure was traced to its 256-entry hourly probe replay
+  cache. v1.9.2 retains the full one-hour window with a bounded 4096-entry cap.
+  Paced-hour, replay/expiry, hard-cap and typed-budget control regressions passed
+  as an unprivileged Linux user. Real isolated Noise Reverse/Direct data/probe/
+  held-stream handover and TCP → WSS → WSSMUX consecutive recovery also passed.
+  The clock model is not a real-hour soak. See [live evidence](auto-live-setup-review.md).
+- Independent public downloads verified all twelve assets, the tag-bound fork
+  Ed25519 signature, seven archive checksums/ELF identities and exact legal/binary
+  members, exclusion of `11/` and symlinks, the compiled public pin and installer
+  equality with the immutable tag. Every binary's Go build information identifies
+  Go 1.27.2 and the preserved module path; the SBOM agrees.
+
+The Windows workstation's unsupported full filesystem/network test attempts
+were not relabelled as passes or worked around in production code. Targeted
+installer/docs tests ran there; the complete supported Linux suite passed in CI.
+Published binaries do not include server credentials, private enrollment data
+or the release signing key. No tag was moved after publication.
+
+Direct Noise/Wat on the restricted operator WAN, the earlier unpaced impaired
+burst with 21 resets, 24-hour soak and 1000-user acceptance remain **NOT VERIFIED**.
+The source/runtime repairs do not turn those measurements into passing gates.
+
+## Historical v1.9.1 release
 
 Date: 2026-10-14. Status: **v1.9.1 PUBLISHED; SIGNED PUBLIC INSTALL VERIFIED**.
 
@@ -73,6 +121,11 @@ acceptance. Burst admission under impairment, current helper security,
 
 ## خلاصهٔ فارسی
 
+نسخهٔ ۱.۹.۲ با ساخت سریع Auto و اصلاح پر شدن حافظهٔ Probe منتشر شد. هر یازده
+بخش CI، نصب عمومی و بررسی مستقل امضا و هفت آرشیو موفق بودند. هر دو نوع
+Reverse و Direct در تست ایزولهٔ Linux بررسی شدند؛ نتیجهٔ WAN محدود و تست
+۲۴ساعته همچنان از این موفقیت‌ها جداست. سورس، تگ و کلید امضای FullPack حفظ شدند.
+
 نسخهٔ ۱.۹.۱ با کلید مستقل FullPack منتشر و نصب عمومی آن بررسی شد. نصب‌کننده پیش از
 استخراج، امضای همان نسخه و چک‌سام آرشیو را با OpenSSL 3 یا جدیدتر بررسی می‌کند.
 هر یازده بخش CI و بررسی مستقل هفت آرشیو موفق بودند. یک اجرای burst صدتایی پس از بازیابی Noise،
@@ -82,4 +135,4 @@ acceptance. Burst admission under impairment, current helper security,
 
 </div>
 
-*Last verified against FullPack v1.9.2 (documentation scope review, 2026-10-14; final release/install gates remain pending).*
+*Last verified against FullPack v1.9.2 (full CI, public signed installation and independent asset verification, 2026-10-14; historical measurements and remaining acceptance limits preserved).*
