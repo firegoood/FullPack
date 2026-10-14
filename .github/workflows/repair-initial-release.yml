@@ -82,11 +82,14 @@ jobs:
           test -n "$RELEASE_SIGNING_KEY"
           go run ./tools/signsums release/SHA256SUMS v1.9.1
           go run ./tools/verifysums release/SHA256SUMS v1.9.1
+          # A detached signature is public metadata, never the signing key.
+          printf 'FULLPACK_V1_9_1_SIGNATURE=%s\n' "$(cat release/SHA256SUMS.sig)"
 
       - name: Replace only detached signature and tag metadata
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: v1.9.1
+          target_commitish: 5abcbfab71a6e860cf68706a7b21d4c5364eba0a
           draft: false
           prerelease: false
           files: |
