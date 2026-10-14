@@ -11,8 +11,10 @@ bash <(curl -fsSL https://raw.githubusercontent.com/firegoood/FullPack/main/inst
 It downloads the prebuilt release archive for your architecture (amd64/arm64)
 into `/root/FullPack`, **verifies its checksum and the tag-bound FullPack
 Ed25519 signature**, installs the binary, and opens the menu when it finishes.
-Release installation needs OpenSSL 1.1.1 or newer, without Go. Online downloads
+Release installation needs OpenSSL 3.0 or newer, without Go. Online downloads
 resolve the tag once and fetch all files from that release.
+The older OpenSSL 1.1.1 `pkeyutl` cannot verify Ed25519; see the
+[OpenSSL command documentation](https://docs.openssl.org/3.0/man1/openssl-pkeyutl/).
 
 Reopen the menu any time with:
 

@@ -320,12 +320,14 @@ resolve_release_tag() {
   printf '%s\n' "$target"
 }
 
-# Match app.ReleaseSignedMessage exactly. OpenSSL 1.1.1 or newer verifies
+# Match app.ReleaseSignedMessage exactly. OpenSSL 3.0 or newer verifies
 # Ed25519 without installing Go or executing any downloaded binary first.
 verify_release_signature() {
-  local sums="$1" signature="$2" tag="$3" work rc=0
+  local sums="$1" signature="$2" tag="$3" work help rc=0
   valid_release_tag "$tag" || { err 'Invalid release tag'; return 1; }
-  command -v openssl >/dev/null 2>&1 || { err 'OpenSSL 1.1.1 or newer is required to verify this release'; return 1; }
+  command -v openssl >/dev/null 2>&1 || { err 'OpenSSL 3.0 or newer is required to verify this release'; return 1; }
+  help="$(openssl pkeyutl -help 2>&1)" || { err 'OpenSSL 3.0 or newer is required to verify this release'; return 1; }
+  [[ "$help" == *'-rawin'* ]] || { err 'This OpenSSL lacks Ed25519 verification; use OpenSSL 3.0 or newer'; return 1; }
   [[ -f "$sums" && -f "$signature" ]] || { err 'Release checksums and signature are both required'; return 1; }
   work="$(mktemp -d "$INSTALL_DIR/.verify.XXXXXXXX")" || return 1
   # DER SubjectPublicKeyInfo for Ed25519: a fixed prefix and the raw public key.

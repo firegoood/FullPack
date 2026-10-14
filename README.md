@@ -255,7 +255,7 @@ sudo fullpack
 
 The installer downloads the release for the server architecture, verifies its
 SHA-256 checksum and tag-bound FullPack Ed25519 signature, installs it and opens
-the CLI. OpenSSL 1.1.1 or newer is required; Go is not needed for release installs.
+the CLI. OpenSSL 3.0 or newer is required; Go is not needed for release installs.
 
 Supported release architectures currently include:
 

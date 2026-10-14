@@ -223,6 +223,8 @@
   differently tagged signatures/checksums refuse installation; they never
   trigger an unverified fallback. Deliberate trusted local source builds remain
   available through the existing `BP_BUILD_FROM_SOURCE=1` option.
+- Release signature verification requires OpenSSL 3.0 or newer and checks for
+  the raw-message verification command. Unsupported versions are refused.
 - The Release workflow reuses all existing CI jobs before publishing, rejects
   an absent/mismatched signing secret and verifies its own signed artifacts.
   CI and release builds pin Go 1.27.2, matching the audited build/format toolchain;
