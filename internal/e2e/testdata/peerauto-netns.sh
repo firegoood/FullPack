@@ -8,7 +8,11 @@ work=$(mktemp -d);suffix=$$
 iran=fpa-iran-$suffix;kharej=fpa-kharej-$suffix
 spid=;cpid=;bpid=
 cleanup(){
-	result=$?;if test "$result" != 0;then cat "$work/iran.log" "$work/kharej.log" 2>/dev/null||true;fi
+	result=$?;if test "$result" != 0;then
+   cat "$work/iran.log" "$work/kharej.log" 2>/dev/null||true
+   "$work/fullpack" auto status iran --json || true
+   "$work/fullpack" auto status kharej --json || true
+  fi
  for pid in "$spid" "$cpid" "$bpid";do if test -n "$pid";then kill "$pid" 2>/dev/null||true;wait "$pid" 2>/dev/null||true;fi;done
  ip netns del "$iran" 2>/dev/null||true;ip netns del "$kharej" 2>/dev/null||true
  rm -rf -- "$work"
@@ -38,6 +42,7 @@ transport = "waticmp"
 token = "disposable-auto-enrollment-secret-0123456789"
 ports = ["22080=127.0.0.1:21080"]
 accept_udp = true
+log_level = "debug"
 skip_optz = true
 EOF
 cat > "$work/kharej.toml" <<EOF
@@ -45,6 +50,7 @@ cat > "$work/kharej.toml" <<EOF
 remote_addr = "10.69.0.1:0"
 transport = "waticmp"
 token = "disposable-auto-enrollment-secret-0123456789"
+log_level = "debug"
 skip_optz = true
 EOF
 for role in iran kharej;do
@@ -96,7 +102,10 @@ wait_route(){
  done
  cat "$work/iran.log" "$work/kharej.log";status iran||true;status kharej||true;exit 1
 }
-traffic(){ ip netns exec "$iran" "$work/fixture" -mode client -address 127.0.0.1:22080 -streams 100; }
+# Hold all 100 admitted application sockets before bulk traffic. This checks
+# actual simultaneous admission and forwarding rather than a mixture of short
+# transactions and new handshakes competing with already-started bulk writes.
+traffic(){ ip netns exec "$iran" "$work/fixture" -mode client -address 127.0.0.1:22080 -streams 100 -hold-connections; }
 block_icmp(){ for ns in "$iran" "$kharej";do ip netns exec "$ns" tc filter add dev eth0 egress protocol ip pref 5 flower ip_proto icmp action drop;done; }
 restore_icmp(){ for ns in "$iran" "$kharej";do ip netns exec "$ns" tc filter del dev eth0 egress protocol ip pref 5;done; }
 restore_tcp(){ for ns in "$iran" "$kharej";do ip netns exec "$ns" tc filter del dev eth0 egress protocol ip pref 10;done; }

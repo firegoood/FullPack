@@ -393,4 +393,4 @@ them both ends have to agree on. This says what exists.
 
 ---
 
-*Generated from `config/` on 2026-10-13. Last verified against FullPack v1.9.0.*
+*Generated from `config/` on 2026-10-14. Last verified against FullPack v1.9.1.*

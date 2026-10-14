@@ -75,3 +75,5 @@ forward می‌شود و **سمت خارج** اتصال بیرونی را برق
 ---
 
 *Last verified against FullPack v1.9.0.*
+
+*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

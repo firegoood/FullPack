@@ -7,7 +7,11 @@ The **Update** menu detects a newer GitHub release and installs the prebuilt
 
 **Direct from GitHub, or through a tunnel peer** when this server cannot reach
 GitHub itself. Both paths terminate TLS at GitHub, so the download is verified
-against the release's published **SHA-256**.
+against the release's published **SHA-256** and the pinned FullPack Ed25519
+signature over that release's tag and checksum list.
+
+Older source-built FullPack installations may still trust the inherited upstream
+key. Reinstall once with the verified fork installer before using their updater.
 
 **An archive that cannot be verified is refused, not installed.** A server that
 can reach neither path installs offline instead — see the offline install
@@ -58,3 +62,5 @@ release-based.
 ---
 
 *Last verified against FullPack v1.9.0.*
+
+*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

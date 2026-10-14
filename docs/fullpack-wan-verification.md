@@ -192,3 +192,18 @@ The subsequent [policy and criticism review](auto-policy-review.md) records
 consecutive default-policy recovery, bounded L3 automatic failover, independent
 QUIC/UDP443 checks, refined diagnostics, cleanup repairs and socket-load tests.
 It preserves the original matrix and its unpassed routes as historical evidence.
+
+<div dir="rtl">
+
+## خلاصهٔ فارسی
+
+این گزارش نتیجهٔ آزمایش محدود یک سرور ایران و دو سرور خارج است. فقط مسیرها
+و سناریوهای موفقِ ثبت‌شده تأیید شده‌اند؛ شکست QUIC، محدودیت Wat در خارج۲
+و مسیرهای ناموجود همچنان جدا از موفقیت‌ها ثبت می‌شوند. بازیابی TCP به WSS
+در هر دو جفت موفق شد و بررسی بعدی بازیابی متوالی و L3 را تکمیل کرد.
+این نتایج اثبات ظرفیت ۱۰۰۰ کاربر یا پایداری ۲۴ساعته نیستند. منابع آزمایش
+پاک شدند و سرویس‌ها، مسیرها و قوانین قبلی حفظ شدند؛ رمزها منتشر نشده‌اند.
+
+</div>
+
+*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

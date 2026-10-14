@@ -181,3 +181,19 @@ Windows CRLF root files, as in earlier audits. The exact final warmed-standby
 regression passed separately after removing an unused test context found by
 staticcheck. Existing whole-project coverage/security results are historical evidence; their full
 gates were not silently rerun or declared passed for this revision.
+
+<div dir="rtl">
+
+## خلاصهٔ فارسی
+
+خرابی‌های متوالی قبلاً ممکن بود پشت Cooldown اختیاری بمانند. بازیابی مسیر
+قطع‌شده اکنون حداقل پنج ثانیه فاصله و سقف ۱۲ تغییر ثبت‌شده در ساعت دارد؛
+محدودیت‌های کیفیت، قفل‌ها و سابقهٔ مشترک حفظ می‌شوند. Timeout از رد هویت جدا
+گزارش می‌شود و پاک‌سازی به پایان callbackها و قفل فایروال توجه می‌کند.
+بازیابی متوالی روی دو مسیر WAN و L3 روی خارج۱ در آزمایش محدود موفق شد؛
+QUIC و Wat در بعضی مسیرها، آزمون ۲۴ساعته و ظرفیت ۱۰۰۰ کاربر تأیید نشده‌اند.
+تست ۱۰۰/۱۹۲ سوکت فقط پذیرش اتصال محدود را ثابت می‌کند.
+
+</div>
+
+*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

@@ -30,7 +30,9 @@ func TestAReleaseSignatureIsGoodForItsOwnTagOnly(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cmd := exec.Command("go", "run", "./tools/signsums", sumsPath)
+	// The child signer has its own compiled pin. Give this isolated fixture its
+	// generated public half too; production builds retain the manifest's key.
+	cmd := exec.Command("go", "run", "-ldflags", "-X github.com/backpack/backpack/internal/app.ReleasePublicKey="+base64.StdEncoding.EncodeToString(pub), "./tools/signsums", sumsPath)
 	cmd.Dir = "../.."
 	cmd.Env = append(os.Environ(),
 		"RELEASE_SIGNING_KEY="+base64.StdEncoding.EncodeToString(priv),

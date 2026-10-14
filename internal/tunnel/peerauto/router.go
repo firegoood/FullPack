@@ -344,6 +344,7 @@ func (m *Manager) bindUsers() error {
 					s, e := m.claim(m.ctx, slot, false)
 					if e != nil {
 						m.flowRejected.Add(1)
+						m.log.WithError(e).Debug("peer user stream admission failed")
 						return
 					}
 					defer s.Close()

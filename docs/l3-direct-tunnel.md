@@ -713,3 +713,5 @@ obfuscated به `CAP_NET_RAW` هم نیاز دارند). **هیچ‌وقت حا�
 ---
 
 *Last verified against FullPack v1.9.0.*
+
+*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

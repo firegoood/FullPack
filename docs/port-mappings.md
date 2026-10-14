@@ -209,3 +209,5 @@ host روی تونل معکوس و مستقیم یعنی `127.0.0.1` خارج، 
 ---
 
 *Last verified against FullPack v1.9.0.*
+
+*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

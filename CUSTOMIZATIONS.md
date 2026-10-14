@@ -239,6 +239,17 @@
   missing prerequisite before checking raw-socket availability, keeping its
   SKIPPED result consistent under both privileged and ordinary CI accounts.
   Actual enrolled/raw fixtures still require privileges and real packet tests.
+- Preserve the stronger release checks for tag-bound test keys and dated,
+  bilingual documentation. Version review stamps describe documentation
+  compatibility; original measurement dates and pending gates remain intact.
+- The Auto namespace recovery fixture holds 100 admitted application sockets
+  before bulk transfer, retaining its packet impairments, connection count and
+  existing production limits/deadlines. Legacy unpaced burst mode remains in
+  the fixture and its observed reset failures are retained as a capacity limit,
+  rather than being declared passed by the held-socket recovery test.
+- Normal, race and coverage CI runs use separate matrix workers with fail-fast
+  disabled. Every existing command and coverage floor remains required; this
+  reduces release waiting time without dropping a check.
 
 ## Web tunnel methods
 

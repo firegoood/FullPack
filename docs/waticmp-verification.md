@@ -459,3 +459,5 @@ did not qualify. Filtering mechanisms remain unresolved; no verification or
 encryption floor was weakened to claim success. A bounded 100/192-application-
 socket test is distinct from users, WAN throughput and sustained capacity.
 Production/1000-user/24-hour acceptance remains **NOT VERIFIED**.
+
+*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

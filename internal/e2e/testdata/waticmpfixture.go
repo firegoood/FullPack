@@ -19,6 +19,7 @@ func main() {
 	mode := flag.String("mode", "backend", "backend or client")
 	addr := flag.String("address", "127.0.0.1:21080", "test-only loopback endpoint")
 	streams := flag.Int("streams", 100, "actual concurrent TCP connections")
+	hold := flag.Bool("hold-connections", false, "admit and hold every TCP connection before starting bulk transfer")
 	timeout := flag.Duration("timeout", 45*time.Second, "test transaction deadline")
 	payload := flag.Int("bytes", 32768, "bytes per TCP connection, 1..1048576")
 	latency := flag.Int("latency", 0, "64-byte interactive RTT samples before bulk")
@@ -73,11 +74,21 @@ func main() {
 	}
 	start := time.Now()
 	var wg sync.WaitGroup
+	var admitted sync.WaitGroup
+	admitted.Add(*streams)
+	startBulk := make(chan struct{})
+	go func() { admitted.Wait(); close(startBulk) }()
 	errs := make(chan error, *streams)
 	for n := 0; n < *streams; n++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+			ready := false
+			defer func() {
+				if !ready {
+					admitted.Done()
+				}
+			}()
 			c, e := net.DialTimeout("tcp", *addr, 5*time.Second)
 			if e != nil {
 				errs <- e
@@ -85,6 +96,28 @@ func main() {
 			}
 			defer c.Close()
 			_ = c.SetDeadline(time.Now().Add(*timeout))
+			if *hold {
+				// A one-byte echo proves peer/backend admission, rather than only
+				// completing the local user listener's TCP handshake.
+				probe := []byte{0x7b}
+				_, e = c.Write(probe)
+				var response [1]byte
+				if e == nil {
+					_, e = io.ReadFull(c, response[:])
+				}
+				if e != nil || response[0] != probe[0] {
+					if e == nil {
+						e = fmt.Errorf("TCP admission echo mismatch")
+					}
+					errs <- e
+					return
+				}
+			}
+			admitted.Done()
+			ready = true
+			if *hold {
+				<-startBulk
+			}
 			p := make([]byte, *payload)
 			_, e = rand.Read(p)
 			if e == nil {

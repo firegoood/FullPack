@@ -9,6 +9,10 @@
 Both are **off by default**. They are useful when several services or customers
 share one link and you want to stop any one of them from taking it all.
 
+These are the manual tunnel limits. Enrolled Auto has a separate bounded
+application-connection admission policy: default 64, maximum 192. Sockets and
+short loopback tests do not establish a user count or sustained WAN capacity.
+
 ---
 
 <div dir="rtl">
@@ -32,3 +36,5 @@ share one link and you want to stop any one of them from taking it all.
 ---
 
 *Last verified against FullPack v1.9.0.*
+
+*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

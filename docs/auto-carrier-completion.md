@@ -143,3 +143,18 @@ they passed only the listed routes and a TCP-to-WSS recovery on both pairs.
 Unavailable routes, arbitrary NAT/firewall combinations, production load and
 a 24-hour soak remain **NOT VERIFIED**. No release or unattended default-on
 policy is implied by either local or partial WAN acceptance.
+
+<div dir="rtl">
+
+## خلاصهٔ فارسی
+
+Auto با ثبت و تأیید هر دو سرور، حداکثر چهار حامل از رجیستری مشترک انتخاب
+می‌کند: ۱۸ حامل Stream با آغاز Reverse یا Direct و شش حامل دیتاگرامی L3.
+L3 یک TUN ثابت دارد و بسته‌ها احراز هویت و محدودیت بازپخش/بازسازی دارند.
+کلیدهای خصوصی و مسیرهای محلی در لینک ثبت سرور صادر نمی‌شوند. Auto پیش‌فرض
+خاموش است؛ موفقیت محلی یا بعضی مسیرهای WAN به معنی تأیید همهٔ مسیرها،
+ظرفیت ۱۰۰۰ کاربر یا آزمون ۲۴ساعته نیست.
+
+</div>
+
+*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

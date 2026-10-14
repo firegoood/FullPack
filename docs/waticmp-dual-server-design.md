@@ -426,3 +426,5 @@ wattun در FullPack ادغام شده است. جهت درخواست‌های IC
 </div>
 
 *Last verified against FullPack v1.9.0 (source review and local acceptance with documented limits, 2026-10-13).*
+
+*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
