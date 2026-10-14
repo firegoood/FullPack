@@ -250,6 +250,12 @@
 - Normal, race and coverage CI runs use separate matrix workers with fail-fast
   disabled. Every existing command and coverage floor remains required; this
   reduces release waiting time without dropping a check.
+- Pass the resolved release tag explicitly to Make and both signing tools.
+  GitHub's reserved `GITHUB_REF_NAME` cannot be overridden by a workflow env
+  entry. The first v1.9.1 metadata was withdrawn when its install check rejected
+  a signature for `main`; a narrowly scoped repair verifies the original source,
+  all eleven passing CI jobs and all seven unchanged archive hashes before
+  replacing only its signature and `RELEASE_TAG`. No source tag is retargeted.
 
 ## Web tunnel methods
 

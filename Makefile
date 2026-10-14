@@ -1,6 +1,7 @@
 BIN      := fullpack
 BIN_PATH := /usr/local/bin/fullpack
 LDFLAGS  := -s -w
+RELEASE_TAG ?= $(shell tr -d ' \n' < VERSION)
 
 .PHONY: all build install uninstall clean tidy run vendor release-linux release version sbom reproducible check
 
@@ -53,8 +54,8 @@ release: version release-linux
 	@# checksum cannot, because it travels the same channel as the archive it
 	@# describes. Nothing happens without RELEASE_SIGNING_KEY in the
 	@# environment, so a fork and a local build still produce a full set.
-	go run ./tools/signsums release/SHA256SUMS
-	@printf '%s\n' "$${GITHUB_REF_NAME:-$$(cat VERSION)}" > release/RELEASE_TAG
+	go run ./tools/signsums release/SHA256SUMS "$(RELEASE_TAG)"
+	@printf '%s\n' "$(RELEASE_TAG)" > release/RELEASE_TAG
 	@# The bill of materials, published with the release.
 	@#
 	@# Go records every module and its hash inside the binary it builds, so this

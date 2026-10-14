@@ -66,7 +66,9 @@
     ],
     "Makefile": [
       "BIN      := fullpack",
-      "release/fullpack_linux_$$a.tar.gz"
+      "release/fullpack_linux_$$a.tar.gz",
+      "RELEASE_TAG ?=",
+      "release/SHA256SUMS \"$(RELEASE_TAG)\""
     ],
     "install.sh": [
       "REPO=\"firegoood/FullPack\"",
@@ -82,6 +84,7 @@
       "release/fullpack_linux_*.tar.gz",
       "Verify FullPack customizations",
       "needs: verify",
+      "make release RELEASE_TAG=\"$TAG\"",
       "tools/verifysums",
       "release/RELEASE_TAG",
       "go-version: '1.27.2'"

@@ -25,6 +25,12 @@ extraction. Offline installation requires the same signed metadata and tag.
   key too. This fixture does not change the production pin or verification.
 - Documentation gained explicit compatibility-review stamps and missing
   Persian summaries. Original measurement dates and unpassed gates remain.
+- The public install check rejected the first signature because the manual
+  workflow's reserved `GITHUB_REF_NAME` stayed `main`. The release was withdrawn
+  to draft. A narrowly scoped metadata repair checks the immutable tested source,
+  all eleven successful CI jobs and seven original archive hashes before signing
+  the unchanged checksum list explicitly for `v1.9.1`. Only its signature and
+  tag metadata may be replaced; binaries, checksums and source tag stay unchanged.
 - [Run 38516691971](https://github.com/firegoood/FullPack/actions/runs/38516691971)
   reached agreed Wat-to-Noise recovery in six seconds, then its unpaced
   100-transaction burst reported **21 resets out of 100** under MTU 700,
