@@ -22,6 +22,15 @@ Reopen the menu any time with:
 sudo fullpack
 ```
 
+For a new Auto pair, choose **Setup Iran → Reverse → Auto → Quick TCP/UDP
+Setup**, enter both server IPs and the forwarded ports, and apply the private
+setup link on Kharej. The [Quick Auto guide](quick-auto-setup.md) lists its four
+endpoints and the corresponding web form.
+
+When this installer updates an existing installation, it reloads an active
+FullPack panel/monitor service so the new embedded form is available. Tunnel
+processes keep running; upgrading their engine still requires their restart.
+
 Everything lands in a tidy layout — the release bundle in `/root/FullPack`,
 backups in `/root/FullPack/backups`, tunnel configs in `/etc/fullpack`. See
 [server layout](server-layout.md).
@@ -121,4 +130,4 @@ amd64 و `aarch64` یعنی arm64. فایل‌های `install.sh`، `SHA256SUMS`
 
 *Last verified against FullPack v1.9.0.*
 
-*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
+*Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

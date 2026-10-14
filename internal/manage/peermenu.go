@@ -23,6 +23,19 @@ func askWatDirection(current string) string {
 	return current
 }
 func setupPeerServer(transport string) {
+	if transport == "auto" {
+		pick := tui.ChooseOpt("Auto Setup", []tui.Option{
+			{Title: "Quick TCP/UDP Setup", Desc: "Two IPs and forwarded ports; reviewed TCP/WSS/Noise Reverse and Noise Direct endpoints"},
+			{Title: "Advanced Setup", Desc: "Choose any approved carrier, custom endpoint, Wat, managed HTTPS or Layer 3"},
+		})
+		if pick < 0 {
+			return
+		}
+		if pick == 0 {
+			setupQuickAutoServer()
+			return
+		}
+	}
 	tui.Info("Enrolled peer forwarding. Auto supports Reverse, Direct initiation and datagram L3; Wat needs Linux CAP_NET_RAW.")
 	n := NewTunnel{Role: "server", Transport: transport, Name: uniqueName(tui.PromptDefault("Tunnel Name", "server-"+transport)), Token: tui.PromptDefault("Enrollment Secret (At Least 32 Bytes)", randomToken(64))}
 	l3Mode := false
@@ -142,7 +155,9 @@ func setupPeerServer(transport string) {
 	tui.Warn("This Setup Link Contains The Enrollment Secret — Keep It Private.")
 	fmt.Println("sudo fullpack link apply '" + link + "'")
 	if tui.Confirm("Create This Explicitly Enrolled Tunnel", true) {
-		finishSetup(s)
+		if !finishSetup(s) {
+			return
+		}
 	}
 	tui.PressEnter()
 }
@@ -201,7 +216,9 @@ func setupPeerClient(transport string) {
 	}
 	summarisePeer(s)
 	if tui.Confirm("Create This Peer With The Same Approved Manifest", true) {
-		finishSetup(s)
+		if !finishSetup(s) {
+			return
+		}
 	}
 	tui.PressEnter()
 }

@@ -14,6 +14,13 @@ import (
 // The same schema/validators serve terminal setup, web setup and peer links.
 // ICMP has no TCP/UDP tunnel port; 0 is only the engine's role marker.
 func specFromPeerNew(n NewTunnel, publicOnly ...bool) (TunnelSpec, error) {
+	if n.QuickAuto != nil {
+		var err error
+		n, err = expandQuickAuto(n)
+		if err != nil {
+			return TunnelSpec{}, err
+		}
+	}
 	s := TunnelSpec{Name: strings.TrimSpace(n.Name), Role: n.Role, Transport: n.Transport, Token: strings.TrimSpace(n.Token), LogLevel: "info", Heartbeat: 5, RetryInterval: 1, ConnectionPool: 4}
 	if !validName(s.Name) {
 		return s, fmt.Errorf("invalid tunnel name")

@@ -78,7 +78,8 @@
       "RELEASE_PUBLIC_KEY=\"QreJZ3kWxUTXjLS/oI3GNAyJKCfYdCcg8hgtfCGSB1A=\"",
       "verify_release_signature",
       "resolve_release_tag",
-      "SHA256SUMS.sig"
+      "SHA256SUMS.sig",
+      "Quick Auto: fullpack"
     ],
     ".github/workflows/release.yml": [
       "release/fullpack_linux_*.tar.gz",
@@ -238,8 +239,8 @@
     "internal/manage/autohelpermenu.go": ["promptAutoHelper", "reality"],
     "internal/manage/autohelpers_test.go": ["TestAutoHTTPSRolesLinksAndRedactedEdits", "TestAutoL3EnrollmentHasNoLocalInterfaceOrRequiredPorts", "reality", "TestAutoNodeRebuildPreservesOnlyCompatibleLocalIdentity"],
     "internal/manage/linkapply.go": ["carryAutoNodeLocal(&n, s)"],
-    "internal/manage/reversesetup.go": ["specFromPeerNew(f.ToNewTunnel(), true)"],
-    "internal/manage/peermenu.go": ["config.AutoCarriers()", "Auto Traffic Mode", "Local Listener Bind For", "Matching Local REALITY Private Key"],
+    "internal/manage/reversesetup.go": ["specFromPeerNew(f.ToNewTunnel(), true)", "if err := refuseBusyForwards(s); err != nil"],
+    "internal/manage/peermenu.go": ["config.AutoCarriers()", "Auto Traffic Mode", "Local Listener Bind For", "Matching Local REALITY Private Key", "setupQuickAutoServer()"],
     "internal/tunnel/peerauto/state_test.go": ["TestManifestKeepsLegacyHashAndIgnoresOnlyLocalOverrides", "TestSpoofUDPPortReservationUsesParsedProfile"],
     "internal/e2e/peerauto_https_test.go": ["TestPeerAutoManagedHTTPSBothDirections", "FULLPACK_AUTO_HELPERS", "runtime.GOARCH"],
     "internal/e2e/testdata/auto-carriers-netns.sh": ["FULLPACK_AUTO_NETNS", "FULLPACK_AUTO_OUTER_MTU", "FULLPACK_AUTO_L3_FORWARD", "FULLPACK_AUTO_WAT_DIRECTION", "8972", "test-now", "stable listener/TUN"],
@@ -263,15 +264,15 @@
     "internal/manage/conntest_waticmp.go": ["waticmp", "watEnrollment"],
     "internal/webui/handlers_peerauto.go": ["handlePeerAuto", "handlePeerEnrollment", "DisallowUnknownFields", "MaxBytesReader"],
     "internal/webui/server.go": ["/api/tunnel/auto", "/api/tunnel/peer-enrollment"],
-    "internal/webui/panel/js/ui/peerauto.js": ["Import an enrolled Kharej endpoint", "peerSetupPayload", "peerEditForm", "api.autoAction", "n.closest('.grp3')", "localAutoFields", "readLocalAuto"],
-    "internal/webui/paneltest/peerauto.test.js": ["Auto edit changes only local fields", "Auto Direct HTTPS", "Auto L3"],
+    "internal/webui/panel/js/ui/peerauto.js": ["Import an enrolled Kharej endpoint", "peerSetupPayload", "peerEditForm", "api.autoAction", "n.closest('.grp3')", "localAutoFields", "readLocalAuto", "quickAutoFields()", "wireQuickAuto", "result.quickAuto"],
+    "internal/webui/paneltest/peerauto.test.js": ["Auto edit changes only local fields", "Auto Direct HTTPS", "Auto L3", "Quick Auto sends only the reviewed IP/port inputs"],
     ".github/workflows/ci.yml": ["Verify FullPack customizations", "FULLPACK_AUTO_HELPERS", "FULLPACK_AUTO_NETNS", "FULLPACK_AUTO_OUTER_MTU=1500", "FULLPACK_AUTO_LOAD", "TestPeerAutoBoundedApplicationConnectionCapacity", "go-version: '1.27.2'", "mode: [normal, race, coverage]", "fail-fast: false"],
     "docs/auto-carrier-completion.md": ["one to four", "4096-packet replay window", "NOT VERIFIED", "same explicitly enrolled receive port"],
     "internal/cli/licenses.go": ["wat.License", "wat.Origin"],
     "internal/menu/system.go": ["Configuration And Fencing State Were Kept", "manage.RemoveInstalledHelpers()", "Remaining Installation Files Were Kept"],
     "internal/manage/installedhelpers.go": ["/usr/local/lib/fullpack", "os.ModeSymlink", "os.RemoveAll(root)"],
     "internal/manage/installedhelpers_test.go": ["TestInstalledHelperCleanupPreservesOperatorFilesAndSymlinkTargets", "TestInstalledHelperCleanupRefusesRedirectedOrPublicRoots"],
-    "internal/e2e/peerauto_test.go": ["TestPeerCoordinatedNativeSwitchKeepsUserListener", "TestPeerCoordinatedAuthenticatedAdapters", "sole-candidate", "Flows.Drained"],
+    "internal/e2e/peerauto_test.go": ["TestPeerCoordinatedNativeSwitchKeepsUserListener", "TestPeerCoordinatedAuthenticatedAdapters", "sole-candidate", "Flows.Drained", "config.UDP, config.STEALTH"],
     "internal/e2e/testdata/peerauto-netns.sh": ["WATICMP_NETNS", "NO_ROUTE", "WATICMP_DEGRADATION", "severe degradation", "-hold-connections", "auto status iran"],
     "internal/e2e/testdata/icmp-coexist.sh": ["ReplayDropped", "AuthDropped"],
     "docs/waticmp-dual-server-design.md": ["خلاصهٔ فارسی", "11/WatTunnel"],
@@ -289,6 +290,13 @@
     "internal/e2e/testdata/waticmpfixture.go": ["hold-connections", "admitted.Wait()", "TCP admission echo mismatch"],
     "docs/fullpack-release-verification.md": ["21 resets", "NOT VERIFIED", "held", "خلاصهٔ فارسی"],
     "tools/verifysums/main.go": ["ReleaseSignedMessage", "ed25519.Verify"],
-    "internal/app/installrelease_test.go": ["replayed-tag", "tampered-archive", "TestInstallerPinsTheApplicationReleaseKey"]
+    "internal/app/installrelease_test.go": ["replayed-tag", "tampered-archive", "TestInstallerPinsTheApplicationReleaseKey"],
+    "internal/manage/peerpreflight_test.go": ["TestPeerSetupRefusesOccupiedForwardsBeforeHostChanges", "TestPeerSetupRejectsMissingAddressesBeforeCreation", "Applying Network Optimizations", "foreign backend listener was incorrectly refused"],
+    "docs/peer-setup-port-review.md": ["anonymous-tunnel-ir01.service", "firenode.service", "SKIPPED", "خلاصهٔ فارسی"],
+    "internal/manage/quickauto.go": ["QuickAutoCarriers()", "expandQuickAuto", "ObserveOnly: false", "Approve These Endpoints And Create Quick Auto"],
+    "internal/manage/quickauto_test.go": ["TestQuickAutoBuildsReviewedEndpointsAndTrustedPeerLink", "TestQuickAutoRejectsMissingAddressesConflictingPortsAndMixedEnrollment"],
+    "internal/manage/spec/peercheck_test.go": ["TestPeerConfigRoleMarkersDoNotRequireSocketPorts", "legacy-server-zero", "auto-user-port-zero"],
+    "docs/quick-auto-setup.md": ["Quick TCP/UDP", "one-to-four", "خلاصهٔ فارسی"],
+    "docs/auto-live-setup-review.md": ["generation 2", "NOT VERIFIED", "No generation history was erased"]
   }
 }

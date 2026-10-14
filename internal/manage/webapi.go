@@ -353,6 +353,7 @@ func PresetTune(preset, role, transport string) FineTune {
 // collects it. It is the form's shape, not the config's: Ports and IPv6 are
 // server-only, ServerAddr is client-only, and the rest is common.
 type NewTunnel struct {
+	QuickAuto  *QuickAutoSetup       `json:"quickAuto,omitempty"`
 	WatICMP    *config.WatICMPConfig `json:"waticmp"`
 	Auto       *config.AutoConfig    `json:"auto"`
 	Role       string                `json:"role"` // "server" (Iran) or "client" (kharej)
@@ -381,9 +382,8 @@ type NewTunnel struct {
 }
 
 // CreateTunnel builds a tunnel from a filled form and starts it. It returns the
-// service name, and whether that service came up — a tunnel whose port is taken
-// is created and reported as not running, exactly as the CLI reports it, rather
-// than being refused after the config was already written.
+// service name, and whether that service came up. Occupied forwarded listeners
+// are refused before writing, on the same terms as the CLI completion step.
 func CreateTunnel(n NewTunnel) (service string, active bool, err error) {
 	// Checked before the form is turned into a configuration, because building
 	// one has side effects — a WSS server generates a certificate — and doing
@@ -457,8 +457,9 @@ func refuseBusyForwards(s TunnelSpec) error {
 	}
 	for _, addr := range addresses {
 		if busy := reverseBusyPorts(s.Ports, addr, s.Transport); len(busy) > 0 {
-			return fmt.Errorf("already in use on this server: %s — the tunnel port or the web "+
-				"panel's own port is the usual one; pick other ports", strings.Join(busy, ", "))
+			return fmt.Errorf("already in use on this server: %s — forwarded listeners must be free on Iran; "+
+				"another service may own them even when the FullPack tunnel list is empty. "+
+				"Choose different local ports or stop their verified owner", strings.Join(busy, ", "))
 		}
 		if managedTransport(selectedTransport(s)) && portHeld(addr) {
 			return fmt.Errorf("HTTPS listener already in use: %s", addr)
@@ -471,6 +472,9 @@ func refuseBusyForwards(s TunnelSpec) error {
 // It writes nothing.
 func specFromNew(n NewTunnel) (TunnelSpec, error) {
 	n.Transport = strings.ToLower(strings.TrimSpace(n.Transport))
+	if n.QuickAuto != nil && n.Transport != "auto" {
+		return TunnelSpec{}, fmt.Errorf("quick Auto requires the Auto transport")
+	}
 	if n.Transport == "waticmp" || n.Transport == "auto" {
 		return specFromPeerNew(n)
 	}

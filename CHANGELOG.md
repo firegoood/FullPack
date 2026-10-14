@@ -2,6 +2,24 @@
 
 All notable changes to Backpack are documented here.
 
+## v1.9.2 — 2026-10-14 (FullPack)
+
+- Add Quick Auto setup to CLI and web: enter the two peer IPv4 addresses and
+  forwarded ports, review four explicit TCP/WSS/Noise Reverse/Direct endpoints,
+  then create the Iran tunnel and import its trusted peer link on Kharej.
+  Identities and secrets are generated; advanced carrier/HTTPS/Wat/L3 setup
+  remains available. Existing enrolled pairs are never rewritten by the preset.
+  Reinstalling refreshes active panel/monitor processes so the new form loads,
+  while running tunnel controllers retain their sessions.
+- Refuse occupied Auto/Wat forwarded listeners before CLI host tuning or config
+  writes, and explain that unrelated services can own ports outside the tunnel
+  list. Correct `fullpack check` for native ICMP/Auto port-zero role markers and
+  optional L3 forwarded ports, retaining engine enrollment and legacy port checks.
+- Extend Direct Noise integration coverage. Bounded live checks confirmed TCP
+  and WSS Reverse on the operator's restricted pair; Direct Noise and Wat Normal
+  did not qualify. These measurements do not establish long-term stability,
+  application/VPN-client throughput or production user capacity.
+
 ## v1.9.1 — 2026-10-14 (FullPack)
 
 - Publish FullPack installation archives for all seven supported Linux

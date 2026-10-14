@@ -48,6 +48,17 @@ updating this repository. These files record the user's persistent preferences.
 - The naming reapply tool does not recreate feature code. Preserve the web
   transport additions through source merges and run their tests on Linux.
   The manifest's required feature guards must pass before accepting an update.
+- Peer CLI creation must refuse occupied forwarded listeners before any host
+  tuning/config/service write, using the shared panel preflight. Keep missing
+  peer-address rejection and foreign backend ports distinct from local Iran
+  listeners. Never stop unrelated port owners merely because FullPack's tunnel
+  list is empty; preserve skipped HTTPS helper prerequisite diagnostics.
+- Preserve CLI/web Quick Auto setup and its shared reviewed four-endpoint
+  builder. Quick mode creates fresh stream pairs with explicit automatic
+  failover; advanced carriers/Wat/HTTPS/L3 and observe-only remain available.
+  Never overwrite an existing manifest or fencing state with a quick preset.
+  Keep native/Auto role-marker checks separate from real socket/user ports,
+  and retain the CLI's full engine enrollment validation.
 - Preserve every recorded customization when integrating a newer BackPack
   release. Do not replace this checkout with an upstream archive or reset it to
   upstream. Fetch and merge/rebase the upstream source, resolve conflicts with

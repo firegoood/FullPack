@@ -36,7 +36,7 @@ func TestPeerCoordinatedAuthenticatedAdapters(t *testing.T) {
 }
 
 func TestPeerAutoAdditionalStreamCarriers(t *testing.T) {
-	for _, carrier := range []config.TransportType{config.TCP, config.TCPMUX, config.WS, config.WSMUX, config.KCP, config.UDP} {
+	for _, carrier := range []config.TransportType{config.TCP, config.TCPMUX, config.WS, config.WSMUX, config.KCP, config.UDP, config.STEALTH} {
 		for _, mode := range []string{"reverse", "direct"} {
 			t.Run(string(carrier)+"/"+mode, func(t *testing.T) {
 				testPeerCoordinatedSwitchKeepsUserListener(t, carrier, true, mode)

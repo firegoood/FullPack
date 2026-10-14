@@ -594,8 +594,19 @@ fi
 install_helpers || { err "Optional helper installation failed; no helper was started"; exit 1; }
 
 chmod +x "$BIN_PATH"
+# An existing panel/monitor keeps its embedded UI until its process reloads.
+# Refresh only these management services; installed tunnel controllers retain
+# their running sessions and generation ownership.
+if command -v systemctl >/dev/null 2>&1; then
+  for management_service in fullpack-webui.service fullpack-monitor.service; do
+    if systemctl is-active --quiet "$management_service" 2>/dev/null; then
+      systemctl restart "$management_service" || warn "Could not refresh $management_service; restart it to load the new management UI."
+    fi
+  done
+fi
 echo
 echo -e "${WHITE}Done!${NC}"
+info "Quick Auto: fullpack -> Setup Iran -> Reverse -> Auto -> Quick TCP/UDP Setup. Apply its private peer link on Kharej."
 
 # Open the menu straight away — people miss the "now run sudo fullpack" step.
 # Only when there is an interactive terminal to read from: a piped install

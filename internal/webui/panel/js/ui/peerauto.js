@@ -67,11 +67,39 @@ function autoFields(a = {}, registry = []) {
     + field('maxMemoryMb', 'Probe memory pressure threshold (MB)', a.maxMemoryMb || 256, 'number')
     + `<div data-peer-candidates>${(a.candidates?.length ? a.candidates : [{}]).map((p, i) => candidateMarkup(p, i, registry)).join('')}</div><button type="button" data-peer-add>Add approved carrier (up to four)</button>`;
 }
+
+function quickAutoFields() {
+  return `<label class="f3"><span>Auto setup</span><select data-peer-field="setupMode"><option value="quick">Quick TCP/UDP setup</option><option value="advanced">Advanced: custom carriers or L3</option></select></label>
+    <div data-peer-quick>${field('quick.iranIp', 'Iran IPv4')}${field('quick.kharejIp', 'Kharej IPv4')}
+      <details><summary>Change data listener ports</summary>${field('quick.basePort', 'First Reverse data port', 24443, 'number', 'TCP, WSS and Noise use this port and the next two on Iran.')}${field('quick.directPort', 'Direct Noise data port', 24445, 'number', 'This listener belongs to Kharej.')}</details>
+      <p>Automatic failover is enabled. Creating this tunnel approves all four endpoints below. Forwarded user ports remain on Iran.</p>
+      <div data-peer-quick-review></div><p>Uses built-in authenticated carriers. Wat, HTTPS helpers and Layer 3 are available in Advanced setup.</p></div>`;
+}
+
+function wireQuickAuto(group, choices, registry) {
+  const update = () => {
+    const quick = get(group, 'setupMode') === 'quick';
+    group.querySelector('[data-peer-quick]').hidden = !quick;
+    group.querySelector('[data-peer-advanced]').hidden = quick;
+    const base = num(group, 'quick.basePort') || 24443, direct = num(group, 'quick.directPort') || base + 2;
+    const iran = get(group, 'quick.iranIp') || 'Iran IPv4', kharej = get(group, 'quick.kharejIp') || 'Kharej IPv4';
+    group.querySelector('[data-peer-quick-review]').innerHTML = `<ul>${choices.map(c => {
+      const label = registry.find(r => r.value === c.transport)?.label || c.transport;
+      const address = c.mode === 'direct' ? `${kharej}:${direct}` : `${iran}:${base + c.portOffset}`;
+      return `<li>${esc(label)} · ${esc(c.mode)} · <b>${esc(address)}</b></li>`;
+    }).join('')}</ul>`;
+  };
+  for (const key of ['setupMode', 'quick.iranIp', 'quick.kharejIp', 'quick.basePort', 'quick.directPort']) {
+    group.querySelector(`[data-peer-field="${key}"]`).addEventListener('input', update);
+    group.querySelector(`[data-peer-field="${key}"]`).addEventListener('change', update);
+  }
+  update();
+}
 export function resetPeerSetup(root) {
   root.querySelectorAll('[data-peer-hidden]').forEach(n => { n.hidden = false; delete n.dataset.peerHidden; });
   root.querySelectorAll('.peer-settings').forEach(n => { n.hidden = true; });
 }
-export function shapePeerSetup(root, transport, role, direct = false, registry = []) {
+export function shapePeerSetup(root, transport, role, direct = false, registry = [], quickChoices = []) {
   const enabled = !direct && isPeerTransport(transport);
   resetPeerSetup(root);
   const here = root.querySelector('.here-card');
@@ -102,18 +130,19 @@ export function shapePeerSetup(root, transport, role, direct = false, registry =
     group = document.createElement('div'); group.className = 'grp3 peer-settings';
     group.dataset.peerTransport = transport;
     group.dataset.peerRole = role;
-    group.innerHTML = `<h3>${transport === 'auto' ? 'Peer Auto (experimental)' : 'Wat ICMP (WatTunnel Engine)'}</h3><p>Linux is required. Wat needs CAP_NET_RAW. TCP/UDP forwarding stays on Iran. Keep the setup link private; it contains the enrollment secret.</p>`
+    group.innerHTML = `<h3>${transport === 'auto' ? 'Peer Auto (experimental)' : 'Wat ICMP (WatTunnel Engine)'}</h3><p>Linux is required.${transport === 'waticmp' ? ' Wat needs CAP_NET_RAW.' : ''} TCP/UDP forwarding stays on Iran. Keep the setup link private; it contains the enrollment secret.</p>`
       + `<button type="button" data-peer-side>${role === 'client' ? 'Build Iran instead' : 'Import an enrolled Kharej endpoint'}</button>`
       + (role === 'client' ? field('enrollmentLink', 'Trusted Iran enrollment link', '', 'password', 'Version 3 only. Match this carrier and obtain the secret-bearing link over a trusted channel; both peers need the new version.')
         + '<div data-peer-local-settings></div><p data-peer-preview-status role="status"></p>'
         : field('acceptUdp', 'Forward UDP as well as TCP', false, 'checkbox')
-        + (transport === 'auto' ? autoFields({}, registry) : field('iranIp', 'This Iran server IPv4', '', 'text', 'Included in the peer setup link.') + watFields()));
+        + (transport === 'auto' ? quickAutoFields() + `<div data-peer-advanced>${autoFields({}, registry)}</div>` : field('iranIp', 'This Iran server IPv4', '', 'text', 'Included in the peer setup link.') + watFields()));
     const anchor = root.querySelector('[name="ports"]')?.closest('.grp3') || root.querySelector('[name="name"]')?.closest('.grp3');
     anchor?.after(group); cache[cacheKey] = group;
     group.querySelector('[data-peer-side]').onclick = () => {
       root.querySelector(`[data-fn="setSide"][data-args*="${role === 'client' ? 'server' : 'client'}"]`)?.click();
     };
     if (transport === 'auto' && role === 'server') {
+      wireQuickAuto(group, quickChoices, registry);
       wireCandidates(group, registry);
       const reshapeMode = () => {
         const l3 = get(group, 'autoMode') === 'l3'; group.querySelector('[data-peer-l3]').hidden = !l3;
@@ -187,6 +216,10 @@ export function peerSetupPayload(root, payload) {
   }
   const result = { name: payload.name, role: payload.role, transport: payload.transport, token: payload.token, ports: payload.ports, tune: { acceptUDP: get(group, 'acceptUdp') } };
   if (payload.transport === 'waticmp') result.waticmp = nativePayload(group);
+  else if (get(group, 'setupMode') === 'quick') {
+    const basePort = num(group, 'quick.basePort') || 24443;
+    result.quickAuto = {iranIp: get(group, 'quick.iranIp'), kharejIp: get(group, 'quick.kharejIp'), basePort, directPort: num(group, 'quick.directPort') || basePort + 2};
+  }
   else {
     const candidates = [...group.querySelectorAll('.peer-candidate')].map(autoCandidatePayload);
     result.auto = { enabled: true, tunnelId: get(group, 'tunnelId'), iranId: get(group, 'iranId'), kharejId: get(group, 'kharejId'),
@@ -197,7 +230,12 @@ export function peerSetupPayload(root, payload) {
   }
   return result;
 }
-export const peerSetupHost = root => get(root.querySelector('.peer-settings[data-peer-transport="waticmp"]'), 'iranIp');
+export const peerSetupHost = root => {
+  const auto = root.querySelector('.peer-settings[data-peer-transport="auto"][data-peer-role="server"]');
+  if (auto && !auto.hidden) return get(auto, 'setupMode') === 'quick' ? get(auto, 'quick.iranIp') : '';
+  const wat = root.querySelector('.peer-settings[data-peer-transport="waticmp"][data-peer-role="server"]');
+  return wat && !wat.hidden ? get(wat, 'iranIp') : '';
+};
 
 function localAutoFields(a, role) {
   return (a.l3 ? field('local.tun', 'Local TUN interface (blank = pair default)', a.l3.interface || '') : '')

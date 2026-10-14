@@ -14,6 +14,61 @@
 | 2026-10-13 | Test the supplied Iran and two Kharej servers | Bounded protocol and Auto recovery tests; preserve existing services and security checks, record partial WAN evidence and clean up audit resources |
 | 2026-10-14 | Review Auto availability, WAN failures, shutdown and capacity criticisms | Reproduce consecutive carrier failures, separate bounded emergency recovery from optional changes, classify diagnostics, preserve cleanup checks and record measured limits |
 | 2026-10-14 | Make one-command installation work by publishing a FullPack release | Independent fork signing key, signed immutable-tag online/offline installation, patched release toolchain and unchanged CI acceptance gates |
+| 2026-10-14 | Inspect occupied 2052/8880 ports on Iran/Kharej2 and skipped HTTPS CLI tests | Preserve unrelated port owners, reject occupied Auto/Wat user listeners before CLI host changes, retain explicit-address and helper prerequisite checks |
+| 2026-10-14 | Inspect the operator's offline Auto and add approved Reverse/Direct endpoints | Re-enroll a fresh four-candidate pair, preserve retired configuration/fencing and verify TCP/WSS passes separately from Direct/Wat failures |
+| 2026-10-14 | Simplify Auto setup and publish an updated release | Shared CLI/web Quick Auto builder, explicit endpoint review, private peer link, advanced setup preservation and signed v1.9.2 source/tag/assets |
+
+## Quick Auto and live setup review approved on 2026-10-14
+
+- Preserve `docs/auto-live-setup-review.md`: the original pair had only Wat
+  Normal; adding arbitrary protocols was never implicit runtime enrollment.
+  The authorized fresh mixed pair preserved old fencing and reached HEALTHY
+  on TCP, with a passing WSS probe. Direct Noise/Wat WAN outcomes remain distinct
+  from passing isolated Linux Direct tests and from application acceptance.
+- Preserve the shared `QuickAutoCarriers`/`expandQuickAuto` builder. CLI and web
+  quick setup review four built-in TCP/WSS/Noise Reverse and Noise Direct
+  endpoints, generate fresh identities/secrets and use the same engine/peer-link
+  validators. Quick mode is explicitly selected Auto, with failover enabled;
+  advanced observe-only, all carriers/helpers/Wat and L3 remain available.
+- Keep quick setup restricted to new Iran/server stream pairs. Never use it to
+  overwrite an existing manifest or erase durable state. Preserve bounded
+  connections/probes, cooldown/dwell/recovery policy, TLS/authenticated carrier
+  binding and receiver-local import forms. Do not download helpers implicitly.
+- Static config checks recognize native/Auto port-zero role markers and optional
+  Auto L3 maps without relaxing legacy socket/user-port checks. The CLI still
+  applies the full engine enrollment verdict after those syntax checks.
+- The operator requested the simplified setup in an updated release, authorizing
+  v1.9.2 commit/push/tag/signed assets to `firegoood/FullPack`. The existing fork
+  signing key and all full-CI release gates remain required. The local `11/`
+  reference and server credentials/configs are never included in publication.
+- On installer updates, refresh only active FullPack panel/monitor processes to
+  load the new embedded setup form; leave tunnel sessions/generation ownership
+  running. Existing source/release signature checks still precede this refresh.
+
+## Peer setup port ownership review on 2026-10-14
+
+- Peer CLI setup uses the panel's forwarded-listener refusal before network
+  optimization, config writes or service creation. An occupied listener can
+  belong to another application even when FullPack's tunnel list is empty.
+- Missing approved peer addresses must be rejected during spec validation;
+  preserve those enrollment checks and the same-port foreign backend allowance.
+- HTTPS Connection Test requires the exact isolated pinned helper paths on both
+  peers. Absence is SKIPPED with a local reason; never relabel it a network
+  failure or borrow an unrelated proxy's executable/configuration implicitly.
+- Preserve unrelated server services. The supplied servers' occupied ports were
+  traced to existing anonymous-tunnel/firenode services, not orphan FullPack
+  controllers. Evidence and bounded regression results are recorded in
+  `docs/peer-setup-port-review.md`.
+- The operator subsequently authorized stopping `anonymous-tunnel-ir01` on
+  Iran to release 2052/8880. That one unit was stopped and its autostart
+  disabled, retaining its config/unit files. Both TCP/UDP ports were verified
+  free; Kharej2's firenode backend stayed active. This is a scoped operational
+  authorization, not permission to stop other port owners in future setups.
+- A follow-up inventory found that anonymous's enabled watchdog timer had
+  restarted the stopped unit. The associated timer/watch service were then
+  stopped and timer autostart disabled before stopping the main unit again.
+  The initial port-release evidence was temporary; the updated report retains
+  that limitation. Uninstall files were left for the operator's requested command.
 
 ## Approved Wat ICMP and peer Auto implementation
 

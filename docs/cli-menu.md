@@ -28,6 +28,16 @@ long form. For *how to set a tunnel up*, use the
 | 9 | **Uninstall** | Removes everything FullPack installed. |
 | 10 | **Exit** | |
 
+## Quick Auto setup
+
+Choose **Setup Iran → Reverse → Auto → Quick TCP/UDP Setup**. Enter the two
+server IPv4 addresses and forwarded ports, review the four enrolled endpoints,
+then create the pair. On Kharej, apply the private setup link printed by Iran.
+Quick setup enables automatic failover with TCP, WSS and Noise Reverse plus
+Noise Direct. **Advanced Setup** retains custom ports, Wat, managed HTTPS and
+L3 enrollment. Existing pairs are unchanged. See [Quick Auto](quick-auto-setup.md)
+for endpoint ports, firewall requirements and the setup-link procedure.
+
 Connection Test includes **Naive / HTTP2**, **XHTTP / TLS** and **REALITY / Vision**.
 Install the optional pinned helpers on both servers (`BP_HELPERS=naive,xray`);
 a missing helper is shown as **SKIPPED** with its reason. Iran automatically
@@ -476,4 +486,4 @@ FEC؛ و zero-copy (فقط روی tcp ساده).
 
 *Last verified against FullPack v1.9.0.*
 
-*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
+*Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

@@ -9,6 +9,16 @@ Run it on the server you manage. CLI and web use the same tunnel methods and
 validation; helper identities and opt-in Auto enrollment still need their
 documented local prerequisites.
 
+## Quick Auto setup
+
+In **Add tunnel → Iran → Reverse → Auto**, Quick setup asks for the Iran and
+Kharej IPv4 addresses and forwarded ports. It shows the four TCP/WSS/Noise
+Reverse and Noise Direct endpoints before creation; carrier ports can be
+changed in the port options. Apply the resulting private setup link on Kharej.
+Switch to **Advanced** for custom carriers, Wat, managed HTTPS or L3.
+Both forms use the CLI's enrollment validators and occupied-port preflight.
+See [Quick Auto](quick-auto-setup.md) for the complete procedure.
+
 ## Getting in
 
 The link and login code are shown in the CLI under **Web Panel** (whose settings
@@ -133,4 +143,4 @@ that does the same job — is in
 
 *Last verified against FullPack v1.9.0.*
 
-*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
+*Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

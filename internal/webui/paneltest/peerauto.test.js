@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 globalThis.document = { documentElement: { dataset: {} } };
-const { peerSetupPayload, peerEditForm } = await import('../panel/js/ui/peerauto.js');
+const { peerSetupPayload, peerEditForm, peerSetupHost } = await import('../panel/js/ui/peerauto.js');
 const controls = values => ({ querySelector: selector => {
   const key = selector.match(/data-peer-field="([^"]+)"/)?.[1];
   const value = values[key];
@@ -39,6 +39,36 @@ test('Kharej enrollment sends only the trusted link and local name', () => {
   const group = controls({ enrollmentLink: 'backpack://3.private' });
   const result = peerSetupPayload({ querySelector: () => group }, { name: 'peer', role: 'client', transport: 'auto', token: 'stale', ports: '443' });
   assert.deepEqual(result, { name: 'peer', role: 'client', transport: 'auto', peerEnrollment: 'backpack://3.private' });
+});
+
+test('Quick Auto sends only the reviewed IP/port inputs and skips advanced enrollment fields', () => {
+  const group = controls({setupMode:'quick', 'quick.iranIp':'192.0.2.1', 'quick.kharejIp':'192.0.2.2', 'quick.basePort':25000, 'quick.directPort':25003, acceptUdp:true, observeOnly:true, tunnelId:'stale', iranId:'stale', kharejId:'stale'});
+  group.querySelectorAll = () => { throw new Error('quick setup must not read advanced candidates'); };
+  const result = peerSetupPayload({querySelector:()=>group}, {name:'quick', role:'server', transport:'auto', token:'secret', ports:'2052,8880', managed:{privateKey:'stale'}, preset:'stale'});
+  assert.deepEqual(result.quickAuto, {iranIp:'192.0.2.1', kharejIp:'192.0.2.2', basePort:25000, directPort:25003});
+  assert.equal(result.tune.acceptUDP, true);
+  for (const key of ['auto', 'managed', 'preset']) assert.equal(key in result,false);
+});
+
+test('Quick Auto shows consistent default ports when custom port fields are blank', () => {
+  const group=controls({setupMode:'quick', 'quick.iranIp':'192.0.2.1', 'quick.kharejIp':'192.0.2.2', 'quick.basePort':'', 'quick.directPort':''});
+  const result=peerSetupPayload({querySelector:()=>group}, {role:'server',transport:'auto'});
+  assert.equal(result.quickAuto.basePort,24443); assert.equal(result.quickAuto.directPort,24445);
+});
+
+test('peer setup links use the visible form after switching between Quick Auto and Wat', () => {
+  const auto = controls({setupMode:'quick', 'quick.iranIp':'192.0.2.1'});
+  const wat = controls({iranIp:'192.0.2.3'});
+  const root = {querySelector: selector => selector.includes('"auto"') ? auto : wat};
+  auto.hidden = false; wat.hidden = true;
+  assert.equal(peerSetupHost(root), '192.0.2.1');
+  auto.hidden = true; wat.hidden = false;
+  assert.equal(peerSetupHost(root), '192.0.2.3');
+  auto.hidden = false; wat.hidden = true;
+  auto.querySelector = controls({setupMode:'advanced'}).querySelector;
+  assert.equal(peerSetupHost(root), '');
+  auto.hidden = true;
+  assert.equal(peerSetupHost(root), '');
 });
 
 test('Auto Direct HTTPS excludes listener keys and incompatible hidden fields', () => {

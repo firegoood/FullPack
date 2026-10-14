@@ -115,11 +115,19 @@ For the complete explanation, see [Before you start](tutorial/before-you-start.m
 
 # Enrolled Auto
 
+For a quick port-forwarding pair, choose **Setup Iran → Auto → Quick TCP/UDP
+Setup** in the CLI, or **Auto → Quick TCP/UDP setup** in the panel. Enter both
+peer IPv4 addresses and the forwarded ports. Review the four proposed endpoints,
+create Iran, then apply its private setup link on Kharej. The quick preset uses
+TCP, WSS and Noise Reverse plus Noise Direct, with automatic failover enabled.
+It needs no optional HTTPS helper. See [Quick Auto setup](docs/quick-auto-setup.md)
+for listener ports and the advanced Wat/HTTPS/L3 path.
+
 Opt-in Auto supports eighteen stream carriers with Reverse or Direct initiation
 and six datagram carriers for a stable L3 TUN. Select one to four explicitly
 approved candidates, create the Iran enrollment, and import its private peer
 link on Kharej with the required local identities. Iran remains the switching
-authority. Start in observe-only mode; local tests do not establish WAN
+ authority. Advanced setup offers observe-only mode; local tests do not establish WAN
 readiness or seamless TCP migration. See [Auto setup and carrier matrix](docs/auto-carrier-completion.md)
 and the [verification report](docs/waticmp-verification.md#8-approved-auto-reversedirectl3-completion).
 

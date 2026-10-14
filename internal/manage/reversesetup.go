@@ -668,6 +668,15 @@ func finishSetup(s TunnelSpec) bool {
 		tui.PressEnter()
 		return false
 	}
+	// Peer Auto/Wat reaches this shared completion step without the legacy
+	// wizard's earlier forward-port check. Refuse occupied user listeners
+	// before optimizing the host or creating a config/service, as the panel does.
+	if err := refuseBusyForwards(s); err != nil {
+		tui.Error(err.Error())
+		tui.Info("Nothing Written — Run Setup Again With Another Port.")
+		tui.PressEnter()
+		return false
+	}
 
 	tui.Info("Applying Network Optimizations...")
 	optimize.ApplyQuiet(ReservedPorts())

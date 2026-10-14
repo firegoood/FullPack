@@ -7,6 +7,8 @@ Reference pages: what each part of FullPack **is**, and every setting it has.
 - Looking for the **overview and install**? → [main README](../README.md)
 
 ### Start here
+- [Quick Auto setup](quick-auto-setup.md) — two server IPs, forwarded ports and
+  one private peer link, with advanced enrollment still available
 - [The CLI menu — complete reference](cli-menu.md) — every option in every menu,
   including the advanced Fine Tune settings
 - [Server layout (file locations)](server-layout.md)
@@ -21,6 +23,11 @@ Reference pages: what each part of FullPack **is**, and every setting it has.
 - [Transports — every one explained](transports.md)
 - [Native Wat ICMP and peer Auto design](waticmp-dual-server-design.md)
 - [Native/Auto verification, enable/disable and rollback](waticmp-verification.md)
+- [Live Auto setup review](auto-live-setup-review.md) — enrolled endpoints,
+  observed TCP/WSS passes and unresolved Direct/Wat WAN outcomes
+- [Peer setup port ownership review](peer-setup-port-review.md) — occupied
+  listeners, preflight checks and skipped helper prerequisites
+- [Signed FullPack release verification](fullpack-release-verification.md)
 - [Measured native ICMP/xDi fixture comparison](waticmp-benchmark.md)
 - [Choosing a transport (Link Test)](choosing-a-transport.md)
 - [TCP + PCK](tcp-pck.md) — TCP without the kernel's TCP stack
@@ -95,4 +102,4 @@ Reference pages: what each part of FullPack **is**, and every setting it has.
 
 *Last verified against FullPack v1.9.0.*
 
-*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
+*Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

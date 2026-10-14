@@ -132,9 +132,16 @@ func ValidateConfigFile(path string) []string {
 
 	if cfg.Server.BindAddr != "" {
 		if _, err := ParseTunnelBind(cfg.Server.BindAddr); err != nil {
-			add("bind_addr: %v", err)
+			h, p, splitErr := net.SplitHostPort(cfg.Server.BindAddr)
+			// Native ICMP has no tunnel socket port. Auto also uses the
+			// primary address only as its Iran/Kharej role marker; its
+			// actual endpoints are the explicitly enrolled candidates.
+			peer := cfg.Auto.Enabled || cfg.Server.Transport == config.WATICMP && cfg.Server.WatICMP.Enabled
+			if !peer || splitErr != nil || p != "0" || net.ParseIP(h) == nil {
+				add("bind_addr: %v", err)
+			}
 		}
-		if len(cfg.Server.Ports) == 0 {
+		if len(cfg.Server.Ports) == 0 && !(cfg.Auto.Enabled && cfg.Auto.Mode == "l3") {
 			add("a server tunnel with no ports forwards nothing")
 		}
 		if err := ValidatePortSpecs(cfg.Server.Ports); err != nil {
@@ -147,8 +154,13 @@ func ValidateConfigFile(path string) []string {
 	if cfg.Client.RemoteAddr != "" {
 		if h, p, err := net.SplitHostPort(cfg.Client.RemoteAddr); err != nil {
 			add("remote_addr %q is not host:port: %v", cfg.Client.RemoteAddr, err)
-		} else if h == "" || !ValidPort(p) {
-			add("remote_addr %q has no host, or a port outside 1-65535", cfg.Client.RemoteAddr)
+		} else {
+			peer := cfg.Auto.Enabled || cfg.Client.Transport == config.WATICMP && cfg.Client.WatICMP.Enabled
+			ip := net.ParseIP(h)
+			marker := peer && p == "0" && ip != nil && ip.To4() != nil && !ip.IsUnspecified() && !ip.IsMulticast() && !ip.Equal(net.IPv4bcast)
+			if h == "" || !ValidPort(p) && !marker {
+				add("remote_addr %q has no host, or a port outside 1-65535", cfg.Client.RemoteAddr)
+			}
 		}
 		if strings.TrimSpace(cfg.Client.Token) == "" {
 			add("token is empty; both ends must carry the same one")

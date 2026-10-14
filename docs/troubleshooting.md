@@ -455,4 +455,4 @@ journalctl -u fullpack-webui -n 100
 
 *Last verified against FullPack v1.9.0.*
 
-*Last verified against FullPack v1.9.1 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
+*Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*

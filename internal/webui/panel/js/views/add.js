@@ -130,7 +130,7 @@ export function addView(ctx) {
         const cn = drawer('cn');
         if (cn) cn.hidden = isManaged(t);
         shapeManaged(root, t, chosen.side, chosen.direction === 'direct');
-        shapePeerSetup(root, t, chosen.side, chosen.direction === 'direct', opts.autoCarriers || []);
+        shapePeerSetup(root, t, chosen.side, chosen.direction === 'direct', opts.autoCarriers || [], opts.autoQuickCarriers || []);
       }
 
       /* Throughput is offered only where it applies — presetSuitsTransport. */
@@ -601,7 +601,7 @@ export function addView(ctx) {
           bindSetupLink(result);
           try {
             const host = chosen.transport === 'naive'
-              ? root.querySelector('[name="managed.serverName"]')?.value.trim() || '' : chosen.transport === 'waticmp' ? peerSetupHost(root) : '';
+              ? root.querySelector('[name="managed.serverName"]')?.value.trim() || '' : ['waticmp', 'auto'].includes(chosen.transport) ? peerSetupHost(root) : '';
             result.innerHTML = setupLinkHTML(await api.tunnelLink(name, host));
           } catch (e) {
             result.innerHTML = `<div class="doneline warn"><span class="tick">!</span><div>
