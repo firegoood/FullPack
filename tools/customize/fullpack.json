@@ -297,6 +297,9 @@
     "internal/manage/quickauto_test.go": ["TestQuickAutoBuildsReviewedEndpointsAndTrustedPeerLink", "TestQuickAutoRejectsMissingAddressesConflictingPortsAndMixedEnrollment"],
     "internal/manage/spec/peercheck_test.go": ["TestPeerConfigRoleMarkersDoNotRequireSocketPorts", "legacy-server-zero", "auto-user-port-zero"],
     "docs/quick-auto-setup.md": ["Quick TCP/UDP", "one-to-four", "خلاصهٔ فارسی"],
-    "docs/auto-live-setup-review.md": ["generation 2", "NOT VERIFIED", "No generation history was erased"]
+    "docs/auto-live-setup-review.md": ["generation 2", "NOT VERIFIED", "No generation history was erased", "probe replay budget exhausted"],
+    "internal/tunnel/peerauto/probes.go": ["maxRecentTransactions = 4096", "now.Sub(at) > time.Hour", "rememberProbeTransaction", "errProbeReplayBudget"],
+    "internal/tunnel/peerauto/probe_budget_test.go": ["TestProbeReplayWindowAllowsAnHourOfPacedHealthChecks", "TestProbeReplayBudgetStaysBoundedAndDoesNotQuarantineACarrier", "TestProbeBudgetRejectKeepsProductionControlUsable"],
+    "internal/tunnel/peerauto/wire.go": ["errProbePressure, errProbeBusy, errProbeReplayBudget"]
   }
 }

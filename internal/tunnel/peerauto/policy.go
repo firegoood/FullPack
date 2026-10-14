@@ -15,6 +15,11 @@ import (
 
 var errProbePressure = errors.New("SKIPPED: local CPU/memory/application pressure")
 var errProbeBusy = errors.New("SKIPPED: global probe concurrency budget")
+var errProbeReplayBudget = errors.New("SKIPPED: probe replay budget exhausted")
+
+func probeSkipped(err error) bool {
+	return errors.Is(err, errProbePressure) || errors.Is(err, errProbeBusy) || errors.Is(err, errProbeReplayBudget)
+}
 
 // Two authority probes per process, one per pair (the decision owner is
 // serial). Their 1 s spacing bounds aggregate echo payload to <256 KiB/s;
@@ -177,7 +182,7 @@ func maxTime(a, b time.Time) time.Time {
 }
 func (m *Manager) probeFailure(e *candidate, err error) {
 	result := "FAILED"
-	if errors.Is(err, errProbePressure) || errors.Is(err, errProbeBusy) {
+	if probeSkipped(err) {
 		result = "SKIPPED"
 	} else {
 		e.failedProbes++
@@ -245,7 +250,7 @@ func (m *Manager) leaderLoop() error {
 				m.lastHealth = time.Now()
 				if err := m.exchangeProbe(active.endpoint, 512); err != nil {
 					m.probeFailure(active.endpoint, err)
-					if !errors.Is(err, errProbePressure) && !errors.Is(err, errProbeBusy) {
+					if !probeSkipped(err) {
 						m.dataFailures++
 					}
 				} else {

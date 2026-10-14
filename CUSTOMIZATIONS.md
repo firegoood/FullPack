@@ -44,6 +44,14 @@
 - On installer updates, refresh only active FullPack panel/monitor processes to
   load the new embedded setup form; leave tunnel sessions/generation ownership
   running. Existing source/release signature checks still precede this refresh.
+- The live pair later exposed a real uptime regression: 256 one-hour probe
+  replay entries exhausted under the ten-second health cadence, causing false
+  carrier failures and Iran NO_ROUTE while Kharej retained its agreed route.
+  Preserve the full one-hour replay protection with the bounded 4096-entry
+  cache; exhausted budgets are typed SKIPPED and cannot cancel production or
+  increment data failures/quarantine. Preserve the paced-hour, hard-cap,
+  replay/expiry and subsequent-control regression tests. A clock-model test is
+  distinct from real-hour/24-hour acceptance.
 
 ## Peer setup port ownership review on 2026-10-14
 

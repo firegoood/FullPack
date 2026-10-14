@@ -149,8 +149,10 @@ func (w *wire) ask(m message, expect string) (message, error) {
 	}
 	r, e := w.receive()
 	if e == nil && r.Op == "REJECT" && r.Transaction == m.Transaction {
-		if r.Reason == errProbePressure.Error() {
-			return r, errProbePressure
+		for _, skipped := range []error{errProbePressure, errProbeBusy, errProbeReplayBudget} {
+			if r.Reason == skipped.Error() {
+				return r, skipped
+			}
 		}
 		return r, errPeerRejected
 	}

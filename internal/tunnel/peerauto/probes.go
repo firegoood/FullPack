@@ -22,6 +22,31 @@ type pendingProbe struct {
 	ch                         chan probeConnection
 }
 
+// The process-wide one-second probe spacing permits up to 3600 transactions
+// per hour, including the active route's ten-second health probes. The old 256
+// entries exhausted under normal uptime. Retain the full one-hour replay window
+// with a fixed cap and room for the shared bounded switch transactions. Budget
+// exhaustion skips a measurement; it is not evidence that a carrier failed.
+const maxRecentTransactions = 4096
+
+func (m *Manager) rememberProbeTransaction(tx string, now time.Time) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for old, at := range m.recentTx {
+		if now.Sub(at) > time.Hour {
+			delete(m.recentTx, old)
+		}
+	}
+	if _, used := m.recentTx[tx]; used {
+		return errors.New("replayed probe transaction")
+	}
+	if len(m.recentTx) >= maxRecentTransactions {
+		return errProbeReplayBudget
+	}
+	m.recentTx[tx] = now
+	return nil
+}
+
 func (m *Manager) deliverProbe(ctx context.Context, w *wire, session carrierSession) {
 	m.mu.Lock()
 	p := m.pendingProbes[w.base.Transaction]

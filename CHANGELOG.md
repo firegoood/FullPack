@@ -19,6 +19,10 @@ All notable changes to Backpack are documented here.
   and WSS Reverse on the operator's restricted pair; Direct Noise and Wat Normal
   did not qualify. These measurements do not establish long-term stability,
   application/VPN-client throughput or production user capacity.
+- Fix a reproduced uptime failure: the 256-entry hourly probe replay cache
+  exhausted during normal ten-second health checks. Keep the full replay window
+  with a bounded 4096-entry cache, classify exhausted probe budgets as SKIPPED,
+  and preserve production control/health failure counts during those skips.
 
 ## v1.9.1 — 2026-10-14 (FullPack)
 

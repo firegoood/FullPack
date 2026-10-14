@@ -20,6 +20,11 @@ updating this repository. These files record the user's persistent preferences.
   typed diagnostics, joined cancellation, scoped lock-waiting cleanup and
   bounded connection-admission tests. Do not equate sockets with users or
   bounded WAN recovery with production/24-hour acceptance.
+  Keep the one-hour transaction replay window and bounded 4096-entry cache
+  compatible with the global one-second probe pacing. Budget skips must not
+  cancel production or count toward carrier quarantine/data failures; preserve
+  replay/expiry and continued-control tests without claiming a clock model as
+  a real-hour soak.
 
 - Preserve the approved complete Auto carrier registry shared by CLI, web and
   engine. Stream Auto supports Reverse and Direct initiation; L3 Auto uses the

@@ -56,6 +56,23 @@ was performed here. Historical WAN results remain separately bounded.
 
 ## Subsequent quick setup request
 
+A later read at 19:41 UTC found Iran NO_ROUTE at the same generation 2 while
+Kharej still reported TCP HEALTHY. Kharej's journal identified the exact local
+cause: `probe replay budget exhausted`. The old 256-entry one-hour cache cannot
+accommodate a healthy route's ten-second data checks (up to 360 per hour), plus
+full/standby probes. Earlier TCP/WSS passes were bounded samples, not continuous
+acceptance. They remain recorded above, with this later failure retained.
+
+The v1.9.2 source keeps the full one-hour replay window and a fixed 4096-entry
+cap, sized for the global one-second probe spacing (3600 starts per hour) plus
+bounded switch transactions. Genuine replay still fails; cache/concurrency/
+pressure exhaustion is typed SKIPPED, leaves the production control usable and
+does not increment carrier/data failures or quarantine. The cap also applies
+to preparation transactions. This fixes the reproduced local cause without
+changing enrollment, generations, endpoints or cryptographic verification.
+The modelled-hour regression does not establish a real-hour/24-hour soak.
+The production servers still ran v1.9.1 during this observation.
+
 The operator then requested a simpler setup and a new signed release. Quick
 setup selects built-in TCP/WSS/Noise Reverse plus Noise Direct and retains the
 advanced Wat/HTTPS/L3 path; it does not rewrite this deployed pair. See
@@ -72,7 +89,9 @@ do not supersede the unavailable WAN Direct observation above.
 دیگری آزموده نمی‌شد. پس از تأیید کاربر، جفت جدید با چهار حامل و با حفظ
 وضعیت امنیتی قبلی ساخته شد. هر دو سمت روی TCP سالم شدند و آزمون مستقل
 WSS هم گذشت. Direct Noise و Wat در این بازه تأیید نشدند و نتیجهٔ آزمون
-حامل با عملکرد واقعی کلاینت VPN یا پذیرش Production یکسان نیست.
+حامل با عملکرد واقعی کلاینت VPN یا پذیرش Production یکسان نیست. بررسی بعدی
+پر شدن حافظهٔ محدود Probe و قطع منطقی مسیر ایران را نشان داد؛ اصلاح این علت
+در سورس ۱.۹.۲ و تست اختصاصی ثبت شده است، نه به‌عنوان پایداری ۲۴ساعته.
 
 </div>
 

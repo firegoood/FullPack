@@ -502,8 +502,8 @@ func (m *Manager) follow(e *candidate) {
 				// A separately isolated probe failure cannot close a healthy
 				// production session. The authority consumes this typed rejection.
 				reason := "isolated candidate probe unavailable"
-				if errors.Is(err, errProbePressure) || errors.Is(err, errProbeBusy) {
-					reason = errProbePressure.Error()
+				if probeSkipped(err) {
+					reason = err.Error()
 				}
 				if e.w.send(message{Op: "REJECT", Transaction: r.Transaction, Reason: reason}) != nil {
 					return
@@ -585,6 +585,9 @@ func (m *Manager) transition(e *candidate, r message) message {
 		if _, used := m.recentTx[r.Transaction]; used {
 			return out
 		}
+		if len(m.recentTx) >= maxRecentTransactions {
+			return out
+		}
 		st.Generation = r.Generation
 		st.Intent = e.spec.ID
 		st.Transaction = r.Transaction
@@ -636,23 +639,8 @@ func (m *Manager) followProbe(e *candidate, r message) error {
 		return errProbeBusy
 	}
 	defer releaseProbe()
-	m.mu.Lock()
-	for tx, at := range m.recentTx {
-		if time.Since(at) > time.Hour {
-			delete(m.recentTx, tx)
-		}
-	}
-	if len(m.recentTx) >= 256 {
-		m.mu.Unlock()
-		return errors.New("probe replay budget exhausted")
-	}
-	_, used := m.recentTx[r.Transaction]
-	if !used {
-		m.recentTx[r.Transaction] = time.Now()
-	}
-	m.mu.Unlock()
-	if used {
-		return errors.New("replayed probe transaction")
+	if err := m.rememberProbeTransaction(r.Transaction, time.Now()); err != nil {
+		return err
 	}
 	probeCtx, cancel := context.WithTimeout(e.ctx, 15*time.Second)
 	defer cancel()
@@ -729,13 +717,13 @@ func (m *Manager) exchangeProbe(e *candidate, probeBytes int) (err error) {
 		})
 	}
 	if _, err := e.w.ask(message{Op: "PROBE_OFFER", Transaction: tx, Bytes: probeBytes}, "PROBE_READY"); err != nil {
-		if !errors.Is(err, errPeerRejected) && !errors.Is(err, errProbePressure) {
+		if !errors.Is(err, errPeerRejected) && !probeSkipped(err) {
 			e.cancel()
 		}
 		return fmt.Errorf("probe offer: %w", err)
 	}
 	if _, err := e.w.ask(message{Op: "PROBE_START", Transaction: tx}, "PROBE_READY"); err != nil {
-		if !errors.Is(err, errPeerRejected) && !errors.Is(err, errProbePressure) {
+		if !errors.Is(err, errPeerRejected) && !probeSkipped(err) {
 			e.cancel()
 		}
 		return fmt.Errorf("probe start: %w", err)
