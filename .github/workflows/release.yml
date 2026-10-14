@@ -22,7 +22,11 @@ permissions:
   contents: write
 
 jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml
+
   release:
+    needs: verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -73,22 +77,26 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version-file: go.mod
+          go-version: '1.27.2'
           cache: true
 
-      - name: Test before publishing
-        # Nothing gets published that has not passed the suite. A broken
-        # release is far more expensive to undo than a slow pipeline.
-        run: go test ./... -timeout 20m
+      - name: Verify installer trust
+        # The required verify job already runs the complete suite, race,
+        # coverage, static/security, native/L3, helper and compatibility gates.
+        # Confirm the release runner's OpenSSL and pinned installer key too.
+        run: go test ./internal/app -run '^TestInstaller' -count=1 -timeout 3m
 
       - name: Build release assets
-        # RELEASE_SIGNING_KEY signs release/SHA256SUMS. Without it the build
-        # still produces every asset and simply publishes no signature, which
-        # is what a fork gets — and what this repository got until a key was
-        # generated. See tools/signsums and internal/manage/releasesig.go.
+        # Local unsigned builds are useful; published FullPack releases must
+        # match the fork's pinned key and include the tag-bound signature.
         env:
           RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
-        run: make release
+          GITHUB_REF_NAME: ${{ steps.tag.outputs.tag }}
+        run: |
+          test -n "$RELEASE_SIGNING_KEY" || { echo 'FullPack release signing secret is missing'; exit 1; }
+          make release
+          go run ./tools/verifysums release/SHA256SUMS "$GITHUB_REF_NAME"
+          (cd release && sha256sum -c SHA256SUMS)
 
       - name: Verify the tag matches the built version
         env:
@@ -154,5 +162,18 @@ jobs:
             release/fullpack_linux_*.tar.gz
             release/SHA256SUMS
             release/SHA256SUMS.sig
+            release/RELEASE_TAG
             release/SBOM.txt
             install.sh
+
+      - name: Verify the published one-command installer
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://raw.githubusercontent.com/firegoood/FullPack/main/install.sh -o /tmp/fullpack-install.sh
+          cmp install.sh /tmp/fullpack-install.sh
+          sudo bash /tmp/fullpack-install.sh </dev/null
+          version="$(/usr/local/bin/fullpack version)"
+          printf '%s\n' "$version"
+          case "$version" in *"$TAG"*) ;; *) echo 'Installed version differs from published tag'; exit 1 ;; esac

@@ -71,6 +71,10 @@ updating this repository. These files record the user's persistent preferences.
 - Do not disable signature verification to make fork releases install. A fork
   needs its own signing key and matching installer/public key before publishing
   signed releases; never put a private signing key in the repository.
+  Preserve the FullPack public key in the customization manifest, application
+  and installer, tag-bound signature checks and the full-CI release dependency.
+  CI/release builds use the manifest's patched Go 1.27.2 toolchain; keep the
+  source installer's patched Go 1.26.9 minimum and 1.27.0/1.27.1 rejection.
 - Build and verify with a patched Go toolchain. Keep the installer rejection
   of Go 1.27.0/1.27.1: their higher minor version does not include the security
   fixes in the project's Go 1.26.9 baseline. Go 1.27 needs patch 2 or newer.

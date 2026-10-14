@@ -9,8 +9,10 @@ bash <(curl -fsSL https://raw.githubusercontent.com/firegoood/FullPack/main/inst
 ```
 
 It downloads the prebuilt release archive for your architecture (amd64/arm64)
-into `/root/FullPack`, **verifies it against the checksum published with the
-release**, installs the binary, and opens the menu when it finishes.
+into `/root/FullPack`, **verifies its checksum and the tag-bound FullPack
+Ed25519 signature**, installs the binary, and opens the menu when it finishes.
+Release installation needs OpenSSL 1.1.1 or newer, without Go. Online downloads
+resolve the tag once and fetch all files from that release.
 
 Reopen the menu any time with:
 
@@ -47,32 +49,21 @@ download the archive for the server's architecture — run `uname -m` on it:
 
 ### With the installer (recommended)
 
-It also records the layout for the uninstaller. Download `install.sh` and
-`SHA256SUMS` alongside the archive, put all three in the **same folder** on the
-VPS, and run it. It finds the local archive, verifies it against `SHA256SUMS`,
-and never touches the network:
+It also records the layout for the uninstaller. Download `install.sh`,
+`SHA256SUMS`, `SHA256SUMS.sig` and `RELEASE_TAG` alongside the archive from the
+same release. Put all five in the **same private folder**, then run the script.
+It verifies the tag-bound signature and archive checksum before extraction
+without touching the network. Missing verification files are refused:
 
 ```bash
-scp install.sh SHA256SUMS fullpack_linux_amd64.tar.gz root@SERVER_IP:/root/
+scp install.sh SHA256SUMS SHA256SUMS.sig RELEASE_TAG fullpack_linux_amd64.tar.gz root@SERVER_IP:/root/
 ssh root@SERVER_IP "cd /root && sudo bash install.sh"
 ```
 
-### By hand
-
-Upload the archive to the server, then as root:
-
-```bash
-sha256sum fullpack_linux_amd64.tar.gz        # compare against SHA256SUMS
-tar xzf fullpack_linux_amd64.tar.gz
-mkdir -p /etc/fullpack /root/FullPack/backups
-install -m 0755 fullpack /usr/local/bin/fullpack
-echo /root/FullPack > /etc/fullpack/install_path
-sudo fullpack
-```
-
-The `install_path` line is what the built-in uninstaller reads to know what to
-remove; skip it and everything still runs, but uninstalling has to be done by
-hand. `install -m 0755` already sets the executable bit, so no `chmod` is needed.
+The tag can also be supplied explicitly, for example
+`BP_RELEASE_TAG=v1.9.1 bash install.sh`. It must match the signed checksums.
+Use the installer for offline extraction so signature checks and installation
+metadata are both retained.
 
 ### Updating offline
 
@@ -85,9 +76,14 @@ afterwards with `sudo fullpack` → **Manage → Restart ALL**.
 ## Updating online
 
 **Main menu → 8) Update.** It downloads the release, verifies it against the
-published SHA-256, installs it, and **rolls back automatically** if a tunnel does
+published SHA-256 and pinned signature, installs it, and **rolls back automatically** if a tunnel does
 not come back up. Anything that cannot be verified is refused rather than
 installed. [More](updates.md).
+
+Older source-built FullPack installations may still carry the upstream public
+release key. Run this fork's verified installer once to enroll the independent
+FullPack release key before using their automatic updater. This affects release
+authentication, not tunnel enrollment or configuration.
 
 ## Uninstalling
 
@@ -100,16 +96,15 @@ installed. [More](updates.md).
 ## خلاصهٔ فارسی
 
 **نصب عادی:** یک دستور با کاربر root روی سرور — آرشیو ریلیز مخصوص معماری سرور را
-دانلود می‌کند، با چک‌سام منتشرشده **تأیید** می‌کند، نصب می‌کند و خودش منو را باز
+دانلود می‌کند، چک‌سام و امضای مخصوص FullPack را **تأیید** می‌کند، نصب می‌کند و خودش منو را باز
 می‌کند. بعداً با `sudo fullpack` منو را باز کن.
 
 **نصب آفلاین (سروری که به گیت‌هاب دسترسی ندارد):** فایل ریلیز را روی یک ماشین با
 اینترنت دانلود کن و به سرور کپی کن. با `uname -m` معماری را ببین: `x86_64` یعنی
-amd64 و `aarch64` یعنی arm64. بهترین راه این است که `install.sh` و `SHA256SUMS`
-را هم کنار آرشیو در **یک پوشه** بگذاری و اسکریپت را اجرا کنی — خودش فایل محلی را
-پیدا و تأیید می‌کند و اصلاً به شبکه دست نمی‌زند. روش دستی هم در بالا آمده؛ فقط
-یادت باشد خط `install_path` را بنویسی، چون حذف‌کنندهٔ داخلی از روی آن می‌فهمد چه
-چیزی را پاک کند.
+amd64 و `aarch64` یعنی arm64. فایل‌های `install.sh`، `SHA256SUMS`،
+`SHA256SUMS.sig` و `RELEASE_TAG` را از همان ریلیز کنار آرشیو در **یک پوشهٔ خصوصی**
+بگذار و اسکریپت را اجرا کن — فایل محلی و امضای نسخه را تأیید می‌کند و به شبکه
+دست نمی‌زند. فایل یا امضای نامعتبر نصب نمی‌شود.
 
 **آپدیت:** از منوی اصلی گزینهٔ ۸ — با تأیید SHA-256 و **بازگشت خودکار** اگر تونل
 بالا نیامد. آپدیت آفلاین هم همان مراحل نصب با آرشیو جدید است و کانفیگ‌های

@@ -2,6 +2,21 @@
 
 All notable changes to Backpack are documented here.
 
+## v1.9.1 — 2026-10-14 (FullPack)
+
+- Publish FullPack installation archives for all seven supported Linux
+  architectures, with the fork's own Ed25519 release key. The installer verifies
+  the signed tag and checksums before installing; online downloads use one
+  resolved release tag, and offline installs require the same signed metadata.
+- Include CLI/web tunnel parity, native Wat ICMP and opt-in enrolled Auto for
+  Reverse, Direct and L3, with bounded consecutive-outage recovery, typed
+  diagnostics and joined, lock-waiting shutdown cleanup.
+- Release publication now depends on all existing CI gates and refuses a
+  missing or mismatched signing key. See `docs/auto-policy-review.md` and
+  `docs/fullpack-wan-verification.md` for bounded evidence and limitations:
+  QUIC WAN, some restricted routes, 24-hour soak and 1000-user capacity remain
+  unverified. This release does not claim production acceptance for those gates.
+
 ## v1.9.0 — 2026-10-09
 
 ### Added

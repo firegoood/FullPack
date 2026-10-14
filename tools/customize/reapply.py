@@ -39,6 +39,12 @@ def transform(path, source):
     if path == "internal/app/app.go":
         source = re.sub(r'RepoOwner\s+= "[^"]+"', 'RepoOwner = "\x03owner\x03"', source)
         source = re.sub(r'RepoName\s+= "[^"]+"', 'RepoName  = "\x03repository\x03"', source)
+        if SPEC.get("release_public_key"):
+            source = re.sub(r'var ReleasePublicKey = "[^"]*"',
+                            'var ReleasePublicKey = "' + SPEC["release_public_key"] + '"', source)
+    if path == "install.sh" and SPEC.get("release_public_key"):
+        source = re.sub(r'RELEASE_PUBLIC_KEY="[^"]*"',
+                        'RELEASE_PUBLIC_KEY="' + SPEC["release_public_key"] + '"', source)
     source = source.replace(SPEC["repository"], "\x03fork\x03")
     source = re.sub(r"\b(?:BackPack|Backpack|BACKPACK)\b", SPEC["display_name"], source)
     source = re.sub(r"(?<![A-Za-z])backpack(?![A-Za-z])", SPEC["command"], source)
@@ -51,6 +57,9 @@ def transform(path, source):
         source = source.replace('src="img/image.png"', 'src="img/fullpack.svg"')
         source = source.replace('src="img/cover.png"', 'src="img/fullpack.svg"')
     if path in {".github/workflows/ci.yml", ".github/workflows/release.yml"}:
+        if SPEC.get("release_go_version"):
+            source = re.sub(r'go-version-file: go.mod|go-version: [\'\"]?[0-9]+\.[0-9]+\.[0-9]+[\'\"]?',
+                            "go-version: '" + SPEC["release_go_version"] + "'", source)
         if "Verify FullPack customizations" not in source:
             newline = "\r\n" if "\r\n" in source else "\n"
             hook = "\n\n      - name: Verify FullPack customizations\n        run: |\n          python3 tools/customize/reapply.py --check\n          python3 -m unittest discover -s tools/customize -p 'test_*.py'"

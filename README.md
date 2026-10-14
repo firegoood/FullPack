@@ -253,7 +253,9 @@ Then:
 sudo fullpack
 ```
 
-The installer downloads the release for the server architecture, verifies its published checksum, installs it and opens the CLI.
+The installer downloads the release for the server architecture, verifies its
+SHA-256 checksum and tag-bound FullPack Ed25519 signature, installs it and opens
+the CLI. OpenSSL 1.1.1 or newer is required; Go is not needed for release installs.
 
 Supported release architectures currently include:
 
@@ -622,7 +624,10 @@ See [Access control](docs/access-control.md).
 
 ### Verified releases
 
-Release archives are verified against the published SHA-256 checksum.
+Release archives are verified against the published SHA-256 checksum and the
+FullPack signature over the tag and checksum list. Missing or invalid signatures
+are refused. Source-built installations carrying the old upstream public key
+need one reinstall with this fork's installer before using automatic updates.
 
 An archive that cannot be verified is refused rather than installed.
 
@@ -775,27 +780,14 @@ Download the release from a machine with internet access and copy it to the serv
 For example:
 
 ```bash
-scp install.sh SHA256SUMS fullpack_linux_amd64.tar.gz root@SERVER_IP:/root/
+scp install.sh SHA256SUMS SHA256SUMS.sig RELEASE_TAG fullpack_linux_amd64.tar.gz root@SERVER_IP:/root/
 
 ssh root@SERVER_IP \
   "cd /root && sudo bash install.sh"
 ```
 
-Or install manually after verifying the checksum:
-
-```bash
-sha256sum fullpack_linux_amd64.tar.gz
-
-tar xzf fullpack_linux_amd64.tar.gz
-
-mkdir -p /etc/fullpack /root/FullPack/backups
-
-install -m 0755 fullpack /usr/local/bin/fullpack
-
-echo /root/FullPack > /etc/fullpack/install_path
-
-sudo fullpack
-```
+Take all files from the same release. The local installer verifies both the
+signature and archive before extraction and records the installation layout.
 
 See [Installation](docs/install.md).
 

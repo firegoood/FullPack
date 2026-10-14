@@ -54,6 +54,7 @@ release: version release-linux
 	@# describes. Nothing happens without RELEASE_SIGNING_KEY in the
 	@# environment, so a fork and a local build still produce a full set.
 	go run ./tools/signsums release/SHA256SUMS
+	@printf '%s\n' "$${GITHUB_REF_NAME:-$$(cat VERSION)}" > release/RELEASE_TAG
 	@# The bill of materials, published with the release.
 	@#
 	@# Go records every module and its hash inside the binary it builds, so this

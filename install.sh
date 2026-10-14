@@ -5,8 +5,8 @@
 #   bash <(curl -fsSL https://raw.githubusercontent.com/firegoood/FullPack/main/install.sh)
 #
 # It downloads the prebuilt release tar.gz for this architecture into
-# /root/FullPack and installs the binary, verifying it against the checksum
-# published with the release. If run inside a source checkout and the download
+# /root/FullPack and installs the binary, verifying its checksum and the
+# tag-bound FullPack Ed25519 signature. If run inside a source checkout and the download
 # fails, it builds from source as a last resort.
 # BP_BUILD_FROM_SOURCE=1 deliberately installs this checkout's build instead
 # of the latest release, for features not present in a published release yet.
@@ -28,6 +28,7 @@ warn() { echo -e "${GRAY}[!]${NC} $*"; }
 err()  { echo -e "${RED}[x]${NC} $*" >&2; }
 
 REPO="firegoood/FullPack"
+RELEASE_PUBLIC_KEY="QreJZ3kWxUTXjLS/oI3GNAyJKCfYdCcg8hgtfCGSB1A="
 BIN_PATH="/usr/local/bin/fullpack"
 INSTALL_DIR="/root/FullPack"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-/tmp}")" 2>/dev/null && pwd || echo /tmp)"
@@ -299,6 +300,50 @@ trusted_dir() {
   (( (${perms:2:1} & 2) == 0 ))
 }
 
+# A tag is resolved once. All downloads then use this immutable release path,
+# rather than independently following /latest as another release is published.
+valid_release_tag() {
+  [[ "$1" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]
+}
+
+resolve_release_tag() {
+  local target
+  if [[ -n "${BP_RELEASE_TAG:-}" ]]; then
+    valid_release_tag "$BP_RELEASE_TAG" || return 1
+    printf '%s\n' "$BP_RELEASE_TAG"
+    return
+  fi
+  target="$(curl -fsSL --connect-timeout 15 --max-time 60 -o /dev/null -w '%{url_effective}' "https://github.com/${REPO}/releases/latest")" || return 1
+  [[ "$target" == "https://github.com/${REPO}/releases/tag/"* ]] || return 1
+  target="${target##*/}"
+  valid_release_tag "$target" || return 1
+  printf '%s\n' "$target"
+}
+
+# Match app.ReleaseSignedMessage exactly. OpenSSL 1.1.1 or newer verifies
+# Ed25519 without installing Go or executing any downloaded binary first.
+verify_release_signature() {
+  local sums="$1" signature="$2" tag="$3" work rc=0
+  valid_release_tag "$tag" || { err 'Invalid release tag'; return 1; }
+  command -v openssl >/dev/null 2>&1 || { err 'OpenSSL 1.1.1 or newer is required to verify this release'; return 1; }
+  [[ -f "$sums" && -f "$signature" ]] || { err 'Release checksums and signature are both required'; return 1; }
+  work="$(mktemp -d "$INSTALL_DIR/.verify.XXXXXXXX")" || return 1
+  # DER SubjectPublicKeyInfo for Ed25519: a fixed prefix and the raw public key.
+  printf '\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00' > "$work/public.der"
+  printf '%s' "$RELEASE_PUBLIC_KEY" | openssl base64 -d -A >> "$work/public.der" || rc=1
+  tr -d '\r\n' < "$signature" | openssl base64 -d -A > "$work/signature" || rc=1
+  printf 'backpack release %s\n' "$tag" > "$work/message"
+  cat "$sums" >> "$work/message" || rc=1
+  if [[ $rc -ne 0 || "$(wc -c < "$work/public.der")" -ne 44 || "$(wc -c < "$work/signature")" -ne 64 ]] ||
+     ! openssl pkeyutl -verify -pubin -keyform DER -inkey "$work/public.der" -rawin -in "$work/message" -sigfile "$work/signature" >/dev/null 2>&1; then
+    rc=1
+    err 'Release signature verification failed; refusing to install'
+  fi
+  rm -rf -- "$work"
+  [[ $rc -eq 0 ]] && info "FullPack signature verified for ${tag}"
+  return "$rc"
+}
+
 install_release() {
   # 1) A local release asset next to the script (e.g. ./release/ or ./dist/).
   for cand in "$SCRIPT_DIR/release/$ASSET" "$SCRIPT_DIR/dist/$ASSET" "$SCRIPT_DIR/$ASSET"; do
@@ -317,34 +362,33 @@ install_release() {
       fi
       info "Using local release asset: ${cand}"
       cp "$cand" "$INSTALL_DIR/$ASSET"
-      # An offline install can carry SHA256SUMS beside the archive; verify it
-      # when it is there, and say plainly when it is not.
-      if [[ -f "$localsums" ]]; then
-        # `|| rc=$?` rather than a bare call: `set -e` is currently suppressed
-        # here because install_release runs inside `if`, so a bare call happens
-        # to work — but only for that reason. Moving the call site would make a
-        # failed verification kill the script instead of reaching the warning.
-        local rc=0
-        verify_asset "$INSTALL_DIR/$ASSET" "$localsums" || rc=$?
-        if [[ $rc -eq 2 ]]; then
-          rm -f "$INSTALL_DIR/$ASSET"
-          exit 1
-        fi
-      else
-        warn "No SHA256SUMS beside the local asset — installing it unverified."
+      local tag="${BP_RELEASE_TAG:-}"
+      if [[ -z "$tag" && -f "$canddir/RELEASE_TAG" ]]; then
+        tag="$(cat "$canddir/RELEASE_TAG")"
+      fi
+      if ! verify_release_signature "$localsums" "$canddir/SHA256SUMS.sig" "$tag" ||
+         ! verify_asset "$INSTALL_DIR/$ASSET" "$localsums"; then
+        rm -f "$INSTALL_DIR/$ASSET"
+        err 'Offline installation needs SHA256SUMS, SHA256SUMS.sig and RELEASE_TAG from the same release'
+        exit 1
       fi
       return 0
     fi
   done
 
-  # 2) The latest GitHub release.
-  fetch "https://github.com/${REPO}/releases/latest/download/${ASSET}" "$INSTALL_DIR/$ASSET" || return 1
+  # 2) Resolve the release before downloading any files.
+  local tag base
+  tag="$(resolve_release_tag)" || { warn 'No published FullPack release could be resolved'; return 1; }
+  base="https://github.com/${REPO}/releases/download/${tag}"
+  fetch "$base/${ASSET}" "$INSTALL_DIR/$ASSET" || return 1
 
   # 3) Verify against the checksums published with the same release. An archive
   #    that cannot be verified is not installed: this binary runs as root, and
   #    the offline install in the README is always available as a way out.
-  if ! fetch "https://github.com/${REPO}/releases/latest/download/SHA256SUMS" "$INSTALL_DIR/SHA256SUMS"; then
-    err "Could not fetch SHA256SUMS, so the download cannot be verified."
+  if ! fetch "$base/SHA256SUMS" "$INSTALL_DIR/SHA256SUMS" ||
+     ! fetch "$base/SHA256SUMS.sig" "$INSTALL_DIR/SHA256SUMS.sig" ||
+     ! verify_release_signature "$INSTALL_DIR/SHA256SUMS" "$INSTALL_DIR/SHA256SUMS.sig" "$tag"; then
+    err "Could not verify the signed release checksums."
     err "Refusing to install it. Install offline instead — see the README."
     rm -f "$INSTALL_DIR/$ASSET"
     exit 1

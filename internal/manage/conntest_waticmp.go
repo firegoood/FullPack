@@ -18,13 +18,13 @@ func ctWatCase(tr string) bool { return tr == "waticmp" || tr == "waticmp-revers
 // addresses/settings are fetched through the existing authenticated per-carrier
 // exchange, just like HTTPS trust material; neither side opens an admin port.
 func (s *ConnTestIran) startWatCase(c *connTestCase, used map[int]bool, o ConnTestOptions) {
-	if ok, why := waticmp.Availability(); !ok {
-		c.skip = "SKIPPED: " + why
-		return
-	}
 	iran, peer := net.ParseIP(s.link.Host), net.ParseIP(strings.TrimSpace(o.WatPeerIPv4))
 	if iran == nil || iran.To4() == nil || peer == nil || peer.To4() == nil {
 		c.skip = "Wat needs explicit Iran and Kharej IPv4 addresses; fill the optional Kharej IPv4 before starting"
+		return
+	}
+	if ok, why := waticmp.Availability(); !ok {
+		c.skip = "SKIPPED: " + why
 		return
 	}
 	c.entry = ctPickPort(used, true)

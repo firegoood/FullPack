@@ -5,11 +5,11 @@ written down, so a release made in a hurry is the same release.
 
 ## Before you tag
 
-- [ ] **The `RELEASE_SIGNING_KEY` secret exists.** Without it the tag publishes
-      no signature, and every updater carrying the pinned public key
-      (`internal/app.ReleasePublicKey`) refuses the release — which is worse
-      than no signing at all. Check first; it is the one step that cannot be
-      fixed after the fact.
+- [ ] **The `RELEASE_SIGNING_KEY` secret exists and matches FullPack's pinned
+      public key.** The Release workflow refuses to publish without it.
+      `tools/customize/fullpack.json`, `internal/app.ReleasePublicKey` and
+      `install.sh` must carry the same public half. Never copy an upstream key
+      or write the private half into the checkout or build artifacts.
 - [ ] `CHANGELOG.md` has a section for this version, and it says what a user
       would have seen rather than what the diff did.
 - [ ] `VERSION` and `internal/app` agree with the tag. CI checks this before it
@@ -44,7 +44,16 @@ git push origin v1.8.5
 ```
 
 The release workflow builds every architecture, writes `SHA256SUMS`, signs it
-with the repository secret, and publishes.
+with the repository secret, verifies its signature and archive hashes, and
+publishes only after the complete reused CI workflow succeeds. CI/release builds
+pin Go 1.27.2, matching the audited formatter and patched build toolchain.
+Manual workflow dispatch signs the resolved tag rather than the branch name.
+
+Assets include all seven Linux archives, `SHA256SUMS`, `SHA256SUMS.sig`,
+`RELEASE_TAG`, `SBOM.txt` and the matching installer. Packaging lists explicit
+binary/legal members and excludes the entire `11/` tree. The first FullPack
+release's bounded WAN evidence and pending production gates remain in
+`auto-policy-review.md` and `fullpack-wan-verification.md`.
 
 What is signed is the **tag and the list together** (`backpack release <tag>`,
 a newline, then `SHA256SUMS`), not the list alone. The list names archives,
@@ -131,9 +140,9 @@ during the incident.
 نکتهٔ اصلی: هر انتشار یک فایل `SHA256SUMS` دارد که با کلید **Ed25519** امضا
 می‌شود، و updater قبل از نصب امضا را بررسی می‌کند. نیمهٔ عمومی کلید داخل خود
 باینری pin شده و نیمهٔ خصوصی فقط در یک repository secret زندگی می‌کند و جای
-دیگری نه. **تا وقتی آن secret وجود نداشته باشد، انتشارِ tag شده هیچ امضایی
-منتشر نمی‌کند و هر updaterای که کلید عمومی را دارد آن را رد می‌کند** — که از
-حالتِ قبل از وجود کلید هم بدتر است.
+دیگری نه. **اگر secret وجود نداشته باشد یا با کلید عمومی FullPack تطابق نداشته
+باشد، workflow انتشار متوقف می‌شود.** همهٔ آزمون‌های CI پیش از انتشار باید
+موفق باشند؛ نصب‌کننده هم امضای همان نسخه را پیش از اجرای باینری بررسی می‌کند.
 
 **ساخت تکرارپذیر:** انتشار با `CGO_ENABLED=0`، `-trimpath` و نسخه‌ای که از
 `VERSION` می‌آید نه از ساعت ساخته می‌شود، پس دو build از یک سورس بایت‌به‌بایت

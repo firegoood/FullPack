@@ -110,6 +110,17 @@ class ReapplicationTests(unittest.TestCase):
             self.assertEqual(1, updated.count("- name: Verify FullPack customizations"))
             self.assertIn("python3 tools/customize/reapply.py --check", updated)
 
+    def test_fork_signing_key_and_patched_release_toolchain_survive_reapply(self):
+        pin = reapply.SPEC["release_public_key"]
+        app = reapply.transform("internal/app/app.go", 'var ReleasePublicKey = "upstream-key"')
+        installer = reapply.transform("install.sh", 'RELEASE_PUBLIC_KEY="upstream-key"')
+        self.assertIn('var ReleasePublicKey = "' + pin + '"', app)
+        self.assertIn('RELEASE_PUBLIC_KEY="' + pin + '"', installer)
+        for value in ["go-version-file: go.mod", "go-version: '1.27.1'"]:
+            workflow = reapply.transform(".github/workflows/release.yml", value)
+            self.assertEqual("go-version: '1.27.2'", workflow)
+            self.assertEqual(workflow, reapply.transform(".github/workflows/release.yml", workflow))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -13,6 +13,7 @@
 | 2026-10-13 | Audit the additions and complete Auto for Reverse **and Direct/L3** | Shared carrier registry, explicit connection direction, encrypted legacy adapters, managed HTTPS identities and a stable TUN with authenticated datagram forwarding; verification status is recorded separately |
 | 2026-10-13 | Test the supplied Iran and two Kharej servers | Bounded protocol and Auto recovery tests; preserve existing services and security checks, record partial WAN evidence and clean up audit resources |
 | 2026-10-14 | Review Auto availability, WAN failures, shutdown and capacity criticisms | Reproduce consecutive carrier failures, separate bounded emergency recovery from optional changes, classify diagnostics, preserve cleanup checks and record measured limits |
+| 2026-10-14 | Make one-command installation work by publishing a FullPack release | Independent fork signing key, signed immutable-tag online/offline installation, patched release toolchain and unchanged CI acceptance gates |
 
 ## Approved Wat ICMP and peer Auto implementation
 
@@ -206,6 +207,37 @@
   bounded audit report to the same repository. This authorizes this source
   push; the remaining acceptance gates and publication exclusions still apply.
 
+## Signed fork installation and release approved on 2026-10-14
+
+- The operator requested a release or installer repair after the normal command
+  could not download an asset. The fork had no releases or signing secret.
+  This request authorizes the v1.9.1 source/tag/release publication to FullPack.
+- The fork now has an independent Ed25519 key. Only its public half is pinned
+  in `tools/customize/fullpack.json`, the installer and application. The private
+  half was generated in memory and encrypted into the repository's
+  `RELEASE_SIGNING_KEY` Actions secret; it was never written into the checkout
+  or a local private-key file. Preserve this trust anchor through source merges.
+- Online installation resolves one tag before fetching the archive, checksum
+  list and signature. Offline installation requires the same three artifacts
+  plus `RELEASE_TAG` (or an explicit `BP_RELEASE_TAG`). Missing, altered or
+  differently tagged signatures/checksums refuse installation; they never
+  trigger an unverified fallback. Deliberate trusted local source builds remain
+  available through the existing `BP_BUILD_FROM_SOURCE=1` option.
+- The Release workflow reuses all existing CI jobs before publishing, rejects
+  an absent/mismatched signing secret and verifies its own signed artifacts.
+  CI and release builds pin Go 1.27.2, matching the audited build/format toolchain;
+  the source minimum remains Go 1.26.9 with unpatched 1.27.0/1.27.1 rejected.
+- Older source-built FullPack binaries carrying the inherited upstream key
+  cannot authenticate this fork's new key. Reinstall once with the verified
+  fork installer before using their automatic updater. No upstream key or
+  transport/security identity was substituted, and `11/` remains excluded.
+- Release availability is distinct from the bounded WAN and pending 24-hour /
+  1000-user acceptance recorded in the existing verification reports.
+- The loopback Connection Test has no explicit Wat peer addresses. Report that
+  missing prerequisite before checking raw-socket availability, keeping its
+  SKIPPED result consistent under both privileged and ordinary CI accounts.
+  Actual enrolled/raw fixtures still require privileges and real packet tests.
+
 ## Web tunnel methods
 
 - The reverse options API reads `cliTransportGroups()`; the direct options API
@@ -290,8 +322,8 @@
    the repository's CI checks, including Linux, race and wire-compatibility tests.
 6. Build and sign **FullPack** assets from the customized source. Configure the
    fork's signing public key in both the application and installer and store the
-   private key only in the release secret. The inherited public key remains
-   unchanged until a fork signing key is deliberately configured.
+   private key only in the release secret. Preserve the deliberately configured
+   fork public key recorded in the customization manifest.
 
 The reapply tool is idempotent. It handles the currently known naming surfaces;
 upstream structural changes still require code review and test verification.

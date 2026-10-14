@@ -2,6 +2,8 @@
   "display_name": "FullPack",
   "command": "fullpack",
   "repository": "firegoood/FullPack",
+  "release_public_key": "QreJZ3kWxUTXjLS/oI3GNAyJKCfYdCcg8hgtfCGSB1A=",
+  "release_go_version": "1.27.2",
   "upstream_repository": "AminMGMT/BackPack",
   "preserve_files": [
     "LICENSE",
@@ -59,7 +61,8 @@
       "InstallDir = \"/root/FullPack\"",
       "ConfigDir = \"/etc/fullpack\"",
       "BinPath = \"/usr/local/bin/fullpack\"",
-      "fullpack_linux_"
+      "fullpack_linux_",
+      "var ReleasePublicKey = \"QreJZ3kWxUTXjLS/oI3GNAyJKCfYdCcg8hgtfCGSB1A=\""
     ],
     "Makefile": [
       "BIN      := fullpack",
@@ -69,14 +72,19 @@
       "REPO=\"firegoood/FullPack\"",
       "BIN_PATH=\"/usr/local/bin/fullpack\"",
       "ASSET=\"fullpack_linux_${ARCH}.tar.gz\"",
-      "got_major == 1 && got_minor == 27 && got_patch < 2"
+      "got_major == 1 && got_minor == 27 && got_patch < 2",
+      "RELEASE_PUBLIC_KEY=\"QreJZ3kWxUTXjLS/oI3GNAyJKCfYdCcg8hgtfCGSB1A=\"",
+      "verify_release_signature",
+      "resolve_release_tag",
+      "SHA256SUMS.sig"
     ],
     ".github/workflows/release.yml": [
       "release/fullpack_linux_*.tar.gz",
-      "Verify FullPack customizations"
-    ],
-    ".github/workflows/ci.yml": [
-      "Verify FullPack customizations"
+      "Verify FullPack customizations",
+      "needs: verify",
+      "tools/verifysums",
+      "release/RELEASE_TAG",
+      "go-version: '1.27.2'"
     ],
     "internal/tui/tui.go": [
       "FullPack"
@@ -254,7 +262,7 @@
     "internal/webui/server.go": ["/api/tunnel/auto", "/api/tunnel/peer-enrollment"],
     "internal/webui/panel/js/ui/peerauto.js": ["Import an enrolled Kharej endpoint", "peerSetupPayload", "peerEditForm", "api.autoAction", "n.closest('.grp3')", "localAutoFields", "readLocalAuto"],
     "internal/webui/paneltest/peerauto.test.js": ["Auto edit changes only local fields", "Auto Direct HTTPS", "Auto L3"],
-    ".github/workflows/ci.yml": ["FULLPACK_AUTO_HELPERS", "FULLPACK_AUTO_NETNS", "FULLPACK_AUTO_OUTER_MTU=1500", "FULLPACK_AUTO_LOAD", "TestPeerAutoBoundedApplicationConnectionCapacity"],
+    ".github/workflows/ci.yml": ["Verify FullPack customizations", "FULLPACK_AUTO_HELPERS", "FULLPACK_AUTO_NETNS", "FULLPACK_AUTO_OUTER_MTU=1500", "FULLPACK_AUTO_LOAD", "TestPeerAutoBoundedApplicationConnectionCapacity", "go-version: '1.27.2'"],
     "docs/auto-carrier-completion.md": ["one to four", "4096-packet replay window", "NOT VERIFIED", "same explicitly enrolled receive port"],
     "internal/cli/licenses.go": ["wat.License", "wat.Origin"],
     "internal/menu/system.go": ["Configuration And Fencing State Were Kept", "manage.RemoveInstalledHelpers()", "Remaining Installation Files Were Kept"],
@@ -274,6 +282,8 @@
     "internal/utils/network/icmpguard_linux.go": ["runScopedIptables", "installXdiEchoGuard"],
     "internal/utils/network/pckguard_linux.go": ["runScopedIptables", "context.WithTimeout", "\"-w\", \"5\""],
     "internal/tunnel/mssclamp/apply_linux.go": ["runClampRule", "context.WithTimeout", "\"-w\", \"5\""],
-    "docs/auto-policy-review.md": ["NOT VERIFIED", "1000-user", "three-carrier", "five-second", "UDP443"]
+    "docs/auto-policy-review.md": ["NOT VERIFIED", "1000-user", "three-carrier", "five-second", "UDP443"],
+    "tools/verifysums/main.go": ["ReleaseSignedMessage", "ed25519.Verify"],
+    "internal/app/installrelease_test.go": ["replayed-tag", "tampered-archive", "TestInstallerPinsTheApplicationReleaseKey"]
   }
 }

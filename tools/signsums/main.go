@@ -10,6 +10,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"encoding/base64"
 	"fmt"
@@ -43,6 +44,13 @@ func main() {
 	key, err := base64.StdEncoding.DecodeString(keyB64)
 	if err != nil || len(key) != ed25519.PrivateKeySize {
 		fmt.Fprintln(os.Stderr, "RELEASE_SIGNING_KEY is not a base64 Ed25519 private key")
+		os.Exit(1)
+	}
+	pub, err := base64.StdEncoding.DecodeString(app.ReleasePublicKey)
+	if err != nil || len(pub) != ed25519.PublicKeySize ||
+		!bytes.Equal(key, ed25519.NewKeyFromSeed(key[:ed25519.SeedSize])) ||
+		!bytes.Equal(key[ed25519.SeedSize:], pub) {
+		fmt.Fprintln(os.Stderr, "RELEASE_SIGNING_KEY does not match this build's pinned FullPack key")
 		os.Exit(1)
 	}
 
