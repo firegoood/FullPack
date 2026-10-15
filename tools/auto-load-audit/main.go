@@ -1,6 +1,6 @@
 // auto-load-audit is an explicitly opted-in, loopback-only synthetic-user audit.
-// It never reads installed accounts/configs, changes the 192-stream production
-// ceiling, or offers a way to direct load at a remote address.
+// It never reads installed accounts/configs, changes production enrollment,
+// or offers a way to direct load at a remote address.
 package main
 
 import (
@@ -46,6 +46,7 @@ type phaseResult struct {
 	Connections      int                  `json:"connectionsPerUser"`
 	Attempts         int                  `json:"connectionAttempts"`
 	Concurrency      int                  `json:"attemptConcurrency"`
+	HoldAll          bool                 `json:"heldUntilAllAttemptsFinished"`
 	Capacity         int                  `json:"enrolledCapacity,omitempty"`
 	InitialSuccess   int                  `json:"initialSuccess"`
 	VerifiedSuccess  int                  `json:"verifiedSuccess"`
@@ -223,7 +224,8 @@ func runPhase(ctx context.Context, name, address, backend string, users, perUser
 	}()
 	gate := make(chan struct{}, concurrent)
 	barrier := make(chan struct{})
-	burst := concurrent == r.Attempts && name != "auto-queued"
+	burst := concurrent == r.Attempts && name != "auto-queued" || strings.HasSuffix(name, "-held")
+	r.HoldAll = burst
 	for task := range r.Attempts {
 		workers.Add(1)
 		go func() {
@@ -443,7 +445,14 @@ func main() {
 	userFlag := flag.String("users", "500,800", "comma-separated synthetic identities, each in 1..1000")
 	output := flag.String("output", "", "JSON report path; contains measurements, no account secrets")
 	skipUDP := flag.Bool("skip-udp-hold", false, "skip the approximately one-minute UDP shared-capacity test")
+	unlimited := flag.Bool("unlimited", false, "also verify held unlimited Auto at 1, 2 and 4 simultaneous connections per synthetic user")
+	unlimitedOnly := flag.Bool("unlimited-only", false, "run direct/unlimited comparisons without repeating historical capped cases")
+	setupConcurrency := flag.Int("setup-concurrency", 128, "simultaneous new handshakes for held unlimited comparisons; all accepted connections remain open together")
 	flag.Parse()
+	if *setupConcurrency < 1 || *setupConcurrency > 4000 {
+		fmt.Fprintln(os.Stderr, "diagnostic setup concurrency must be in 1..4000")
+		os.Exit(2)
+	}
 	if !*run || *binary == "" || runtime.GOOS != "linux" {
 		fmt.Fprintln(os.Stderr, "Requires --run --xray <isolated-binary> on Linux; all endpoints are loopback only.")
 		os.Exit(2)
@@ -473,7 +482,7 @@ func main() {
 		r.XraySHA256 = hex.EncodeToString(sum[:])
 	}
 	emit(map[string]any{"event": "start", "source": r.Source, "users": counts, "xray": r.XrayVersion})
-	err := execute(ctx, *binary, counts, *skipUDP, &r)
+	err := execute(ctx, *binary, counts, *skipUDP, *unlimited || *unlimitedOnly, *unlimitedOnly, *setupConcurrency, &r)
 	if err != nil {
 		r.InvariantErrors = append(r.InvariantErrors, err.Error())
 	}
@@ -491,7 +500,7 @@ func main() {
 	}
 }
 
-func execute(ctx context.Context, binary string, counts []int, skipUDP bool, r *report) error {
+func execute(ctx context.Context, binary string, counts []int, skipUDP, unlimited, unlimitedOnly bool, setupConcurrency int, r *report) error {
 	echo, err := startEcho(ctx)
 	if err != nil {
 		return err
@@ -531,10 +540,39 @@ func execute(ctx context.Context, binary string, counts []int, skipUDP bool, r *
 				if p.Failures["integrity"] > 0 || p.LostAfterOpen["integrity"] > 0 {
 					r.InvariantErrors = append(r.InvariantErrors, "payload corruption")
 				}
+				if strings.HasPrefix(p.Name, "xray-direct") && p.VerifiedSuccess != p.Attempts {
+					r.InvariantErrors = append(r.InvariantErrors, "direct Xray comparison did not serve every connection")
+				}
 			}
 			add(runPhase(ctx, "plain-direct", echo.address, echo.address, users, 1, users, 0, x, nil))
-			for _, per := range []int{1, 2} {
-				add(runPhase(ctx, "xray-direct", x.address, echo.address, users, per, users*per, 0, x, nil))
+			perUser := []int{1, 2}
+			if unlimited {
+				perUser = append(perUser, 4)
+			}
+			for _, per := range perUser {
+				name, window := "xray-direct", users*per
+				if unlimited {
+					name = "xray-direct-held"
+					window = min(setupConcurrency, window)
+				}
+				add(runPhase(ctx, name, x.address, echo.address, users, per, window, 0, x, nil))
+			}
+			if unlimited {
+				f, err := startAuto(ctx, x.address, 0)
+				if err != nil {
+					return err
+				}
+				for _, per := range perUser {
+					p := runPhase(ctx, "auto-unlimited-held", f.entry, echo.address, users, per, min(setupConcurrency, users*per), 0, x, f)
+					add(p)
+					if p.VerifiedSuccess != p.Attempts || p.UsersAll != users || len(p.LostAfterOpen) != 0 || p.FlowsWhileLoaded == nil || !p.FlowsWhileLoaded.Unlimited || p.FlowsWhileLoaded.Live != p.Attempts {
+						r.InvariantErrors = append(r.InvariantErrors, "unlimited held application workload did not serve every connection")
+					}
+				}
+				f.Close()
+			}
+			if unlimitedOnly {
+				return nil
 			}
 			for _, limit := range []int{64, 192} {
 				f, err := startAuto(ctx, x.address, limit)

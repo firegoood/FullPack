@@ -28,6 +28,7 @@ type candidate struct {
 	ctx             context.Context
 	cancel          context.CancelFunc
 	data            chan net.Conn
+	dataWake        chan struct{}
 	mu              sync.Mutex // one caller/transaction on a control stream
 	lastSeen        atomic.Int64
 	peerGeneration  uint64
@@ -100,6 +101,7 @@ type Status struct {
 // Stream outcomes are reported after closure. Interrupted includes route/session
 // fencing; delivered bytes cannot prove that an application transaction finished.
 type FlowStatus struct {
+	Unlimited     bool   `json:"unlimited,omitempty"`
 	Limit         int    `json:"limit"`
 	LiveUDP       int    `json:"liveUdp"`
 	UDPLimit      int    `json:"udpLimit"`
@@ -130,8 +132,9 @@ type Manager struct {
 	status                                                                                 Status
 	recentTx                                                                               map[string]time.Time
 	workers                                                                                sync.WaitGroup
-	connections                                                                            chan struct{}
 	admission                                                                              *admissionGate
+	handshakes                                                                             chan struct{}
+	udpHandshakes                                                                          chan struct{}
 	dataDiagnostics                                                                        dataDiagnostics
 	actions                                                                                chan actionRequest
 	pendingProbes                                                                          map[string]*pendingProbe
@@ -166,9 +169,11 @@ func New(ctx context.Context, cfg *config.Config, statePath string) (*Manager, e
 	}
 	mctx, cancel := context.WithCancel(ctx)
 	m := &Manager{ctx: mctx, cancel: cancel, policy: a, iran: cfg.Server.BindAddr != "", manifest: h, incarnation: fresh(), store: store,
-		log: logrus.New(), endpoints: map[string]*candidate{}, recentTx: map[string]time.Time{}, connections: make(chan struct{}, a.MaxConnections), actions: make(chan actionRequest, 8), pendingProbes: map[string]*pendingProbe{}}
+		log: logrus.New(), endpoints: map[string]*candidate{}, recentTx: map[string]time.Time{}, actions: make(chan actionRequest, 8), pendingProbes: map[string]*pendingProbe{}}
 	m.token = cfg.Client.Token
-	m.admission = &admissionGate{live: m.connections}
+	m.admission = &admissionGate{limit: a.ConnectionCapacity()}
+	m.handshakes = make(chan struct{}, maxPendingHandshakes)
+	m.udpHandshakes = make(chan struct{}, maxPendingHandshakes)
 	level, format := cfg.Client.LogLevel, cfg.Client.LogFormat
 	if m.iran {
 		level, format = cfg.Server.LogLevel, cfg.Server.LogFormat
@@ -245,7 +250,7 @@ func (m *Manager) Snapshot() Status {
 		s.NextSwitch = time.Time{}
 	}
 	live, udp, queued := m.admission.snapshot()
-	s.Flows = FlowStatus{Live: live, Limit: m.policy.MaxConnections, LiveUDP: udp, UDPLimit: m.admission.udpLimit(), QueuedTCP: queued, QueueLimit: m.admission.queueLimit(), Admitted: m.flowAdmitted.Load(), Completed: m.flowCompleted.Load(), Drained: m.flowDrained.Load(), Interrupted: m.flowInterrupted.Load(), Rejected: m.flowRejected.Load(), UDPQueueDrops: m.udpQueueDrops.Load()}
+	s.Flows = FlowStatus{Unlimited: m.policy.ConnectionCapacity() == 0, Live: live, Limit: m.policy.ConnectionCapacity(), LiveUDP: udp, UDPLimit: m.admission.udpLimit(), QueuedTCP: queued, QueueLimit: m.admission.queueLimit(), Admitted: m.flowAdmitted.Load(), Completed: m.flowCompleted.Load(), Drained: m.flowDrained.Load(), Interrupted: m.flowInterrupted.Load(), Rejected: m.flowRejected.Load(), UDPQueueDrops: m.udpQueueDrops.Load()}
 	if m.policy.Mode != "l3" {
 		s.Data = m.dataSnapshot(s.Flows, time.Now())
 	}
@@ -466,7 +471,11 @@ func (m *Manager) runSession(p config.AutoCandidate, s carrierSession, dialRelea
 		m.deliverProbe(ctx, w, s)
 		return
 	}
-	e := &candidate{spec: p, session: s, w: w, ctx: ctx, cancel: cancel, data: make(chan net.Conn, 4), peerGeneration: peer.Generation}
+	cache := 4
+	if m.policy.ConnectionLimit != nil {
+		cache = maxPendingHandshakes
+	}
+	e := &candidate{spec: p, session: s, w: w, ctx: ctx, cancel: cancel, data: make(chan net.Conn, cache), dataWake: make(chan struct{}, 1), peerGeneration: peer.Generation}
 	e.lastSeen.Store(time.Now().UnixNano())
 	m.mu.Lock()
 	if m.runtimeDisabled[p.ID] {
@@ -1012,6 +1021,12 @@ func (m *Manager) installRouteLocked(e *candidate, generation uint64, ticket str
 	ctx, cancel := context.WithCancel(e.ctx)
 	old := m.active
 	m.active = &route{endpoint: e, generation: generation, ticket: ticket, ctx: ctx, cancel: cancel}
+	// The active path can fill its bounded prefetch immediately, without
+	// waiting for user requests to make four streams per WAN round trip.
+	select {
+	case e.dataWake <- struct{}{}:
+	default:
+	}
 	// Existing streams keep their already approved route for at most 30 s.
 	// New streams require the newly agreed generation immediately.
 	if old != nil && old.cancel != nil {

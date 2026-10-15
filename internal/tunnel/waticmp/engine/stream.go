@@ -323,7 +323,7 @@ func (s *Session) killStream(st *Stream, err error) {
 		st.err = err
 	}
 	delete(s.streams, st.id)
-	s.tomb[st.id] = s.now
+	s.rememberRetiredStream(st.id)
 	s.winExtra -= st.win - streamWindow
 	st.rc.Broadcast()
 	st.wc.Broadcast()
@@ -338,7 +338,7 @@ func (st *Stream) maybeFinish() {
 	st.dead = true
 	st.stopTimers()
 	delete(s.streams, st.id)
-	s.tomb[st.id] = s.now
+	s.rememberRetiredStream(st.id)
 	s.winExtra -= st.win - streamWindow
 	st.rc.Broadcast()
 	st.wc.Broadcast()

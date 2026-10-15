@@ -10,7 +10,7 @@ import (
 
 func TestAdmissionUDPShareLeavesTCPRoomAndKeepsTotalBound(t *testing.T) {
 	for _, limit := range []int{1, 64, 192} {
-		g := &admissionGate{live: make(chan struct{}, limit)}
+		g := &admissionGate{limit: limit}
 		var held []*admissionTicket
 		for range g.udpLimit() {
 			ticket, err := g.begin(context.Background(), true)
@@ -45,7 +45,7 @@ func TestAdmissionUDPShareLeavesTCPRoomAndKeepsTotalBound(t *testing.T) {
 }
 
 func TestAdmissionFIFOQueueBoundsCancellationAndTimeout(t *testing.T) {
-	g := &admissionGate{live: make(chan struct{}, 1)}
+	g := &admissionGate{limit: 1}
 	first, _ := g.begin(context.Background(), false)
 	second, _ := g.begin(context.Background(), false)
 	third, _ := g.begin(context.Background(), false)
@@ -80,7 +80,7 @@ func TestAdmissionFIFOQueueBoundsCancellationAndTimeout(t *testing.T) {
 }
 
 func TestAdmissionConcurrentGrantCancellationAndRelease(t *testing.T) {
-	g := &admissionGate{live: make(chan struct{}, 64)}
+	g := &admissionGate{limit: 64}
 	var workers sync.WaitGroup
 	for i := range 2000 {
 		workers.Add(1)
@@ -106,5 +106,73 @@ func TestAdmissionConcurrentGrantCancellationAndRelease(t *testing.T) {
 	workers.Wait()
 	if live, udp, queued := g.snapshot(); live != 0 || udp != 0 || queued != 0 {
 		t.Fatal("concurrent admission leaked resources")
+	}
+}
+
+func TestUnlimitedAdmissionKeepsTCPAndUDPWithoutAConnectionCeiling(t *testing.T) {
+	g := &admissionGate{}
+	var held []*admissionTicket
+	for i := range 4096 {
+		ticket, err := g.begin(context.Background(), i%2 == 0)
+		if err != nil {
+			t.Fatalf("connection %d refused: %v", i, err)
+		}
+		if err := ticket.wait(context.Background(), time.Second); err != nil {
+			t.Fatal(err)
+		}
+		held = append(held, ticket)
+	}
+	if live, udp, queued := g.snapshot(); live != 4096 || udp != 2048 || queued != 0 {
+		t.Fatalf("unlimited accounting: %d/%d/%d", live, udp, queued)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, err := g.begin(ctx, false); !errors.Is(err, context.Canceled) {
+		t.Fatal(err)
+	}
+	var workers sync.WaitGroup
+	for _, ticket := range held {
+		workers.Add(1)
+		go func() { defer workers.Done(); ticket.release(); ticket.release() }()
+	}
+	workers.Wait()
+	if live, udp, queued := g.snapshot(); live != 0 || udp != 0 || queued != 0 {
+		t.Fatal("unlimited release leaked resources")
+	}
+}
+
+func TestOptionalHugeCapDoesNotAllocateOrOverflowItsQueue(t *testing.T) {
+	g := &admissionGate{limit: int(^uint(0) >> 1)}
+	ticket, err := g.begin(context.Background(), false)
+	if err != nil || g.queueLimit() <= 0 {
+		t.Fatal("huge operator cap overflowed", err)
+	}
+	ticket.release()
+}
+
+func TestHandshakeBackpressureReleasesWithoutWaitingForApplicationClose(t *testing.T) {
+	slots := make(chan struct{}, 1)
+	release, ok := handshakePermit(context.Background(), slots)
+	if !ok {
+		t.Fatal("handshake permit unavailable")
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan bool, 1)
+	go func() { _, ok := handshakePermit(ctx, slots); done <- ok }()
+	cancel()
+	if <-done {
+		t.Fatal("cancelled waiter obtained occupied permit")
+	}
+	release()
+	release()
+	for range 1000 {
+		r, ok := handshakePermit(context.Background(), slots)
+		if !ok {
+			t.Fatal("an established flow retained handshake capacity")
+		}
+		r()
+	}
+	if len(slots) != 0 {
+		t.Fatal("handshake permit leaked")
 	}
 }

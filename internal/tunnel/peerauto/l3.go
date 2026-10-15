@@ -34,7 +34,7 @@ func l3Settings(a config.AutoConfig, token string, iran bool) l3.Config {
 		digest := sha256.Sum256([]byte(a.TunnelID))
 		iface = fmt.Sprintf("fp%x", digest[:5])
 	}
-	return l3.Config{Mode: l3.ModeDial, Addr: "127.0.0.1:1", Token: token, Carrier: "udp", LocalIP: local, PeerIP: peer, MTU: a.L3.MTU, Iface: iface, Ports: a.Ports, AcceptUDP: a.AcceptUDP, MaxConnections: a.MaxConnections}
+	return l3.Config{Mode: l3.ModeDial, Addr: "127.0.0.1:1", Token: token, Carrier: "udp", LocalIP: local, PeerIP: peer, MTU: a.L3.MTU, Iface: iface, Ports: a.Ports, AcceptUDP: a.AcceptUDP, MaxConnections: a.ConnectionCapacity()}
 }
 func validateAutoL3(a config.AutoConfig, token string) error {
 	if a.L3.Interface != "" && !localInterface.MatchString(a.L3.Interface) {

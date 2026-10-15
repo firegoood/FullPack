@@ -14,7 +14,6 @@ import (
 	"github.com/backpack/backpack/internal/node"
 	"github.com/backpack/backpack/internal/quota"
 	"github.com/backpack/backpack/internal/sysstat"
-	"github.com/backpack/backpack/internal/tunnel/peerauto"
 )
 
 // TunnelInfo is one row for /api/tunnels.
@@ -514,7 +513,7 @@ func fillConfig(info *TunnelInfo, t manage.Tunnel) {
 	}
 	if cfg.Auto.Enabled {
 		if cfg.Auto.Mode != "l3" {
-			info.MaxConnections = peerauto.Defaults(cfg.Auto).MaxConnections
+			info.MaxConnections = cfg.Auto.ConnectionCapacity()
 		}
 		return
 	}

@@ -21,6 +21,42 @@
 | 2026-10-15 | Diagnose EOF with 500/800 synthetic users | Opt-in loopback load audit with fresh Xray identities, matched direct/Auto workloads, connection-per-user accounting, bounded resources and UDP/TCP shared-capacity evidence; no production capacity/enrollment change |
 | 2026-10-15 | Fix the diagnosed Auto admission and misleading-health problems | Bound UDP occupancy, queue short TCP bursts with a bounded deadline, preserve enrollment totals and generation fencing, and expose capacity/backend data warnings in CLI/web independently of carrier health |
 | 2026-10-15 | Install the repaired build and test 700–1000 simulated users | Identifiable verified fork build with rollback, coordinated tunnel/panel restarts, preserved manifests/fencing and scoped synthetic/WAN traffic checks; do not claim simultaneous-user capacity above enrolled limits |
+| 2026-10-15 | Remove compulsory Auto connection ceilings, as in manual forwarding | Explicit unlimited new enrollment, optional operator cap without a 192 maximum, dynamic active-flow accounting, independent bounded handshake work and carrier stream-policy parity; preserve legacy enrollment/fencing and measure actual concurrency |
+
+## Unlimited Auto connection policy approved on 2026-10-15
+
+The operator explicitly rejected a compulsory fixed connection ceiling. This
+supersedes the earlier repair's 64/192 restriction for newly enrolled policy;
+old measurements remain historical. New Quick and advanced CLI/web setup use
+`connection_limit = 0`, with positive optional caps and no artificial maximum.
+The optional field distinguishes this deliberate choice from legacy omitted
+`max_connections`, whose historical zero/default hash still means 64. Changing
+an installed pair's shared policy requires coordinated enrollment, not a local
+edit, ignored manifest mismatch or deleted generation history.
+
+Active-flow counts must not allocate channels/arrays sized by a configured
+maximum. Established connections do not retain transient handshake permits.
+New enrolled policies prefetch a bounded 128 streams on the active carrier
+(four on standby), awakened by commit. This is not an application-count cap
+or four-new-streams-per-WAN-round-trip bottleneck. Keep transport reserve credit
+consistent with that cache, and retain legacy four-stream prefetch semantics.
+Bound unfinished handshakes, caches, datagrams and per-flow byte windows;
+backpressure and actual resource/OS exhaustion remain possible. Keep optional
+positive caps' UDP share/FIFO and typed diagnostics, and do not classify an
+unlimited zero as saturated. Wat Auto must honor the enrolled stream override
+without its legacy 256 stream cap; retain manual native defaults and all nonce,
+replay, tombstone and byte-window protections. Unlimited QUIC retains the manual
+engine's transport credit window (65536 streams), not unsafe 2^60 credit: sparse
+stream IDs could otherwise allocate huge numbers before application auth. This
+inherited transport constraint must remain visible in the evidence and is not
+a new Auto admission cap. Pressure skips must retain production
+and must not turn into carrier failures. Record actual concurrency and remaining
+WAN/soak gates in `docs/auto-unlimited-connections.md`.
+Auto Wat retirement must compact sequential identities into a permanent prefix
+plus at most 4096 out-of-order identities, retaining lifetime non-resurrection
+without filling a churn-sized tombstone table. Manual native behavior remains
+unchanged. OS file/socket exhaustion must be classified as `local_resource`;
+forwarded listeners retry with bounded backoff and keep established flows.
 
 ## Controlled admission deployment approved on 2026-10-15
 

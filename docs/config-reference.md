@@ -121,6 +121,7 @@ them both ends have to agree on. This says what exists.
 | `allow_degradation_switch` | `bool` | AllowDegradationSwitch optionally permits changing a reachable path after sustained severe measured degradation. |
 | `allow_plaintext_fallback` | `bool` | AllowPlaintextFallback must remain false: plaintext Auto adapters are unsupported in this version. |
 | `candidates` | `[]AutoCandidate` | Candidates lists 1-4 approved endpoints, or up to 48 with opt-in Selection. |
+| `connection_limit` | `*int` | ConnectionLimit explicitly selects current admission semantics: 0 means no application connection ceiling, positive values are an operator's cap. Nil preserves legacy enrollment, including its canonical manifest hash. |
 | `cooldown` | `int` | Cooldown is seconds between optional cross-carrier changes, default 300, minimum 5. Debounced no-route recovery uses a separate 5-second gate; all commits still extend this cooldown. |
 | `enabled` | `bool` | Enabled opts into the enrolled coordinator; false/absent keeps the manual engine and legacy fallback. |
 | `failure_threshold` | `int` | FailureThreshold debounces carrier failure, default 3, range 3-20; skipped probes do not count. |
@@ -128,7 +129,7 @@ them both ends have to agree on. This says what exists.
 | `kharej_id` | `string` | KharejID identifies the distinct enrolled follower; changing identities requires a new pair. |
 | `l3` | `*AutoL3Config` | L3 enrolls the shared addresses and MTU. Interface is a local setting. |
 | `manual_lock` | `string` | ManualLock fixes the allowed active candidate ID; runtime unlock cannot weaken an enrolled lock. |
-| `max_connections` | `int` | MaxConnections bounds simultaneous user connections, default 64, maximum 192; probes reserve separate streams. |
+| `max_connections` | `int` | MaxConnections is the legacy enrolled cap; absent/zero retains its old default of 64 so an upgrade cannot silently change an existing manifest. |
 | `max_memory_mb` | `int` | MaxMemoryMB skips probes above this local process RSS pressure threshold, default 256 MB; it is not a hard memory limit. |
 | `max_switches_per_hour` | `int` | MaxSwitchesPerHour limits optional changes using all persisted cross-carrier commits, default 2, range 1-12. Debounced no-route recovery retains the absolute persisted ceiling of 12 changes per hour. |
 | `minimum_dwell` | `int` | MinimumDwell is seconds before optional degradation switching, default 600, minimum 5. |
@@ -405,10 +406,4 @@ them both ends have to agree on. This says what exists.
 
 ---
 
-*Generated from `config/` on 2026-10-15. Last verified against FullPack v1.9.3.*
-
-## Admission release compatibility review (2026-10-15)
-
-The Auto admission repair changes scheduling and diagnostics without changing `[auto].max_connections`, enrollment hashes or generation state. UDP has a bounded quarter share and TCP a two-second FIFO bounded at twice the enrolled total. Manual tunnel connection settings retain their existing meaning.
-
-*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+*Generated from `config/` on 2026-10-16. Last verified against FullPack v1.9.4-beta.1.*

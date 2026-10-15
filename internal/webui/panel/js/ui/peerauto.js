@@ -63,7 +63,7 @@ function autoFields(a = {}, registry = []) {
     + field('cooldown', 'Optional switch cooldown (seconds)', a.cooldown || 300, 'number')
     + field('minimumDwell', 'Minimum dwell (seconds)', a.minimumDwell || 600, 'number')
     + field('maxSwitchesPerHour', 'Optional switches per hour', a.maxSwitchesPerHour || 2, 'number', 'Confirmed outages use a separate recovery gate: at least 5 seconds between changes, at most 12 committed changes per hour. Locks and observe-only still apply.')
-    + field('maxConnections', 'Maximum concurrent application connections', a.maxConnections || 64, 'number', 'Default 64, maximum 192. Connections are not a measured user capacity.')
+    + field('connectionLimit', 'Optional application connection limit', a.connectionLimit ?? a.maxConnections ?? 0, 'number', '0 means no connection ceiling. A positive value is an optional operator limit. Connections are not users; available server resources still apply.')
     + field('maxMemoryMb', 'Probe memory pressure threshold (MB)', a.maxMemoryMb || 256, 'number')
     + `<div data-peer-candidates>${(a.candidates?.length ? a.candidates : [{}]).map((p, i) => candidateMarkup(p, i, registry)).join('')}</div><button type="button" data-peer-add>Add approved carrier (up to four)</button>`;
 }
@@ -222,11 +222,13 @@ export function peerSetupPayload(root, payload) {
     result.quickAuto = {iranIp: get(group, 'quick.iranIp'), kharejIp: get(group, 'quick.kharejIp'), basePort, directPort: num(group, 'quick.directPort') || basePort + 32, mode: get(group, 'quick.mode') || 'stream'};
   }
   else {
+    const connectionLimit = num(group, 'connectionLimit');
+    if (!Number.isSafeInteger(connectionLimit) || connectionLimit < 0) throw new Error('Connection limit must be a nonnegative whole number; 0 means no limit.');
     const candidates = [...group.querySelectorAll('.peer-candidate')].map(autoCandidatePayload);
     result.auto = { enabled: true, tunnelId: get(group, 'tunnelId'), iranId: get(group, 'iranId'), kharejId: get(group, 'kharejId'),
       observeOnly: get(group, 'observeOnly'), allowDegradationSwitch: get(group, 'allowDegradationSwitch'), acceptUdp: get(group, 'acceptUdp'), candidates,
       probeInterval: num(group, 'probeInterval'), cooldown: num(group, 'cooldown'), minimumDwell: num(group, 'minimumDwell'), maxSwitchesPerHour: num(group, 'maxSwitchesPerHour'),
-      maxConnections: num(group, 'maxConnections'), maxMemoryMb: num(group, 'maxMemoryMb') };
+      connectionLimit, maxMemoryMb: num(group, 'maxMemoryMb') };
     if (get(group, 'autoMode') === 'l3') { result.auto.mode = 'l3'; result.auto.l3 = {iranIp: get(group, 'l3.iranIp'), kharejIp: get(group, 'l3.kharejIp'), mtu: num(group, 'l3.mtu'), interface: get(group, 'l3.interface')}; }
   }
   return result;
@@ -288,7 +290,7 @@ export function peerEditForm(root, settings, name) {
         <p>${esc(s.reason || '')}</p>${s.selection ? `<p><b>Stable selected paths: ${Number(s.selection.healthy || 0)}/4</b> · Enrolled: ${(s.candidates || []).length} · ${s.selection.scanning ? 'Rescanning reserve pool' : esc(s.selection.reason || '')}</p>` : ''}<p>Observe: ${s.observeOnly ? 'on' : 'off'} · Lock: ${esc(s.manualLock || 'none')}</p>
         <p>Last commit: ${esc(s.lastSwitch || 'none')} · Next eligible switch: ${esc(s.nextEligibleSwitch || 'policy permits')}</p>
         <p>Flows: ${Number(s.flows?.live || 0)} live, ${Number(s.flows?.drained || 0)} drained, ${Number(s.flows?.interrupted || 0)} interrupted, ${Number(s.flows?.rejected || 0)} refused; UDP queue drops: ${Number(s.flows?.udpQueueDrops || 0)}.</p>
-        ${s.mode !== 'l3' && s.flows?.limit ? `<p>Connection ceiling: ${Number(s.flows.limit)} · UDP associations: ${Number(s.flows.liveUdp || 0)}/${Number(s.flows.udpLimit)} · TCP waiting: ${Number(s.flows.queuedTcp || 0)}/${Number(s.flows.queueLimit)} (2s maximum). These are connections, not users. Changing the enrolled ceiling requires a fresh pair.</p>` : ''}
+        ${s.mode !== 'l3' && s.flows ? (s.flows.unlimited ? `<p>Application connections: no limit · UDP associations: ${Number(s.flows.liveUdp || 0)}. Available server resources still apply; these are connections, not users.</p>` : `<p>Connection ceiling: ${Number(s.flows.limit)} · UDP associations: ${Number(s.flows.liveUdp || 0)}/${Number(s.flows.udpLimit)} · TCP waiting: ${Number(s.flows.queuedTcp || 0)}/${Number(s.flows.queueLimit)} (2s maximum). These are connections, not users. Changing the enrolled ceiling requires a fresh pair.</p>`) : ''}
         ${s.packets ? `<p>TUN ${esc(s.packets.interface || '')}: ${Number(s.packets.sent || 0)} IP packets sent, ${Number(s.packets.received || 0)} received, ${Number(s.packets.dropped || 0)} dropped.</p>` : ''}
         <table><thead><tr><th>Carrier / direction</th><th>Readiness</th><th>Probe Mbps / RTT ms</th></tr></thead><tbody>${(s.candidates || []).map(c => `<tr><td>${esc(c.id)} · ${esc(c.transport)} ${esc(c.mode || 'reverse')} ${esc(c.direction || '')}</td><td>${esc(c.stable ? (c.selected ? 'stable · selected' : 'stable · reserve') : c.ready ? 'authenticated · awaiting stable data tests' : c.reason || 'unavailable')}</td><td>${c.lastProbe && !c.lastProbe.startsWith('0001-') ? `${Number(c.usefulMbps || 0).toFixed(3)} / ${Number(c.rttMs || 0).toFixed(1)}` : 'not measured here'}</td></tr>`).join('')}</tbody></table>
         <small>Probe application traffic is capped at 128 KB/s. Reported throughput is a bounded lower-bound measurement.</small>

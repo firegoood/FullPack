@@ -2,6 +2,21 @@
 
 All notable changes to Backpack are documented here.
 
+## v1.9.4-beta.2 — 2026-10-16 (FullPack prerelease)
+
+- New CLI/web Auto setup explicitly selects no application connection ceiling;
+  positive operator limits are optional without the former 192 maximum. Keep
+  legacy default hashes and existing pair policy until coordinated enrollment.
+- Separate established-flow accounting from bounded unfinished TCP/UDP
+  handshakes, pipeline active-path stream preparation, and report actual OS
+  exhaustion without permanently abandoning the forwarded listener.
+- Honor Auto's stream policy in Wat without its old 256 cap; compact retired
+  identities with bounded out-of-order state and retain native nonce/replay/
+  byte budgets. QUIC keeps the manual engine's transport credit constraints.
+- Add held-concurrency, mixed TCP/UDP, native encrypted-engine and independent
+  Xray-account checks. Verification and remaining limits are recorded in
+  `docs/auto-unlimited-connections.md`; no 24-hour production claim is implied.
+
 ## v1.9.3 — 2026-10-15 (FullPack)
 
 - Quick Auto enrolls all eighteen stream carriers in Reverse/Direct, including

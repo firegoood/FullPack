@@ -79,6 +79,7 @@
     "explicit low pacing ceilings also bound initial rate and minimum rate",
     "bounded retired-packet timing metadata lets authenticated late ACKs repair RTT estimates after path delay changes",
     "paced packet accounting includes the native enrollment envelope as well as IPv4/ICMP headers",
-    "optional enrolled Auto Direct bidirectional stream admission with disjoint odd/even identities; default manual admission retained"
+    "optional enrolled Auto Direct bidirectional stream admission with disjoint odd/even identities; default manual admission retained",
+    "explicit enrolled Auto stream override; bounded out-of-order retirement frontier prevents both churn-sized tombstones and retired identity resurrection; manual defaults retained"
   ]
 }

@@ -27,6 +27,10 @@ var candidateID = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,16}$`)
 var localInterface = regexp.MustCompile(`^[a-zA-Z0-9_.-]{1,15}$`)
 
 func Defaults(a config.AutoConfig) config.AutoConfig {
+	if a.ConnectionLimit != nil {
+		limit := *a.ConnectionLimit
+		a.ConnectionLimit = &limit
+	}
 	if a.Selection != nil {
 		v := *a.Selection
 		if v.Target == 0 {
@@ -156,7 +160,7 @@ func validate(c *config.Config, local bool) error {
 			return fmt.Errorf("Iran forwarded maps must match the enrolled Auto manifest")
 		}
 	}
-	if a.MaxConnections < 1 || a.MaxConnections > 192 || a.ProbeInterval < 30 || a.ProbeInterval > 86400 || a.Cooldown < 5 || a.MinimumDwell < 5 || a.MaxSwitchesPerHour < 1 || a.MaxSwitchesPerHour > 12 || a.FailureThreshold < 3 || a.FailureThreshold > 20 {
+	if a.MaxConnections < 0 || a.ConnectionCapacity() < 0 || a.ProbeInterval < 30 || a.ProbeInterval > 86400 || a.Cooldown < 5 || a.MinimumDwell < 5 || a.MaxSwitchesPerHour < 1 || a.MaxSwitchesPerHour > 12 || a.FailureThreshold < 3 || a.FailureThreshold > 20 {
 		return fmt.Errorf("Auto resource/timing policy outside its conservative bounds")
 	}
 	limit := 4
@@ -350,8 +354,34 @@ func watSettings(a config.AutoConfig, p config.AutoCandidate, token string, iran
 		ip = p.KharejIP
 	}
 	h := sha256.Sum256([]byte(a.TunnelID + ":" + p.ID))
+	limit := a.ConnectionCapacity()
+	if limit > 0 {
+		reserve := streamReserve(a)
+		limit = min(limit, int(^uint(0)>>1)-reserve) + reserve
+	}
 	return waticmp.Settings{Enabled: true, BidirectionalStreams: p.Mode == "direct", PeerIP: ip, TunnelID: hex.EncodeToString(h[:]), Direction: p.Direction, Token: token,
-		MaxStreams: min(256, Defaults(a).MaxConnections+16), MaxPayload: p.MaxPayload, MaxBps: 1_000_000, Paths: 4}
+		StreamLimit: &limit, MaxPayload: p.MaxPayload, MaxBps: 1_000_000, Paths: 4}
+}
+
+// Zero selects the same transport credit window as manual QUIC. Advertising
+// 2^60 streams is unsafe: a sparse stream ID can make quic-go allocate every
+// skipped stream before application authentication. Do not create that DoS
+// while removing Auto's much smaller admission ceiling. Transport credit is
+// returned on close; it is separate from application admission and byte limits.
+func incomingStreams(a config.AutoConfig) int64 {
+	limit := int64(a.ConnectionCapacity())
+	reserve := int64(streamReserve(a))
+	if limit == 0 || limit > (1<<16)-reserve {
+		return 0
+	}
+	return limit + reserve
+}
+
+func streamReserve(a config.AutoConfig) int {
+	if a.ConnectionLimit != nil {
+		return maxPendingHandshakes + 16
+	}
+	return 16
 }
 
 func tlsSettings(c *config.Config) network.TLSSettings {

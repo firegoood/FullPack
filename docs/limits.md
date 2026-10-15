@@ -9,9 +9,11 @@
 Both are **off by default**. They are useful when several services or customers
 share one link and you want to stop any one of them from taking it all.
 
-These are the manual tunnel limits. Enrolled Auto has a separate bounded
-application-connection admission policy: default 64, maximum 192. Sockets and
-short loopback tests do not establish a user count or sustained WAN capacity.
+These are the manual tunnel limits. New Auto setup explicitly enrolls
+`connection_limit = 0`, with no application connection ceiling. A positive cap
+is optional, without a 192 maximum. Legacy enrollment remains unchanged until
+coordinated replacement. See [unlimited Auto](auto-unlimited-connections.md).
+Sockets and short loopback tests do not establish sustained WAN user capacity.
 
 ---
 
@@ -43,6 +45,6 @@ short loopback tests do not establish a user count or sustained WAN capacity.
 
 ## Admission release compatibility review (2026-10-15)
 
-Auto stream admission retains the enrolled total (default 64, maximum 192). UDP can occupy at most one quarter; TCP can use the full total when UDP is absent. TCP waits in a FIFO of at most twice the total for at most two seconds. Overflow remains a failed connection, not a served user. See [admission repair](auto-admission-repair.md).
+The earlier capped admission repair retained the enrolled total (default 64, maximum 192). That historical policy is recorded in [admission repair](auto-admission-repair.md). Optional positive caps still use the UDP quarter share and bounded two-second TCP FIFO. New unlimited enrollment has no connection-count gate; physical resources and native transport constraints remain.
 
-*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+*Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

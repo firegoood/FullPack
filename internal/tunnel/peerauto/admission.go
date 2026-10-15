@@ -13,15 +13,17 @@ var (
 	errAdmissionFull    = errors.New("bounded TCP admission queue full")
 	errAdmissionTimeout = errors.New("TCP admission queue deadline exceeded")
 	errUDPCapacity      = errors.New("UDP admission share exhausted; capacity reserved for TCP")
+	errUDPHandshakeBusy = errors.New("unfinished UDP handshake budget busy; retry datagram")
 )
 
-// The enrolled total remains unchanged. UDP associations cannot signal client
-// closure, so cap their share at one quarter; TCP may use the entire total.
-// Pending TCP sockets have a separate, bounded FIFO and never own a live slot.
-// No queue, counter or fairness setting changes the enrollment hash or fencing.
+// Zero means no application connection ceiling. Counters allocate no storage
+// proportional to a configured limit. An explicit positive cap retains the
+// bounded FIFO and UDP share; an unlimited enrollment has neither count gate.
+// Transient handshake work and per-flow buffers are bounded independently.
 type admissionGate struct {
 	mu    sync.Mutex
-	live  chan struct{}
+	limit int
+	live  int
 	udp   int
 	queue []*admissionTicket
 }
@@ -33,8 +35,16 @@ type admissionTicket struct {
 	granted, released bool // protected by gate.mu
 }
 
-func (g *admissionGate) udpLimit() int   { return min(cap(g.live)-1, max(1, cap(g.live)/4)) }
-func (g *admissionGate) queueLimit() int { return 2 * cap(g.live) }
+func (g *admissionGate) udpLimit() int {
+	if g.limit == 0 {
+		return 0
+	}
+	return min(g.limit-1, max(1, g.limit/4))
+}
+func (g *admissionGate) queueLimit() int {
+	// A huge optional cap must not overflow or preallocate a huge channel.
+	return min(g.limit, int(^uint(0)>>1)/2) * 2
+}
 
 // begin runs in the accept loop, before starting a worker. Overload cannot
 // allocate an unbounded goroutine/socket queue, even if no active flow ends.
@@ -44,11 +54,11 @@ func (g *admissionGate) begin(ctx context.Context, udp bool) (*admissionTicket, 
 	}
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	if udp && (g.udp >= g.udpLimit() || len(g.live) >= cap(g.live) || len(g.queue) != 0) {
+	if g.limit > 0 && udp && (g.udp >= g.udpLimit() || g.live >= g.limit || len(g.queue) != 0) {
 		return nil, errUDPCapacity
 	}
 	t := &admissionTicket{gate: g, ready: make(chan struct{}), udp: udp}
-	if len(g.live) < cap(g.live) && len(g.queue) == 0 {
+	if g.limit == 0 || g.live < g.limit && len(g.queue) == 0 {
 		g.grant(t)
 	} else {
 		if len(g.queue) >= g.queueLimit() {
@@ -60,7 +70,7 @@ func (g *admissionGate) begin(ctx context.Context, udp bool) (*admissionTicket, 
 }
 
 func (g *admissionGate) grant(t *admissionTicket) {
-	g.live <- struct{}{}
+	g.live++
 	if t.udp {
 		g.udp++
 	}
@@ -96,7 +106,7 @@ func (t *admissionTicket) release() {
 	}
 	t.released = true
 	if t.granted {
-		<-g.live
+		g.live--
 		if t.udp {
 			g.udp--
 		}
@@ -108,7 +118,7 @@ func (t *admissionTicket) release() {
 			}
 		}
 	}
-	for len(g.queue) != 0 && len(g.live) < cap(g.live) {
+	for len(g.queue) != 0 && g.live < g.limit {
 		next := g.queue[0]
 		g.queue[0] = nil
 		g.queue = g.queue[1:]
@@ -119,5 +129,5 @@ func (t *admissionTicket) release() {
 func (g *admissionGate) snapshot() (live, udp, queued int) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	return len(g.live), g.udp, len(g.queue)
+	return g.live, g.udp, len(g.queue)
 }

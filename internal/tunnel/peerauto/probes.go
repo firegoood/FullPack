@@ -118,6 +118,7 @@ func probeWatConnect(ctx context.Context, a config.AutoConfig, p config.AutoCand
 	s := watSettings(a, p, token, iran)
 	s.Token = string(keyed([]byte(token), "ephemeral-probe:", tx))
 	s.MaxStreams = 2
+	s.StreamLimit = nil // probes keep their two-stream resource bound
 	s.MaxBps = 256000
 	s.HandshakeTimeout = 10 * time.Second
 	w, e := waticmp.Connect(ctx, iran, s)

@@ -113,7 +113,7 @@ func listenCarrier(ctx context.Context, a config.AutoConfig, p config.AutoCandid
 			return watCarrier{w}, nil
 		}, func() {}, nil
 	case config.QUIC:
-		l, e := network.QUICListen(bind, network.QUICSettings{DatagramMode: a.Mode == "l3", IncomingStreamLimit: int64(Defaults(a).MaxConnections + 16), KeepAlivePeriod: 5 * time.Second, MaxIdleTimeout: 15 * time.Second, SO_RCVBUF: 1 << 20, SO_SNDBUF: 1 << 20})
+		l, e := network.QUICListen(bind, network.QUICSettings{DatagramMode: a.Mode == "l3", IncomingStreamLimit: incomingStreams(a), KeepAlivePeriod: 5 * time.Second, MaxIdleTimeout: 15 * time.Second, SO_RCVBUF: 1 << 20, SO_SNDBUF: 1 << 20})
 		if e != nil {
 			return nil, nil, e
 		}
@@ -152,7 +152,7 @@ func dialCarrier(ctx context.Context, a config.AutoConfig, p config.AutoCandidat
 		}
 		return watCarrier{w}, nil
 	case config.QUIC:
-		q, e := network.QUICDial(ctx, p.Endpoint, network.QUICSettings{DatagramMode: a.Mode == "l3", IncomingStreamLimit: int64(Defaults(a).MaxConnections + 16), DialTimeout: 10 * time.Second, KeepAlivePeriod: 5 * time.Second, MaxIdleTimeout: 15 * time.Second, SO_RCVBUF: 1 << 20, SO_SNDBUF: 1 << 20})
+		q, e := network.QUICDial(ctx, p.Endpoint, network.QUICSettings{DatagramMode: a.Mode == "l3", IncomingStreamLimit: incomingStreams(a), DialTimeout: 10 * time.Second, KeepAlivePeriod: 5 * time.Second, MaxIdleTimeout: 15 * time.Second, SO_RCVBUF: 1 << 20, SO_SNDBUF: 1 << 20})
 		if e != nil {
 			return nil, e
 		}

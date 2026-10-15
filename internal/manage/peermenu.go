@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 
 	"github.com/backpack/backpack/config"
@@ -62,6 +63,12 @@ func setupPeerServer(transport string) {
 		n.WatICMP = &config.WatICMPConfig{Enabled: true, PeerIP: tui.Prompt("Kharej Explicit IPv4: "), TunnelID: randomToken(32), Direction: direction, MaxPayload: 512, MaxStreams: 128, Paths: 4}
 	} else {
 		a := config.AutoConfig{Enabled: true, ObserveOnly: tui.Confirm("Start In Observe-Only Mode (No Automatic Cross-Carrier Switch)", true), TunnelID: randomToken(32), IranID: randomToken(32), KharejID: randomToken(32), Ports: parsePorts(n.Ports), AcceptUDP: accept}
+		limit, err := strconv.Atoi(strings.TrimSpace(tui.PromptDefault("Optional Maximum Connections (0 = No Limit)", "0")))
+		if err != nil || limit < 0 {
+			tui.Error("Connection limit must be a nonnegative integer; 0 means no limit.")
+			return
+		}
+		a.ConnectionLimit = &limit
 		if l3Mode {
 			a.Mode = "l3"
 			a.L3 = &config.AutoL3Config{IranIP: tui.PromptDefault("Iran TUN Address/Prefix", "10.44.0.1/30"), KharejIP: tui.PromptDefault("Kharej TUN Address/Prefix", "10.44.0.2/30"), MTU: 1400, Interface: tui.Prompt("Local TUN Interface (Blank = Pair-Specific Default): ")}
@@ -225,6 +232,11 @@ func setupPeerClient(transport string) {
 func summarisePeer(s TunnelSpec) {
 	tui.Info("Enrolled Forwarding — " + selectedTransport(s))
 	if s.Auto.Enabled {
+		if limit := s.Auto.ConnectionCapacity(); limit == 0 {
+			tui.Info("Application connections: no limit (available server resources still apply).")
+		} else {
+			tui.Info(fmt.Sprintf("Application connection limit: %d", limit))
+		}
 		tui.Info("Authority: Iran " + s.Auto.IranID + "; foreign peer: " + s.Auto.KharejID)
 		if s.Auto.L3 != nil {
 			tui.Info("Stable L3 TUN: " + s.Auto.L3.IranIP + " ↔ " + s.Auto.L3.KharejIP)

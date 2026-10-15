@@ -68,7 +68,7 @@ func TestProbeBudgetRejectKeepsProductionControlUsable(t *testing.T) {
 			peer := &wire{c: right, key: w.key, base: peerBase}
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
-			m := &Manager{ctx: ctx, policy: config.AutoConfig{MaxConnections: 64, MaxMemoryMB: 2048}, connections: make(chan struct{}, 64), pendingProbes: map[string]*pendingProbe{}}
+			m := &Manager{ctx: ctx, policy: config.AutoConfig{MaxConnections: 64, MaxMemoryMB: 2048}, admission: &admissionGate{limit: 64}, pendingProbes: map[string]*pendingProbe{}}
 			e := &candidate{ctx: ctx, cancel: cancel, w: w, spec: config.AutoCandidate{ID: "tcp", Transport: config.TCP, Mode: "reverse"}}
 			done := make(chan error, 1)
 			go func() {

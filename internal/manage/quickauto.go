@@ -98,7 +98,8 @@ func expandQuickAuto(n NewTunnel) (NewTunnel, error) {
 	if q.Mode != "" && q.Mode != "stream" && q.Mode != "l3" {
 		return n, fmt.Errorf("quick Auto mode must be stream or l3")
 	}
-	a := config.AutoConfig{Enabled: true, ObserveOnly: false, TunnelID: randomToken(32), IranID: randomToken(32), KharejID: randomToken(32), Selection: &config.AutoSelectionConfig{Target: 4, RefillAt: 2, StableSamples: 3, RetryInterval: 60, HelperEpoch: time.Now().Unix()}}
+	limit := 0 // no application connection ceiling; enroll this choice explicitly
+	a := config.AutoConfig{Enabled: true, ObserveOnly: false, ConnectionLimit: &limit, TunnelID: randomToken(32), IranID: randomToken(32), KharejID: randomToken(32), Selection: &config.AutoSelectionConfig{Target: 4, RefillAt: 2, StableSamples: 3, RetryInterval: 60, HelperEpoch: time.Now().Unix()}}
 	choices := QuickAutoCarriers()
 	if q.Mode == "l3" {
 		a.Mode = "l3"

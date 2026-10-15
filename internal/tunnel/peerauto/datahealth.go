@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -36,12 +37,16 @@ type dataDiagnostics struct {
 func dataErrorCode(err error) string {
 	var timeout net.Error
 	switch {
+	case localResourceError(err):
+		return "local_resource"
 	case errors.Is(err, errAdmissionFull):
 		return "queue_full"
 	case errors.Is(err, errAdmissionTimeout):
 		return "queue_timeout"
 	case errors.Is(err, errUDPCapacity):
 		return "udp_capacity"
+	case errors.Is(err, errUDPHandshakeBusy):
+		return "handshake_busy"
 	case errors.Is(err, errPeerCapacity):
 		return "peer_capacity"
 	case errors.Is(err, errBackend):
@@ -92,7 +97,7 @@ func (m *Manager) dataSnapshot(f FlowStatus, now time.Time) *DataStatus {
 		s.Errors[k] = v
 	}
 	switch {
-	case f.Live >= f.Limit:
+	case f.Limit > 0 && f.Live >= f.Limit:
 		s.Code, s.Detail = "capacity", fmt.Sprintf("connection capacity full (%d/%d); %d TCP connection(s) waiting; existing sessions retained", f.Live, f.Limit, f.QueuedTCP)
 	case f.QueuedTCP > 0:
 		s.Code, s.Detail = "queueing", fmt.Sprintf("%d TCP connection(s) waiting for capacity (maximum %d, deadline 2s)", f.QueuedTCP, f.QueueLimit)
@@ -100,4 +105,8 @@ func (m *Manager) dataSnapshot(f FlowStatus, now time.Time) *DataStatus {
 		s.Code, s.Detail = "recent_errors", "recent data admission failures: "+d.code+"; inspect counters and capacity"
 	}
 	return s
+}
+
+func localResourceError(err error) bool {
+	return errors.Is(err, syscall.EMFILE) || errors.Is(err, syscall.ENFILE) || errors.Is(err, syscall.ENOBUFS) || errors.Is(err, syscall.ENOMEM)
 }

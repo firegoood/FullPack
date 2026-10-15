@@ -43,12 +43,29 @@ type AutoConfig struct {
 	MaxSwitchesPerHour int `toml:"max_switches_per_hour" json:"maxSwitchesPerHour"` // default 2
 	// FailureThreshold debounces carrier failure, default 3, range 3-20; skipped probes do not count.
 	FailureThreshold int `toml:"failure_threshold" json:"failureThreshold"` // consecutive actual path failures, default 3
-	// MaxConnections bounds simultaneous user connections, default 64, maximum 192; probes reserve separate streams.
-	MaxConnections int `toml:"max_connections" json:"maxConnections"` // default 64, maximum 192
+	// MaxConnections is the legacy enrolled cap; absent/zero retains its old
+	// default of 64 so an upgrade cannot silently change an existing manifest.
+	MaxConnections int `toml:"max_connections" json:"maxConnections"`
+	// ConnectionLimit explicitly selects current admission semantics: 0 means
+	// no application connection ceiling, positive values are an operator's cap.
+	// Nil preserves legacy enrollment, including its canonical manifest hash.
+	ConnectionLimit *int `toml:"connection_limit" json:"connectionLimit,omitempty"`
 	// ManualLock fixes the allowed active candidate ID; runtime unlock cannot weaken an enrolled lock.
 	ManualLock string `toml:"manual_lock" json:"manualLock"`
 	// MaxMemoryMB skips probes above this local process RSS pressure threshold, default 256 MB; it is not a hard memory limit.
 	MaxMemoryMB int `toml:"max_memory_mb" json:"maxMemoryMb"` // default 256
+}
+
+// ConnectionCapacity separates a deliberate unlimited enrollment from the
+// legacy zero/default value. New CLI/web setups explicitly enroll zero.
+func (a AutoConfig) ConnectionCapacity() int {
+	if a.ConnectionLimit != nil {
+		return *a.ConnectionLimit
+	}
+	if a.MaxConnections == 0 {
+		return 64
+	}
+	return a.MaxConnections
 }
 
 // AutoSelectionConfig never authorizes an endpoint outside Candidates.
@@ -162,6 +179,10 @@ type AutoPacketConfig struct {
 // PeerEnrollment copies the paired policy without receiver-local paths,
 // interface overrides or helper private keys. Credentials remain paired secrets.
 func (a AutoConfig) PeerEnrollment() AutoConfig {
+	if a.ConnectionLimit != nil {
+		limit := *a.ConnectionLimit
+		a.ConnectionLimit = &limit
+	}
 	if a.Selection != nil {
 		v := *a.Selection
 		a.Selection = &v

@@ -191,6 +191,13 @@ func startAuto(ctx context.Context, backend string, limit int) (*autoFixture, er
 	maps := []string{f.entry + "=" + backend}
 	a := config.AutoConfig{Enabled: true, TunnelID: freshSecret(), IranID: freshSecret(), KharejID: freshSecret(), Ports: maps, MaxConnections: limit, AcceptUDP: true,
 		Candidates: []config.AutoCandidate{{ID: "tcp", Transport: config.TCP, Endpoint: endpoint}}}
+	if limit == 0 {
+		a.ConnectionLimit = &limit
+		// The test shares a process with thousands of client/echo sockets.
+		// Its runner independently bounds the enclosing cgroup. Do not confuse fixture
+		// RSS with the installed engine's probe-pressure default (256 MiB).
+		a.MaxMemoryMB = 1024
+	}
 	token := freshSecret()
 	f.iran, err = peerauto.New(child, &config.Config{Auto: a, Server: config.ServerConfig{BindAddr: endpoint, Token: token, Ports: maps, LogLevel: "error"}}, filepath.Join(dir, "iran.json"))
 	if err != nil {

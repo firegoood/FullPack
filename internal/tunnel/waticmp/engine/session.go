@@ -52,20 +52,24 @@ type Config struct {
 	// Even/odd stream namespaces prevent opposite initiators from colliding.
 	BidirectionalStreams bool
 	MaxStreams           int // defaults to 128; hard ceiling 256
-	Server               bool
-	Key                  []byte
-	SID                  uint64        // session id (client: random if 0; server sessions get the client's)
-	Paths                int           // client: lanes (ICMP identifiers) to stripe over
-	InitBps              float64       // starting pace, bytes/s (default 1.5 MB/s)
-	MaxBps               float64       // pace ceiling, bytes/s (default 16 MB/s)
-	MinBps               float64       // pace floor (default 200 KB/s)
-	Slack                time.Duration // extra RTT over the minimum tolerated before slowing down (default 8 ms)
-	Boot                 uint64        // server process id (random per run); clients reset their streams when it changes
-	MaxPayload           int           // datagram size cap incl. header and tag; 0 = MaxPayload (640), bounded to [256, 1400]
-	Hedge                bool          // send young packets twice on different lanes (costs ~8% extra packets)
-	FEC                  bool          // adaptive XOR parity after bursts of small packets (both ends must enable it; see fec.go)
-	Bond                 PathTimings   // multipath health/probe timings (server side; zero = production values)
-	Logf                 func(string, ...any)
+	// StreamLimit is the explicitly enrolled Auto override. Nil preserves the
+	// manual defaults above; zero has no application stream-count ceiling.
+	// Replay, tombstone, packet and per-stream byte budgets remain bounded.
+	StreamLimit *int
+	Server      bool
+	Key         []byte
+	SID         uint64        // session id (client: random if 0; server sessions get the client's)
+	Paths       int           // client: lanes (ICMP identifiers) to stripe over
+	InitBps     float64       // starting pace, bytes/s (default 1.5 MB/s)
+	MaxBps      float64       // pace ceiling, bytes/s (default 16 MB/s)
+	MinBps      float64       // pace floor (default 200 KB/s)
+	Slack       time.Duration // extra RTT over the minimum tolerated before slowing down (default 8 ms)
+	Boot        uint64        // server process id (random per run); clients reset their streams when it changes
+	MaxPayload  int           // datagram size cap incl. header and tag; 0 = MaxPayload (640), bounded to [256, 1400]
+	Hedge       bool          // send young packets twice on different lanes (costs ~8% extra packets)
+	FEC         bool          // adaptive XOR parity after bursts of small packets (both ends must enable it; see fec.go)
+	Bond        PathTimings   // multipath health/probe timings (server side; zero = production values)
+	Logf        func(string, ...any)
 }
 
 type Stats struct {
@@ -136,16 +140,21 @@ type Session struct {
 	lastRecv  time.Time // cleared after 30 s of silence (the session then counts as dead)
 	lastAuth  time.Time // same, never cleared: what LastRecv reports
 
-	streams  map[uint64]*Stream
-	tomb     map[uint64]time.Time
-	nextSID  uint64
-	acceptQ  []*Stream
-	acceptC  *sync.Cond
-	prio     streamQ // interactive streams (sent < prioBytes), FIFO
-	bulk     fairQ   // bulk streams: fair between groups (public ports), round-robin inside a group
-	ctrl     [][]byte
-	sent     []*sentPkt
-	sentHead int
+	streams map[uint64]*Stream
+	tomb    map[uint64]time.Time
+	// Auto opens sequential stream identities. Remember the contiguous seen
+	// prefix permanently and at most 4096 out-of-order identities, so retiring
+	// thousands of streams cannot fill a count-sized tombstone table.
+	peerSeenThrough uint64
+	peerSeenAhead   map[uint64]struct{}
+	nextSID         uint64
+	acceptQ         []*Stream
+	acceptC         *sync.Cond
+	prio            streamQ // interactive streams (sent < prioBytes), FIFO
+	bulk            fairQ   // bulk streams: fair between groups (public ports), round-robin inside a group
+	ctrl            [][]byte
+	sent            []*sentPkt
+	sentHead        int
 	// Lost packet numbers are never reused. Retain only bounded timing metadata
 	// so a valid late ACK can teach a single carrier that its RTT increased.
 	lateAcks  [4096]lateAckTime
@@ -211,6 +220,13 @@ func NewSession(cfg Config, pio PacketIO) (*Session, error) {
 	}
 	if cfg.MaxStreams < 1 || cfg.MaxStreams > maxStreams || cfg.Paths < 0 || cfg.Paths > 8 {
 		return nil, errors.New("waticmp: stream or lane limit is invalid")
+	}
+	if cfg.StreamLimit != nil {
+		limit := *cfg.StreamLimit
+		if limit < 0 {
+			return nil, errors.New("waticmp: stream limit cannot be negative")
+		}
+		cfg.StreamLimit = &limit
 	}
 	if cfg.Paths <= 0 {
 		cfg.Paths = 1
@@ -370,7 +386,7 @@ func (s *Session) OpenStream() (*Stream, error) {
 	if s.closed {
 		return nil, ErrSessionDead
 	}
-	if len(s.streams) >= s.cfg.MaxStreams {
+	if s.streamCapacityFull() {
 		return nil, ErrTooManyConns
 	}
 	id := s.nextSID
@@ -383,6 +399,16 @@ func (s *Session) OpenStream() (*Stream, error) {
 		s.nextSID++
 	}
 	return s.newStream(id), nil
+}
+
+// Called under s.mu. An unlimited application count does not alter any nonce,
+// receive-window, tombstone, retransmission or packet allocation constraint.
+func (s *Session) streamCapacityFull() bool {
+	limit := s.cfg.MaxStreams
+	if s.cfg.StreamLimit != nil {
+		limit = *s.cfg.StreamLimit
+	}
+	return limit > 0 && len(s.streams) >= limit
 }
 
 // Accept waits for a stream opened by the peer (server side).
@@ -1127,6 +1153,8 @@ func (s *Session) parse(b []byte, now time.Time) (eliciting bool) {
 			eliciting = true
 			if st := s.streams[sid]; st != nil {
 				s.killStream(st, ErrReset)
+			} else if s.cfg.StreamLimit != nil {
+				s.observePeerStream(sid)
 			} else if len(s.tomb) < 4096 {
 				s.tomb[sid] = now
 			}
@@ -1167,13 +1195,13 @@ func (s *Session) onStream(sid, off uint64, data []byte, fin bool) {
 	}
 	st := s.streams[sid]
 	if st == nil {
-		if !s.cfg.Server && !s.cfg.BidirectionalStreams || len(s.streams) >= s.cfg.MaxStreams || len(s.tomb) >= 4096 {
+		if !s.cfg.Server && !s.cfg.BidirectionalStreams || s.streamCapacityFull() || len(s.tomb) >= 4096 {
 			return
 		}
 		if s.cfg.BidirectionalStreams && (sid%2 == 0) == s.cfg.Server {
 			return
 		}
-		if _, gone := s.tomb[sid]; gone {
+		if !s.observePeerStream(sid) {
 			return
 		}
 		st = s.newStream(sid)
@@ -1187,6 +1215,65 @@ func (s *Session) onStream(sid, off uint64, data []byte, fin bool) {
 		st.peerFin, st.peerFinO = true, off+uint64(len(data))
 	}
 	st.insert(off, data)
+}
+
+// observePeerStream is called under s.mu, only for an absent stream. A seen
+// identity without a live stream is retired and may never be resurrected.
+// Manual sessions keep their legacy bounded tombstones. Auto's disjoint,
+// monotonic peer namespace permits a compact lifetime retirement frontier.
+func (s *Session) observePeerStream(sid uint64) bool {
+	if s.cfg.StreamLimit == nil {
+		_, retired := s.tomb[sid]
+		return !retired
+	}
+	if sid == 0 || sid > (1<<62)-1 || !s.cfg.Server && !s.cfg.BidirectionalStreams {
+		return false
+	}
+	n := sid
+	if s.cfg.BidirectionalStreams {
+		if (sid%2 == 0) == s.cfg.Server {
+			return false
+		}
+		first := uint64(1)
+		if !s.cfg.Server {
+			first = 2
+		}
+		n = (sid-first)/2 + 1
+	}
+	if n <= s.peerSeenThrough {
+		return false
+	}
+	if _, seen := s.peerSeenAhead[n]; seen {
+		return false
+	}
+	if n == s.peerSeenThrough+1 {
+		s.peerSeenThrough++
+		for {
+			next := s.peerSeenThrough + 1
+			if _, ok := s.peerSeenAhead[next]; !ok {
+				break
+			}
+			delete(s.peerSeenAhead, next)
+			s.peerSeenThrough = next
+		}
+		return true
+	}
+	if len(s.peerSeenAhead) >= 4096 {
+		return false
+	}
+	if s.peerSeenAhead == nil {
+		s.peerSeenAhead = make(map[uint64]struct{})
+	}
+	s.peerSeenAhead[n] = struct{}{}
+	return true
+}
+
+func (s *Session) rememberRetiredStream(sid uint64) {
+	if s.cfg.StreamLimit != nil {
+		s.observePeerStream(sid)
+		return
+	}
+	s.tomb[sid] = s.now
 }
 
 func (s *Session) onAck(largest uint64, delay time.Duration, rs rangeSet, now time.Time) {

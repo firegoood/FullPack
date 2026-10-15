@@ -88,6 +88,12 @@ jobs:
           FULLPACK_AUTO_LOAD: '1'
         run: go test ./internal/e2e -run '^TestPeerAutoBoundedApplicationConnectionCapacity$' -race -count=1 -timeout 4m
 
+      - name: Verify unlimited Auto held connections on Reverse and Direct carriers
+        if: matrix.mode == 'race'
+        env:
+          FULLPACK_AUTO_UNLIMITED_LOAD: '1'
+        run: go test ./internal/e2e -run '^TestPeerAutoUnlimitedApplicationConnections$' -race -count=1 -timeout 12m
+
       - name: Coverage
         if: matrix.mode == 'coverage'
         # Measured with -coverpkg, which is the only way this number means

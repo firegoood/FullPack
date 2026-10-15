@@ -44,6 +44,7 @@ type Settings struct {
 	Token                string
 	Paths                int
 	MaxStreams           int
+	StreamLimit          *int // internal Auto override: 0 = no application stream ceiling
 	MaxPayload           int
 	MaxBps               int
 	HandshakeTimeout     time.Duration
@@ -65,6 +66,9 @@ func (s Settings) Validate() error {
 	}
 	if s.Paths < 0 || s.Paths > 8 || s.MaxStreams < 0 || s.MaxStreams > 256 {
 		return errors.New("Wat ICMP supports 1-8 lanes and at most 256 streams")
+	}
+	if s.StreamLimit != nil && *s.StreamLimit < 0 {
+		return errors.New("Wat ICMP stream limit cannot be negative")
 	}
 	if s.MaxPayload != 0 && (s.MaxPayload < 256 || s.MaxPayload > 1400) {
 		return errors.New("Wat ICMP payload must be 256-1400 bytes; increases require authenticated PMTU confirmation")
@@ -373,7 +377,7 @@ func Connect(parent context.Context, server bool, s Settings) (*Conn, error) {
 				return nil, ctx.Err()
 			}
 			engine, err := wat.NewSession(wat.Config{Server: server, BidirectionalStreams: s.BidirectionalStreams, Key: binding, SID: sid, Paths: s.Paths,
-				MaxPayload: s.MaxPayload, MaxStreams: s.MaxStreams, InitBps: 200_000, MinBps: 32_000, MaxBps: float64(s.MaxBps)}, i)
+				MaxPayload: s.MaxPayload, MaxStreams: s.MaxStreams, StreamLimit: s.StreamLimit, InitBps: 200_000, MinBps: 32_000, MaxBps: float64(s.MaxBps)}, i)
 			if err != nil {
 				return nil, err
 			}

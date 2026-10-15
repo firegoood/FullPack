@@ -80,9 +80,18 @@ updating this repository. These files record the user's persistent preferences.
   identities from connection concurrency. Keep synthetic credentials separate,
   resource/network isolation and direct-Xray comparisons; never bypass Auto's
   admission/enrollment limits or present these short tests as WAN acceptance.
-- Preserve the authorized Auto admission repair in `docs/auto-admission-repair.md`:
-  retain the enrolled total, UDP's bounded share and TCP's bounded two-second
-  FIFO, joined cancellation and generation revalidation after a capacity wait.
+- Preserve the authorized unlimited Auto policy in `docs/auto-unlimited-connections.md`.
+  New CLI/web setups explicitly enroll `connection_limit = 0` (no application
+  connection ceiling); positive limits are optional and have no 192 maximum.
+  Keep legacy absent-field defaults/hashes compatible until coordinated
+  re-enrollment; never silently rewrite an existing pair or erase fencing.
+  Bound transient handshakes and per-flow buffers independently of active
+  connection counts. Preserve Wat nonce/replay/tombstone/window budgets and
+  QUIC's inherited manual transport credit window; never advertise enormous
+  unauthenticated QUIC credit or substitute a large hidden Auto user ceiling.
+  Preserve the earlier optional-cap admission repair in `docs/auto-admission-repair.md`:
+  UDP's bounded share and TCP's bounded two-second FIFO apply to positive caps.
+  Keep joined cancellation and generation revalidation after a capacity wait.
   Keep capacity/backend diagnostics separate from carrier health and recovery;
   queued/rejected sockets are not successful users. Never silently raise or
   rewrite an existing pair's admission policy or fencing state.

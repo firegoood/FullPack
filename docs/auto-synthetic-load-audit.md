@@ -172,4 +172,4 @@ WAN 500/800-user acceptance, sustained bandwidth, real application session mixes
 independent users. Deliberately rejected overflow is an observed policy outcome,
 not successful service to the rejected users.
 
-*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+*Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

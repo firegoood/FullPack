@@ -28,10 +28,11 @@ test('native setup removes incompatible drawers and carries the explicit directi
 });
 test('Auto setup requires explicit approved endpoint data and conservative controls', () => {
   const row = controls({ id: 'noise', transport: 'stealth', endpoint: '192.0.2.1:24443', localBind: '0.0.0.0:24443' });
-  const group = controls({ acceptUdp: false, tunnelId: 'pair-identity-example', iranId: 'iran-identity-example', kharejId: 'kharej-identity-example', observeOnly: true, probeInterval: 600, cooldown: 300, minimumDwell: 600, maxSwitchesPerHour: 2, maxConnections: 64, maxMemoryMb: 256 });
+  const group = controls({ acceptUdp: false, tunnelId: 'pair-identity-example', iranId: 'iran-identity-example', kharejId: 'kharej-identity-example', observeOnly: true, probeInterval: 600, cooldown: 300, minimumDwell: 600, maxSwitchesPerHour: 2, connectionLimit: 0, maxMemoryMb: 256 });
   group.querySelectorAll = () => [row];
   const result = peerSetupPayload({ querySelector: () => group }, { transport: 'auto', role: 'server', name: 'auto', token: 'secret', ports: '443', ipv6: true });
   assert.equal(result.auto.enabled, true); assert.equal(result.auto.observeOnly, true);
+  assert.equal(result.auto.connectionLimit, 0); assert.equal('maxConnections' in result.auto, false);
   assert.deepEqual(result.auto.candidates, [{ id: 'noise', transport: 'stealth', disabled: false, endpoint: '192.0.2.1:24443', localBind: '0.0.0.0:24443' }]);
   assert.equal(result.auto.cooldown, 300); assert.equal('ipv6' in result, false);
 });
@@ -39,6 +40,17 @@ test('Kharej enrollment sends only the trusted link and local name', () => {
   const group = controls({ enrollmentLink: 'backpack://3.private' });
   const result = peerSetupPayload({ querySelector: () => group }, { name: 'peer', role: 'client', transport: 'auto', token: 'stale', ports: '443' });
   assert.deepEqual(result, { name: 'peer', role: 'client', transport: 'auto', peerEnrollment: 'backpack://3.private' });
+});
+
+test('Auto accepts an optional high cap and rejects invalid numbers without silently reverting to legacy default', () => {
+  for (const value of [0, 4000]) {
+    const group=controls({connectionLimit:value});group.querySelectorAll=()=>[];
+    assert.equal(peerSetupPayload({querySelector:()=>group},{transport:'auto',role:'server'}).auto.connectionLimit,value);
+  }
+  for (const value of [-1, 1.5, 'invalid', 1e30]) {
+    const group=controls({connectionLimit:value});group.querySelectorAll=()=>[];
+    assert.throws(()=>peerSetupPayload({querySelector:()=>group},{transport:'auto',role:'server'}),/0 means no limit/);
+  }
 });
 
 test('Quick Auto sends only the reviewed IP/port inputs and skips advanced enrollment fields', () => {

@@ -61,7 +61,7 @@ and is not used as a memory-peak claim. Production services were not deployed
 or restarted by this isolated test. The separate installation/WAN evidence is
 recorded below.
 
-*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+*Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
 
 ## Release gate interruption
 
@@ -170,9 +170,10 @@ protocol or four healthy paths at all times.
 
 In the manual forwarding path, `config.Config.MaxConnections` uses **0 = unlimited**
 and `internal/server/transport/limits.go` creates no connection limiter for that
-setting. Auto's separately introduced admission policy instead defaults to 64
-and rejects enrollment above 192 (`config/auto.go` and
-`internal/tunnel/peerauto/config.go`). Both installed pairs have 64 shared across
+setting. The installed v1.9.4-beta.1 Auto admission policy instead defaulted to 64
+and rejected enrollment above 192. New unlimited policy is recorded separately
+in `auto-unlimited-connections.md`; the measurements here describe the older
+deployment. Both pairs in this recorded deployment had 64 shared across
 their forwarded ports and TCP/UDP traffic. Those are connection slots, not
 users: one Xray/V2Ray user can hold several connections.
 

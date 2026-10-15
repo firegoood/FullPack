@@ -84,7 +84,8 @@ func specFromPeerNew(n NewTunnel, publicOnly ...bool) (TunnelSpec, error) {
 			if s.Role == "server" {
 				peer = p.KharejIP
 			}
-			s.WatICMP = config.WatICMPConfig{Enabled: true, PeerIP: peer, TunnelID: hex.EncodeToString(h[:]), Direction: p.Direction, MaxStreams: min(256, s.Auto.MaxConnections+16), MaxPayload: p.MaxPayload}
+			// Role marker only. The Auto carrier applies its enrolled stream policy.
+			s.WatICMP = config.WatICMPConfig{Enabled: true, PeerIP: peer, TunnelID: hex.EncodeToString(h[:]), Direction: p.Direction, MaxStreams: 128, MaxPayload: p.MaxPayload}
 			if s.Role == "client" {
 				s.RemoteAddr = net.JoinHostPort(p.IranIP, "0")
 			}

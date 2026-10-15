@@ -59,8 +59,11 @@ var resources = struct {
 func (m *Manager) pressure() bool {
 	// Reserving user capacity comes before starting a benchmark. A skipped
 	// probe is never a failed carrier measurement.
-	if len(m.connections) >= max(1, m.policy.MaxConnections/2) {
-		return true
+	if limit := m.policy.ConnectionCapacity(); limit > 0 && m.admission != nil {
+		live, _, _ := m.admission.snapshot()
+		if live >= max(1, limit/2) {
+			return true
+		}
 	}
 	resources.Lock()
 	defer resources.Unlock()

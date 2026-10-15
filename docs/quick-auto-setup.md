@@ -37,8 +37,11 @@ it cannot create additional working paths by software alone.
 
 Use `fullpack auto rescan NAME` or **Rescan approved reserve pool** for a manual
 sweep. Observe-only, manual locks, optional-change cooldown/dwell/hourly limits,
-bounded outage recovery and the 64/default, 192/maximum connection policy stay
-in effect. A socket is not an independent user or a production capacity result.
+and bounded outage recovery stay in effect. New setup enrolls
+`connection_limit = 0` with no application connection ceiling. Optional positive
+caps are available in advanced setup without a 192 maximum. Existing capped
+pairs need coordinated new enrollment; see [unlimited Auto](auto-unlimited-connections.md).
+A socket is not an independent user or a production capacity result.
 
 ## Ports and prerequisites
 
@@ -98,4 +101,4 @@ results; WAN availability, 24-hour soak and 1000-user capacity remain NOT VERIFI
 
 Quick Auto preserves its enrolled connection policy. Carrier availability and data admission are reported separately: an online route can be at capacity. See [admission repair](auto-admission-repair.md) for queue/UDP limits and [deployment evidence](auto-admission-deployment.md) for the measured scope.
 
-*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+*Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

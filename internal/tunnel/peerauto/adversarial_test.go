@@ -46,7 +46,11 @@ func TestProbePressureAndInvalidActionPreserveProduction(t *testing.T) {
 	m.installRouteLocked(e, 2, fresh())
 	m.mu.Unlock()
 	for range m.policy.MaxConnections / 2 {
-		m.connections <- struct{}{}
+		ticket, err := m.admission.begin(m.ctx, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer ticket.release()
 	}
 	before := m.store.snapshot()
 	result := make(chan error, 1)

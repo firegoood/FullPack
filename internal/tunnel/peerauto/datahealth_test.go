@@ -5,9 +5,22 @@ import (
 	"errors"
 	"io"
 	"net"
+	"syscall"
 	"testing"
 	"time"
 )
+
+func TestOSResourceExhaustionIsLocalAndNotCarrierOrEnrolledCapacity(t *testing.T) {
+	for _, err := range []error{syscall.EMFILE, syscall.ENFILE, syscall.ENOBUFS, syscall.ENOMEM} {
+		wrapped := &net.OpError{Op: "accept", Net: "tcp", Err: err}
+		if !localResourceError(wrapped) || dataErrorCode(wrapped) != "local_resource" {
+			t.Fatal("OS exhaustion misclassified", wrapped)
+		}
+	}
+	if localResourceError(net.ErrClosed) || dataErrorCode(errUDPHandshakeBusy) != "handshake_busy" {
+		t.Fatal("shutdown/handshake classification lost")
+	}
+}
 
 func TestDataHealthSeparatesCapacityBackendAndCarrier(t *testing.T) {
 	m, _, _ := followerForState(t)
@@ -91,7 +104,11 @@ func TestPeerDataQueueCannotAdmitRetiredGeneration(t *testing.T) {
 	defer client.Close()
 	_ = client.SetDeadline(time.Now().Add(3 * time.Second))
 	done := make(chan struct{})
-	go func() { defer close(done); defer server.Close(); m.serveData(e, server, make(chan struct{}, 1)) }()
+	go func() {
+		defer close(done)
+		defer server.Close()
+		m.serveData(e, server, make(chan struct{}, 1), func() {})
+	}()
 	if _, err := client.Write(requestHeader(r, 0, false)); err != nil {
 		t.Fatal(err)
 	}

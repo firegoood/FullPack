@@ -58,4 +58,4 @@ TLS و قدرت توکن.
 
 For peer Auto, carrier state and `DataWarning`/`DataCode` are independent. Current capacity or recent admission/backend errors remain visible even with a healthy carrier; the recent warning window is 30 seconds. Available admission is not an application-delivery check. See [repair and limits](auto-admission-repair.md).
 
-*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+*Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

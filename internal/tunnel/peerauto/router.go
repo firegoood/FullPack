@@ -18,6 +18,21 @@ import (
 
 const requestSize = 8 + 2 + 1 + 32
 
+// Bound unfinished stream/backend handshakes, not established application
+// connections. A permit is returned before relaying data. Waiting before
+// Accept provides TCP backpressure instead of rejecting established flows.
+const maxPendingHandshakes = 128
+
+func handshakePermit(ctx context.Context, slots chan struct{}) (func(), bool) {
+	select {
+	case slots <- struct{}{}:
+		var once sync.Once
+		return func() { once.Do(func() { <-slots }) }, true
+	case <-ctx.Done():
+		return nil, false
+	}
+}
+
 func requestHeader(r *route, slot int, udp bool) []byte {
 	b := make([]byte, requestSize)
 	binary.BigEndian.PutUint64(b, r.generation)
@@ -71,27 +86,36 @@ func (m *Manager) acceptData(e *candidate) {
 func (m *Manager) openData(e *candidate) {
 	var wg sync.WaitGroup
 	defer wg.Wait()
-	consumed := make(chan struct{}, m.policy.MaxConnections+4)
-	permits := make(chan struct{}, m.policy.MaxConnections+4)
+	consumed := make(chan struct{}, maxPendingHandshakes)
+	permits := make(chan struct{}, maxPendingHandshakes)
 	idle := 0
 	for e.ctx.Err() == nil {
-		if idle >= 4 {
+		prefetch := 4
+		if m.policy.ConnectionLimit != nil {
+			m.mu.Lock()
+			active := m.active != nil && m.active.endpoint == e
+			m.mu.Unlock()
+			if active {
+				prefetch = maxPendingHandshakes
+			}
+		}
+		if idle >= prefetch {
 			select {
 			case <-e.ctx.Done():
 				return
+			case <-e.dataWake:
 			case <-consumed:
 				idle--
 			}
 			continue
 		}
-		select {
-		case permits <- struct{}{}:
-		case <-e.ctx.Done():
+		release, ok := handshakePermit(e.ctx, permits)
+		if !ok {
 			return
 		}
 		c, err := e.session.Open(e.ctx)
 		if err != nil {
-			<-permits
+			release()
 			if !pause(e.ctx, 250*time.Millisecond) {
 				return
 			}
@@ -102,16 +126,16 @@ func (m *Manager) openData(e *candidate) {
 		_ = c.SetWriteDeadline(time.Time{})
 		if err != nil {
 			c.Close()
-			<-permits
+			release()
 			e.cancel()
 			return
 		}
 		idle++
 		wg.Add(1)
-		go func() { defer wg.Done(); defer func() { <-permits }(); defer c.Close(); m.serveData(e, c, consumed) }()
+		go func() { defer wg.Done(); defer release(); defer c.Close(); m.serveData(e, c, consumed, release) }()
 	}
 }
-func (m *Manager) serveData(e *candidate, c net.Conn, consumed chan<- struct{}) {
+func (m *Manager) serveData(e *candidate, c net.Conn, consumed chan<- struct{}, releaseHandshake func()) {
 	var b [requestSize]byte
 	_, err := io.ReadFull(c, b[:])
 	select {
@@ -190,6 +214,7 @@ func (m *Manager) serveData(e *candidate, c net.Conn, consumed chan<- struct{}) 
 		return
 	}
 	_ = c.SetWriteDeadline(time.Time{})
+	releaseHandshake()
 	defer m.trackFlow(r)()
 	if udp {
 		relayDatagrams(r.ctx, c, backend)
@@ -341,8 +366,19 @@ func (m *Manager) bindUsers() error {
 			defer stop()
 			defer l.Close()
 			for {
+				release, ok := handshakePermit(m.ctx, m.handshakes)
+				if !ok {
+					return
+				}
 				c, e := l.Accept()
 				if e != nil {
+					release()
+					if m.ctx.Err() == nil && localResourceError(e) {
+						m.dataFailure("accept", e)
+						if pause(m.ctx, 250*time.Millisecond) {
+							continue
+						}
+					}
 					return
 				}
 				ticket, err := m.admission.begin(m.ctx, false)
@@ -350,9 +386,11 @@ func (m *Manager) bindUsers() error {
 					m.flowRejected.Add(1)
 					m.dataFailure("local_admission", err)
 					c.Close()
+					release()
 					continue
 				}
 				m.launch(func() {
+					defer release()
 					defer ticket.release()
 					defer c.Close()
 					if err := ticket.wait(m.ctx, admissionWait); err != nil {
@@ -368,6 +406,7 @@ func (m *Manager) bindUsers() error {
 						return
 					}
 					defer s.Close()
+					release()
 					handlers.TCPConnectionHandler(m.ctx, false, c, metrics.CountedConn(s), m.log, nil, 0, false)
 				})
 			}
@@ -405,10 +444,24 @@ func (m *Manager) serveUDP(pc net.PacketConn, slot int) {
 		mu.Lock()
 		f := sources[key]
 		var ticket *admissionTicket
+		var releaseHandshake func()
 		if f == nil {
+			// UDP has no accept backlog. Bound only unfinished handshakes;
+			// successful associations return the permit before relaying data.
+			select {
+			case m.udpHandshakes <- struct{}{}:
+				var once sync.Once
+				releaseHandshake = func() { once.Do(func() { <-m.udpHandshakes }) }
+			default:
+				m.dataFailure("udp_handshake", errUDPHandshakeBusy)
+				m.udpQueueDrops.Add(1)
+				mu.Unlock()
+				continue
+			}
 			var err error
 			ticket, err = m.admission.begin(m.ctx, true)
 			if err != nil {
+				releaseHandshake()
 				m.dataFailure("udp_admission", err)
 			}
 		}
@@ -418,10 +471,11 @@ func (m *Manager) serveUDP(pc net.PacketConn, slot int) {
 			flow := f
 			peer := addr
 			m.launch(func() {
+				defer releaseHandshake()
 				defer ticket.release()
 				defer close(flow.done)
 				defer func() { mu.Lock(); delete(sources, key); mu.Unlock() }()
-				m.udpSource(pc, peer, slot, flow)
+				m.udpSource(pc, peer, slot, flow, releaseHandshake)
 			})
 		}
 		enqueued := false
@@ -439,13 +493,14 @@ func (m *Manager) serveUDP(pc net.PacketConn, slot int) {
 		mu.Unlock()
 	}
 }
-func (m *Manager) udpSource(pc net.PacketConn, peer net.Addr, slot int, f *udpSource) {
+func (m *Manager) udpSource(pc net.PacketConn, peer net.Addr, slot int, f *udpSource, releaseHandshake func()) {
 	c, err := m.claim(m.ctx, slot, true)
 	if err != nil {
 		m.dataFailure("udp_peer_handshake", err)
 		return
 	}
 	defer c.Close()
+	releaseHandshake()
 	ctx, cancel := context.WithCancel(m.ctx)
 	defer cancel()
 	stop := afterFuncJoined(ctx, func() { c.Close() })

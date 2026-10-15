@@ -15,6 +15,10 @@
 
 ## Behavior and compatibility
 
+This is the historical v1.9.4-beta.1 capped repair. The subsequent explicit
+[unlimited policy](auto-unlimited-connections.md) supersedes its compulsory
+64/192 restriction for new enrollment; the measurements below retain their scope.
+
 - Keep the authenticated, enrolled total exactly as configured: default 64,
   maximum 192. Neither the default, schema, hash, generation nor durable history
   changes. Changing that total still requires fresh enrollment; increasing it
@@ -125,4 +129,4 @@ and a 24-hour soak. The two enrolled production pairs remain at their configured
 limit until a coordinated, verified deployment; no manifest/fencing files are
 rewritten by the diagnostic fixture. This source repair is not a signed release.
 
-*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+*Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

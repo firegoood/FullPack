@@ -304,7 +304,9 @@ This implementation assumes a permitted reachable enrolled path and running
 peers. No reachable physical route means NO_ROUTE; no software can repair
 fully blocked ICMP/TCP/UDP or a powered-off remote machine. Auto resource
 pressure thresholds skip probes; they are not an OS-enforced total RSS cap.
-Maximum simultaneous Auto users is 192, not 1,000. TCP may end during failure
+The original audited Auto build capped connections at 192; that was never a
+user-capacity measurement. New unlimited enrollment has separate evidence in
+`auto-unlimited-connections.md`. TCP may end during failure
 or the bounded 30 s drain. Small ACK/control/handshake traffic is separately
 bounded and is not a strict all-packet bandwidth guarantee.
 
@@ -464,4 +466,4 @@ Production/1000-user/24-hour acceptance remains **NOT VERIFIED**.
 
 *Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*
 
-*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+*Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

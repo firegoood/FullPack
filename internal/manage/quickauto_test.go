@@ -18,7 +18,7 @@ func TestQuickAutoBuildsReviewedEndpointsAndTrustedPeerLink(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(s.Token) != 64 || !s.Auto.Enabled || s.Auto.ObserveOnly || len(s.Auto.Candidates) != 38 || s.Auto.Selection == nil || s.Auto.Selection.Target != 4 || s.Auto.Selection.RefillAt != 2 || s.Auto.MaxConnections != 64 || s.Auto.Cooldown != 300 || s.Auto.MinimumDwell != 600 || s.Auto.MaxSwitchesPerHour != 2 {
+	if len(s.Token) != 64 || !s.Auto.Enabled || s.Auto.ObserveOnly || len(s.Auto.Candidates) != 38 || s.Auto.Selection == nil || s.Auto.Selection.Target != 4 || s.Auto.Selection.RefillAt != 2 || s.Auto.ConnectionLimit == nil || s.Auto.ConnectionCapacity() != 0 || s.Auto.Cooldown != 300 || s.Auto.MinimumDwell != 600 || s.Auto.MaxSwitchesPerHour != 2 {
 		t.Fatalf("quick setup lost opt-in/security/policy bounds: %#v", s.Auto)
 	}
 	seen := map[string]bool{}

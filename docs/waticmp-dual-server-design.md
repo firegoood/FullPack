@@ -291,7 +291,9 @@ Connection Test remains at 4 s.
   `internal/client/transport/waticmp.go` use existing reverse control/pool/
   backend paths. TCP half-close and framed UDP are real application traffic.
   Direct GRE/L3 does not reuse this stream adapter.
-- Auto router admits at most 64 simultaneous user flows by default/192 maximum,
+- New Auto setups explicitly enroll zero/no application connection ceiling;
+  the original 64/default and 192/maximum policy remains historical for legacy
+  enrollment. Optional positive caps retain bounded queues. There are still
   1-32 enrolled port maps and 1-4 legacy approved candidates. Opt-in pool
   enrollment additionally allows at most 48 approved candidates with four
   measured selected routes; see `quick-auto-setup.md`. Backend selection is a
@@ -433,4 +435,4 @@ wattun در FullPack ادغام شده است. جهت درخواست‌های IC
 
 *Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*
 
-*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+*Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
