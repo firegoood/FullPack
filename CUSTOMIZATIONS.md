@@ -43,6 +43,24 @@ explicitly (2048 MiB) and report measured RSS/CPU on bootstrap failure. Keep
 the production 256 MiB default and all real pressure/CPU/admission guards;
 this fixture allowance is not a production-capacity increase or a skipped gate.
 
+The signed `v1.9.4-beta.1` source `4e0bc91fa5b332662da9258ac2d982ad63300629`
+passed all eleven CI verification jobs and exact-tag public installation in
+run `38761783514`, then was installed on all three supplied hosts. Preserve
+`docs/verification/auto-admission-wan-20261015.json`: each stream pair passed
+700/800/1000-identity phases and 2880 short WAN transactions with concurrency
+16. A separate 1000-attempt held burst served only 64 TR / 61 NL synthetic
+connections; the enrolled total remained 64, including other live traffic.
+These rejected clients are not successful users. Runtime test accounts and
+fixtures were independently verified removed; operator config hashes and
+FireNode/Xray processes were retained. NL cold start exceeded the initial
+180-second observer and activated after about 215 seconds; preserve that
+timing failure separately from its subsequent data success.
+The user's manual-BackPack comparison exposes an unresolved Auto capacity
+gap: manual forwarding permits 0 = unlimited, while Auto uses its own 64/192
+policy. Queue/UDP repairs do not establish 700–1000 simultaneous-user support.
+Retain this distinction and the pending sustained-bandwidth/24-hour gates;
+do not silently raise existing enrollment or label overflow as acceptance.
+
 ## Auto admission repair approved on 2026-10-15
 
 - Keep the original total connection ceiling (default 64, maximum 192) and

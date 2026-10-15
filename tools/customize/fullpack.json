@@ -324,7 +324,8 @@
     "internal/webui/panel/js/lib/tstate.js": ["dataWarning", "At capacity", "Data errors"],
     "docs/auto-admission-repair.md": ["NOT VERIFIED", "two-second", "one quarter", "fresh enrollment"],
     "docs/verification/auto-admission-20261015.json": ["\"peakQueuedTcp\"", "\"udpAssociations\": 16", "\"productionDeployment\": \"NOT DONE\""],
-    "docs/auto-admission-deployment.md": ["NOT VERIFIED", "v1.9.4-beta.1", "Never restore", "currently 64"],
+    "docs/auto-admission-deployment.md": ["NOT VERIFIED", "v1.9.4-beta.1", "Never restore", "currently 64", "0 = unlimited", "61", "700–1000-user concurrency"],
+    "docs/verification/auto-admission-wan-20261015.json": ["\"sweepConcurrency\": 16", "\"installedEnrolledLimit\": 64", "\"remainingOwnedUsers\": 0", "\"NLInitial\"", "TIMEOUT", "700-1000 simultaneous users"],
     "internal/app/releaseversion_test.go": ["TestReleaseToolingKeepsPrereleaseIdentity", "v1.9.4-beta.1"]
   }
 }
