@@ -56,6 +56,8 @@
     "internal/manage/managedwebapi.go"
   ],
   "required": {
+    "docs/verification/auto-unlimited-wan-20261016.json": ["\"observedPeakActiveFlows\": 1000", "\"newRejectedFlows\": 0", "\"forensicStateRestored\": false", "\"operatorBackendPidsUnchangedSinceBeforeUpgrade\": true"],
+    "docs/verification/auto-unlimited-local-20261016.json": ["\"completedNarrowSweep\"", "\"peerFlowsAfterClose\"", "4000"],
     "tools/configref/main.go": ["github.com/backpack/backpack/internal/app", "app.Version"],
     "internal/app/app.go": [
       "RepoOwner = \"firegoood\"",

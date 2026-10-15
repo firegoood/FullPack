@@ -58,6 +58,22 @@ without filling a churn-sized tombstone table. Manual native behavior remains
 unchanged. OS file/socket exhaustion must be classified as `local_resource`;
 forwarded listeners retry with bounded backoff and keep established flows.
 
+The signed `v1.9.4-beta.2` source
+`42164d93523771853ec98e3af90008e1ed0723a2` passed all eleven CI verification jobs
+and exact-tag public installation in run `38806904756`. All three supplied hosts
+now run that verified binary. Fresh `TR-unlimited` / `NL-unlimited` pairs retain
+the same 38 approved candidates and existing forwarded ports; original pair
+configurations/fencing and private binary rollback remain intact. Preserve
+`docs/verification/auto-unlimited-local-20261016.json` and
+`docs/verification/auto-unlimited-wan-20261016.json`: 2000 held local connections
+with 1000 Xray identities passed, and installed TCP Reverse/Direct WAN each
+passed 1000 held connections/accounts with sampled concurrency 1000, no new
+rejections, unchanged generations and independently verified account cleanup.
+Setup concurrency was 128; this is not simultaneous completion of 1000 new
+handshakes. The 4000-connection lab OOM and the direct-Xray 1000-start timeout
+remain failures, and 24-hour/production acceptance remains unverified. Never
+replace these bounded statements with an unconditional capacity guarantee.
+
 ## Controlled admission deployment approved on 2026-10-15
 
 The operator explicitly requested installation and further load tests. Prepare

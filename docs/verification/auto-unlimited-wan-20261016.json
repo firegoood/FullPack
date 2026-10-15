@@ -1,0 +1,2278 @@
+{
+  "date": "2026-10-16",
+  "scope": "bounded installed WAN application verification; synthetic accounts are not real-user or 24-hour acceptance",
+  "release": {
+    "tag": "v1.9.4-beta.2",
+    "release_url": "https://github.com/firegoood/FullPack/releases/tag/v1.9.4-beta.2",
+    "archives": {
+      "fullpack_linux_386.tar.gz": "bc76b07ef37b050309c2f03bb22ea178958448c09607165001f7631742f93e83",
+      "fullpack_linux_amd64.tar.gz": "0decbf0da680a69f190c41d3d981eb2b96a8a0c388ba41d305f732458222d147",
+      "fullpack_linux_arm64.tar.gz": "2f8f4fa15c42eecc38df161d412cbb2a82796ddbf14f6bc20e631fc44a7beead",
+      "fullpack_linux_armv5.tar.gz": "7d70da55b356077240919ee1597a7fb1ea83994d1f52b21d684ebbb047bc7b32",
+      "fullpack_linux_armv6.tar.gz": "3015c737eee5426eedf249389091c09047a1d1e3f8ee0634cd6695f6ce03a401",
+      "fullpack_linux_armv7.tar.gz": "ef6022805c851695f72a9d4ef7f1bcc2752f8d313b5cd36f052524651ae5a6f6",
+      "fullpack_linux_s390x.tar.gz": "201a7818077829f3e26c70a20931a2f8532751f0011e1bb7c69faf8f612665a7"
+    },
+    "signature_verified": true,
+    "excluded_11": true,
+    "fullCiRun": 38806904756,
+    "fullCiConclusion": "success",
+    "sourceCommit": "42164d93523771853ec98e3af90008e1ed0723a2"
+  },
+  "installedBinarySha256": "85429bc265ab664ba6836e5cbbc3003510fa6ba2ade065bd053b629163fb35c3",
+  "policy": {
+    "applicationConnectionLimit": 0,
+    "unlimited": true,
+    "legacyBefore": 64,
+    "freshPairedEnrollment": true,
+    "newEndpointsAdded": false,
+    "originalManifestAndFencingPreserved": true,
+    "forensicStateRestored": false
+  },
+  "workload": {
+    "identitiesPerPair": 1000,
+    "heldConnectionsPerPair": 1000,
+    "maximumConcurrentNewHandshakes": 128,
+    "holdAfterAllEstablishedSeconds": 5,
+    "application": "owned HTTP 404 response/body through existing Shadowsocks and installed Auto; checked twice",
+    "accounts": "fresh runtime-only accounts; operator credentials never exported; scoped cleanup and independent API check"
+  },
+  "cases": [
+    {
+      "outside": "206.1.101.187",
+      "port": 2052,
+      "pair": "TR-unlimited",
+      "direct": {
+        "name": "held_overflow",
+        "identities": 1000,
+        "attempts": 1000,
+        "concurrency": 128,
+        "heldEstablished": 1000,
+        "heldUntilAllAttemptsFinished": true,
+        "verified": 1000,
+        "errors": {},
+        "lostAfterOpen": 0,
+        "durationMs": 26653,
+        "p95Ms": 3800.348
+      },
+      "wan": {
+        "name": "held_overflow",
+        "identities": 1000,
+        "attempts": 1000,
+        "concurrency": 128,
+        "heldEstablished": 1000,
+        "heldUntilAllAttemptsFinished": true,
+        "verified": 1000,
+        "errors": {},
+        "lostAfterOpen": 0,
+        "durationMs": 28504,
+        "p95Ms": 4618.19
+      },
+      "activeRoutes": [
+        "tcp-r"
+      ],
+      "generations": [
+        2
+      ],
+      "observedPeakActiveFlows": 1000,
+      "newRejectedFlows": 0,
+      "postLoadApplicationCheck": true,
+      "cleanup": {
+        "remainingOwnedUsers": 0,
+        "independentApiQuery": true
+      }
+    },
+    {
+      "outside": "185.114.49.230",
+      "port": 8888,
+      "pair": "NL-unlimited",
+      "direct": {
+        "name": "held_overflow",
+        "identities": 1000,
+        "attempts": 1000,
+        "concurrency": 128,
+        "heldEstablished": 1000,
+        "heldUntilAllAttemptsFinished": true,
+        "verified": 1000,
+        "errors": {},
+        "lostAfterOpen": 0,
+        "durationMs": 7686,
+        "p95Ms": 564.304
+      },
+      "wan": {
+        "name": "held_overflow",
+        "identities": 1000,
+        "attempts": 1000,
+        "concurrency": 128,
+        "heldEstablished": 1000,
+        "heldUntilAllAttemptsFinished": true,
+        "verified": 1000,
+        "errors": {},
+        "lostAfterOpen": 0,
+        "durationMs": 9444,
+        "p95Ms": 700.07
+      },
+      "activeRoutes": [
+        "tcp-d"
+      ],
+      "generations": [
+        2
+      ],
+      "observedPeakActiveFlows": 1000,
+      "newRejectedFlows": 0,
+      "postLoadApplicationCheck": true,
+      "cleanup": {
+        "remainingOwnedUsers": 0,
+        "independentApiQuery": true
+      }
+    }
+  ],
+  "secondaryPorts": [
+    {
+      "outside": "206.1.101.187",
+      "port": 8880,
+      "direct": true,
+      "wan": true,
+      "postLoad": true,
+      "cleanup": {
+        "remainingOwnedUsers": 0,
+        "independentApiQuery": true
+      }
+    },
+    {
+      "outside": "185.114.49.230",
+      "port": 8889,
+      "direct": true,
+      "wan": true,
+      "postLoad": true,
+      "cleanup": {
+        "remainingOwnedUsers": 0,
+        "independentApiQuery": true
+      }
+    }
+  ],
+  "installed": [
+    {
+      "host": "188.136.159.49",
+      "version": "v1.9.4-beta.2\nhttps://github.com/firegoood/FullPack",
+      "allRunningFullPackProcessesMatchRelease": true,
+      "pairs": {
+        "TR-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 1015,
+            "completed": 1015,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          },
+          "selection": {
+            "target": 4,
+            "refillAt": 2,
+            "healthy": 3,
+            "scanning": false,
+            "selected": [
+              "tcp-r",
+              "stealth-r",
+              "wss-r"
+            ],
+            "reason": "selected paths are measured; active traffic retains its agreed generation"
+          },
+          "originalManifestAndFencingPreserved": true,
+          "approvedCandidates": 38,
+          "forwardedPorts": [
+            "8880",
+            "2052"
+          ],
+          "configSha256": "e9146cb3e2c2a130ac85b4fff607b5b7f5d633e9152a3d42cea7dea1685954ef"
+        },
+        "NL-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 1,
+            "admitted": 1014,
+            "completed": 1013,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 2,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorCode": "no_route",
+            "lastErrorStage": "udp_peer_handshake",
+            "lastErrorAt": "2026-10-15T21:32:58.242264091Z",
+            "errors": {
+              "no_route": 4
+            }
+          },
+          "selection": {
+            "target": 4,
+            "refillAt": 2,
+            "healthy": 4,
+            "scanning": false,
+            "selected": [
+              "tcp-d",
+              "wssmux-d",
+              "wssmux-r",
+              "wsmux-r"
+            ],
+            "reason": "selected paths are measured; active traffic retains its agreed generation"
+          },
+          "originalManifestAndFencingPreserved": true,
+          "approvedCandidates": 38,
+          "forwardedPorts": [
+            "8888",
+            "8889"
+          ],
+          "configSha256": "731f809173c654d8c582be05a1b0edfce3f6edae08cad74f3c60ccfacf8007d7"
+        }
+      },
+      "backendPids": {},
+      "ownedUsers": {},
+      "binaryRollbackPreserved": true,
+      "cleaned": [
+        "/tmp/fullpack-peer-audit-20261014/unlimited-ops-20261016",
+        "/tmp/fullpack-peer-audit-20261014/wan-unlimited-20261016",
+        "/tmp/fullpack-peer-audit-20261014/release-v1.9.4-beta.2"
+      ],
+      "temporaryActiveUnits": "",
+      "restartedAux": []
+    },
+    {
+      "host": "206.1.101.187",
+      "version": "v1.9.4-beta.2\nhttps://github.com/firegoood/FullPack",
+      "allRunningFullPackProcessesMatchRelease": true,
+      "pairs": {
+        "TR-unlimited-kharej": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 1015,
+            "completed": 1015,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          },
+          "selection": {
+            "target": 4,
+            "refillAt": 2,
+            "healthy": 3,
+            "scanning": false,
+            "selected": [
+              "tcp-r",
+              "stealth-r",
+              "wss-r"
+            ],
+            "reason": ""
+          },
+          "originalManifestAndFencingPreserved": true,
+          "approvedCandidates": 38,
+          "forwardedPorts": [
+            "8880",
+            "2052"
+          ],
+          "configSha256": "e6cbaef4ad755852afe686b31abf6ef858a6bd4489efce99c20e09fe98c2c696"
+        }
+      },
+      "backendPids": {
+        "firenode": 28230,
+        "xray": 28337
+      },
+      "ownedUsers": {
+        "8880": {
+          "remainingOwnedUsers": 0,
+          "independentApiQuery": true
+        },
+        "2052": {
+          "remainingOwnedUsers": 0,
+          "independentApiQuery": true
+        }
+      },
+      "binaryRollbackPreserved": true,
+      "cleaned": [
+        "/tmp/fullpack-peer-audit-20261014/unlimited-ops-20261016",
+        "/tmp/fullpack-peer-audit-20261014/wan-unlimited-20261016",
+        "/tmp/fullpack-peer-audit-20261014/release-v1.9.4-beta.2",
+        "/run/fullpack-unlimited-20261016"
+      ],
+      "temporaryActiveUnits": "",
+      "restartedAux": []
+    },
+    {
+      "host": "185.114.49.230",
+      "version": "v1.9.4-beta.2\nhttps://github.com/firegoood/FullPack",
+      "allRunningFullPackProcessesMatchRelease": true,
+      "pairs": {
+        "NL-unlimited-kharej": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 1,
+            "admitted": 1014,
+            "completed": 1013,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          },
+          "selection": {
+            "target": 4,
+            "refillAt": 2,
+            "healthy": 4,
+            "scanning": false,
+            "selected": [
+              "tcp-d",
+              "wssmux-d",
+              "wssmux-r",
+              "wsmux-r"
+            ],
+            "reason": ""
+          },
+          "originalManifestAndFencingPreserved": true,
+          "approvedCandidates": 38,
+          "forwardedPorts": [
+            "8888",
+            "8889"
+          ],
+          "configSha256": "0bc3a3e1aa52d85ee84cd503d82c28b47e09f7b365fdd318bf981119f0c9d5c0"
+        }
+      },
+      "backendPids": {
+        "firenode": 34097,
+        "xray": 34168
+      },
+      "ownedUsers": {
+        "8888": {
+          "remainingOwnedUsers": 0,
+          "independentApiQuery": true
+        },
+        "8889": {
+          "remainingOwnedUsers": 0,
+          "independentApiQuery": true
+        }
+      },
+      "binaryRollbackPreserved": true,
+      "cleaned": [
+        "/tmp/fullpack-peer-audit-20261014/unlimited-20261015",
+        "/tmp/fullpack-peer-audit-20261014/unlimited-build-20261015",
+        "/tmp/fullpack-peer-audit-20261014/unlimited-ops-20261016",
+        "/tmp/fullpack-peer-audit-20261014/wan-unlimited-20261016",
+        "/tmp/fullpack-peer-audit-20261014/release-v1.9.4-beta.2",
+        "/run/fullpack-unlimited-20261016"
+      ],
+      "temporaryActiveUnits": "",
+      "restartedAux": []
+    }
+  ],
+  "resourceSamples": [
+    {
+      "host": "188.136.159.49",
+      "at": "2026-10-15T21:36:36.610054+00:00",
+      "memory": {
+        "MemTotal": "2015040 kB",
+        "MemAvailable": "1498744 kB"
+      },
+      "processes": [
+        {
+          "name": "fullpack",
+          "pid": 360210,
+          "rss": "25212 kB",
+          "fds": 6
+        },
+        {
+          "name": "fullpack",
+          "pid": 360736,
+          "rss": "42996 kB",
+          "fds": 49
+        },
+        {
+          "name": "fullpack",
+          "pid": 361546,
+          "rss": "50980 kB",
+          "fds": 60
+        },
+        {
+          "name": "fullpack",
+          "pid": 362726,
+          "rss": "23520 kB",
+          "fds": 7
+        }
+      ],
+      "status": {
+        "TR-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 3,
+            "completed": 3,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        },
+        "NL-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 0,
+            "completed": 0,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 2,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorCode": "no_route",
+            "lastErrorStage": "udp_peer_handshake",
+            "lastErrorAt": "2026-10-15T21:32:58.242264091Z",
+            "errors": {
+              "no_route": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": "188.136.159.49",
+      "at": "2026-10-15T21:36:38.000705+00:00",
+      "memory": {
+        "MemTotal": "2015040 kB",
+        "MemAvailable": "1501800 kB"
+      },
+      "processes": [
+        {
+          "name": "fullpack",
+          "pid": 360210,
+          "rss": "25212 kB",
+          "fds": 6
+        },
+        {
+          "name": "fullpack",
+          "pid": 360736,
+          "rss": "42996 kB",
+          "fds": 47
+        },
+        {
+          "name": "fullpack",
+          "pid": 361546,
+          "rss": "50980 kB",
+          "fds": 60
+        },
+        {
+          "name": "fullpack",
+          "pid": 362726,
+          "rss": "23520 kB",
+          "fds": 7
+        }
+      ],
+      "status": {
+        "TR-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 3,
+            "completed": 3,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        },
+        "NL-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 0,
+            "completed": 0,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 2,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorCode": "no_route",
+            "lastErrorStage": "udp_peer_handshake",
+            "lastErrorAt": "2026-10-15T21:32:58.242264091Z",
+            "errors": {
+              "no_route": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": "206.1.101.187",
+      "at": "2026-10-15T21:36:39.143967+00:00",
+      "memory": {
+        "MemTotal": "2015212 kB",
+        "MemAvailable": "1247288 kB"
+      },
+      "processes": [
+        {
+          "name": "firenode",
+          "pid": 28230,
+          "rss": "38312 kB",
+          "fds": 10
+        },
+        {
+          "name": "xray",
+          "pid": 28337,
+          "rss": "217980 kB",
+          "fds": 145
+        },
+        {
+          "name": "fullpack",
+          "pid": 57916,
+          "rss": "44248 kB",
+          "fds": 9
+        },
+        {
+          "name": "fullpack",
+          "pid": 58415,
+          "rss": "42248 kB",
+          "fds": 178
+        },
+        {
+          "name": "fullpack",
+          "pid": 58819,
+          "rss": "23788 kB",
+          "fds": 6
+        }
+      ],
+      "status": {
+        "TR-unlimited-kharej": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 128,
+            "admitted": 134,
+            "completed": 6,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        }
+      }
+    },
+    {
+      "host": "188.136.159.49",
+      "at": "2026-10-15T21:36:42.853459+00:00",
+      "memory": {
+        "MemTotal": "2015040 kB",
+        "MemAvailable": "1486084 kB"
+      },
+      "processes": [
+        {
+          "name": "fullpack",
+          "pid": 360210,
+          "rss": "25212 kB",
+          "fds": 6
+        },
+        {
+          "name": "fullpack",
+          "pid": 360736,
+          "rss": "49780 kB",
+          "fds": 305
+        },
+        {
+          "name": "fullpack",
+          "pid": 361546,
+          "rss": "51364 kB",
+          "fds": 61
+        },
+        {
+          "name": "fullpack",
+          "pid": 362726,
+          "rss": "23520 kB",
+          "fds": 7
+        }
+      ],
+      "status": {
+        "TR-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 258,
+            "admitted": 223,
+            "completed": 6,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        },
+        "NL-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 0,
+            "completed": 0,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 2,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorCode": "no_route",
+            "lastErrorStage": "udp_peer_handshake",
+            "lastErrorAt": "2026-10-15T21:32:58.242264091Z",
+            "errors": {
+              "no_route": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": "206.1.101.187",
+      "at": "2026-10-15T21:36:43.867027+00:00",
+      "memory": {
+        "MemTotal": "2015212 kB",
+        "MemAvailable": "1304232 kB"
+      },
+      "processes": [
+        {
+          "name": "firenode",
+          "pid": 28230,
+          "rss": "41884 kB",
+          "fds": 11
+        },
+        {
+          "name": "xray",
+          "pid": 28337,
+          "rss": "116560 kB",
+          "fds": 498
+        },
+        {
+          "name": "fullpack",
+          "pid": 57916,
+          "rss": "44256 kB",
+          "fds": 185
+        },
+        {
+          "name": "fullpack",
+          "pid": 58415,
+          "rss": "46592 kB",
+          "fds": 355
+        },
+        {
+          "name": "fullpack",
+          "pid": 58819,
+          "rss": "23788 kB",
+          "fds": 6
+        }
+      ],
+      "status": {
+        "TR-unlimited-kharej": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 304,
+            "admitted": 310,
+            "completed": 6,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        }
+      }
+    },
+    {
+      "host": "188.136.159.49",
+      "at": "2026-10-15T21:36:47.501800+00:00",
+      "memory": {
+        "MemTotal": "2015040 kB",
+        "MemAvailable": "1471604 kB"
+      },
+      "processes": [
+        {
+          "name": "fullpack",
+          "pid": 360210,
+          "rss": "25212 kB",
+          "fds": 6
+        },
+        {
+          "name": "fullpack",
+          "pid": 360736,
+          "rss": "57972 kB",
+          "fds": 527
+        },
+        {
+          "name": "fullpack",
+          "pid": 361546,
+          "rss": "51364 kB",
+          "fds": 60
+        },
+        {
+          "name": "fullpack",
+          "pid": 362726,
+          "rss": "23520 kB",
+          "fds": 7
+        }
+      ],
+      "status": {
+        "TR-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 470,
+            "admitted": 454,
+            "completed": 6,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        },
+        "NL-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 0,
+            "completed": 0,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 2,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorCode": "no_route",
+            "lastErrorStage": "udp_peer_handshake",
+            "lastErrorAt": "2026-10-15T21:32:58.242264091Z",
+            "errors": {
+              "no_route": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": "206.1.101.187",
+      "at": "2026-10-15T21:36:48.424085+00:00",
+      "memory": {
+        "MemTotal": "2015212 kB",
+        "MemAvailable": "1308156 kB"
+      },
+      "processes": [
+        {
+          "name": "firenode",
+          "pid": 28230,
+          "rss": "42108 kB",
+          "fds": 10
+        },
+        {
+          "name": "xray",
+          "pid": 28337,
+          "rss": "135936 kB",
+          "fds": 1044
+        },
+        {
+          "name": "fullpack",
+          "pid": 57916,
+          "rss": "44276 kB",
+          "fds": 458
+        },
+        {
+          "name": "fullpack",
+          "pid": 58415,
+          "rss": "55476 kB",
+          "fds": 626
+        },
+        {
+          "name": "fullpack",
+          "pid": 58819,
+          "rss": "23788 kB",
+          "fds": 6
+        }
+      ],
+      "status": {
+        "TR-unlimited-kharej": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 576,
+            "admitted": 582,
+            "completed": 6,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        }
+      }
+    },
+    {
+      "host": "188.136.159.49",
+      "at": "2026-10-15T21:36:52.285818+00:00",
+      "memory": {
+        "MemTotal": "2015040 kB",
+        "MemAvailable": "1449984 kB"
+      },
+      "processes": [
+        {
+          "name": "fullpack",
+          "pid": 360210,
+          "rss": "25212 kB",
+          "fds": 6
+        },
+        {
+          "name": "fullpack",
+          "pid": 360736,
+          "rss": "70388 kB",
+          "fds": 794
+        },
+        {
+          "name": "fullpack",
+          "pid": 361546,
+          "rss": "51364 kB",
+          "fds": 59
+        },
+        {
+          "name": "fullpack",
+          "pid": 362726,
+          "rss": "23520 kB",
+          "fds": 7
+        }
+      ],
+      "status": {
+        "TR-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 744,
+            "admitted": 749,
+            "completed": 6,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        },
+        "NL-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 0,
+            "completed": 0,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 2,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorCode": "no_route",
+            "lastErrorStage": "udp_peer_handshake",
+            "lastErrorAt": "2026-10-15T21:32:58.242264091Z",
+            "errors": {
+              "no_route": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": "206.1.101.187",
+      "at": "2026-10-15T21:36:53.223822+00:00",
+      "memory": {
+        "MemTotal": "2015212 kB",
+        "MemAvailable": "1264412 kB"
+      },
+      "processes": [
+        {
+          "name": "firenode",
+          "pid": 28230,
+          "rss": "43068 kB",
+          "fds": 10
+        },
+        {
+          "name": "xray",
+          "pid": 28337,
+          "rss": "173064 kB",
+          "fds": 1515
+        },
+        {
+          "name": "fullpack",
+          "pid": 57916,
+          "rss": "44440 kB",
+          "fds": 693
+        },
+        {
+          "name": "fullpack",
+          "pid": 58415,
+          "rss": "62220 kB",
+          "fds": 864
+        },
+        {
+          "name": "fullpack",
+          "pid": 58819,
+          "rss": "23788 kB",
+          "fds": 6
+        }
+      ],
+      "status": {
+        "TR-unlimited-kharej": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 814,
+            "admitted": 820,
+            "completed": 6,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        }
+      }
+    },
+    {
+      "host": "188.136.159.49",
+      "at": "2026-10-15T21:36:56.919400+00:00",
+      "memory": {
+        "MemTotal": "2015040 kB",
+        "MemAvailable": "1436652 kB"
+      },
+      "processes": [
+        {
+          "name": "fullpack",
+          "pid": 360210,
+          "rss": "25212 kB",
+          "fds": 6
+        },
+        {
+          "name": "fullpack",
+          "pid": 360736,
+          "rss": "77044 kB",
+          "fds": 974
+        },
+        {
+          "name": "fullpack",
+          "pid": 361546,
+          "rss": "51364 kB",
+          "fds": 60
+        },
+        {
+          "name": "fullpack",
+          "pid": 362726,
+          "rss": "23520 kB",
+          "fds": 7
+        }
+      ],
+      "status": {
+        "TR-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 927,
+            "admitted": 933,
+            "completed": 6,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        },
+        "NL-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 0,
+            "completed": 0,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 2,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorCode": "no_route",
+            "lastErrorStage": "udp_peer_handshake",
+            "lastErrorAt": "2026-10-15T21:32:58.242264091Z",
+            "errors": {
+              "no_route": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": "206.1.101.187",
+      "at": "2026-10-15T21:36:57.875968+00:00",
+      "memory": {
+        "MemTotal": "2015212 kB",
+        "MemAvailable": "1224428 kB"
+      },
+      "processes": [
+        {
+          "name": "firenode",
+          "pid": 28230,
+          "rss": "43068 kB",
+          "fds": 11
+        },
+        {
+          "name": "xray",
+          "pid": 28337,
+          "rss": "199564 kB",
+          "fds": 1769
+        },
+        {
+          "name": "fullpack",
+          "pid": 57916,
+          "rss": "45904 kB",
+          "fds": 841
+        },
+        {
+          "name": "fullpack",
+          "pid": 58415,
+          "rss": "66940 kB",
+          "fds": 980
+        },
+        {
+          "name": "fullpack",
+          "pid": 58819,
+          "rss": "23788 kB",
+          "fds": 9
+        }
+      ],
+      "status": {
+        "TR-unlimited-kharej": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 927,
+            "admitted": 933,
+            "completed": 6,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        }
+      }
+    },
+    {
+      "host": "188.136.159.49",
+      "at": "2026-10-15T21:37:01.602346+00:00",
+      "memory": {
+        "MemTotal": "2015040 kB",
+        "MemAvailable": "1426824 kB"
+      },
+      "processes": [
+        {
+          "name": "fullpack",
+          "pid": 360210,
+          "rss": "25212 kB",
+          "fds": 6
+        },
+        {
+          "name": "fullpack",
+          "pid": 360736,
+          "rss": "81524 kB",
+          "fds": 1049
+        },
+        {
+          "name": "fullpack",
+          "pid": 361546,
+          "rss": "51364 kB",
+          "fds": 61
+        },
+        {
+          "name": "fullpack",
+          "pid": 362726,
+          "rss": "23520 kB",
+          "fds": 7
+        }
+      ],
+      "status": {
+        "TR-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 1000,
+            "admitted": 1006,
+            "completed": 6,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        },
+        "NL-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 0,
+            "completed": 0,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 2,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorCode": "no_route",
+            "lastErrorStage": "udp_peer_handshake",
+            "lastErrorAt": "2026-10-15T21:32:58.242264091Z",
+            "errors": {
+              "no_route": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": "206.1.101.187",
+      "at": "2026-10-15T21:37:03.123421+00:00",
+      "memory": {
+        "MemTotal": "2015212 kB",
+        "MemAvailable": "1182304 kB"
+      },
+      "processes": [
+        {
+          "name": "firenode",
+          "pid": 28230,
+          "rss": "43496 kB",
+          "fds": 10
+        },
+        {
+          "name": "xray",
+          "pid": 28337,
+          "rss": "219656 kB",
+          "fds": 2014
+        },
+        {
+          "name": "fullpack",
+          "pid": 57916,
+          "rss": "48184 kB",
+          "fds": 1006
+        },
+        {
+          "name": "fullpack",
+          "pid": 58415,
+          "rss": "71332 kB",
+          "fds": 1053
+        },
+        {
+          "name": "fullpack",
+          "pid": 58819,
+          "rss": "23612 kB",
+          "fds": 6
+        }
+      ],
+      "status": {
+        "TR-unlimited-kharej": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 1000,
+            "admitted": 1006,
+            "completed": 6,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        }
+      }
+    },
+    {
+      "host": "188.136.159.49",
+      "at": "2026-10-15T21:37:06.519083+00:00",
+      "memory": {
+        "MemTotal": "2015040 kB",
+        "MemAvailable": "1424832 kB"
+      },
+      "processes": [
+        {
+          "name": "fullpack",
+          "pid": 360210,
+          "rss": "25212 kB",
+          "fds": 6
+        },
+        {
+          "name": "fullpack",
+          "pid": 360736,
+          "rss": "82676 kB",
+          "fds": 1049
+        },
+        {
+          "name": "fullpack",
+          "pid": 361546,
+          "rss": "51364 kB",
+          "fds": 60
+        },
+        {
+          "name": "fullpack",
+          "pid": 362726,
+          "rss": "23520 kB",
+          "fds": 7
+        }
+      ],
+      "status": {
+        "TR-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 1000,
+            "admitted": 1006,
+            "completed": 6,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        },
+        "NL-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 0,
+            "completed": 0,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 2,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorCode": "no_route",
+            "lastErrorStage": "udp_peer_handshake",
+            "lastErrorAt": "2026-10-15T21:32:58.242264091Z",
+            "errors": {
+              "no_route": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": "206.1.101.187",
+      "at": "2026-10-15T21:37:07.504286+00:00",
+      "memory": {
+        "MemTotal": "2015212 kB",
+        "MemAvailable": "1194532 kB"
+      },
+      "processes": [
+        {
+          "name": "firenode",
+          "pid": 28230,
+          "rss": "39068 kB",
+          "fds": 10
+        },
+        {
+          "name": "xray",
+          "pid": 28337,
+          "rss": "220244 kB",
+          "fds": 14
+        },
+        {
+          "name": "fullpack",
+          "pid": 57916,
+          "rss": "51156 kB",
+          "fds": 6
+        },
+        {
+          "name": "fullpack",
+          "pid": 58415,
+          "rss": "72720 kB",
+          "fds": 52
+        },
+        {
+          "name": "fullpack",
+          "pid": 58819,
+          "rss": "23612 kB",
+          "fds": 6
+        }
+      ],
+      "status": {
+        "TR-unlimited-kharej": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 1006,
+            "completed": 1006,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        }
+      }
+    },
+    {
+      "host": "188.136.159.49",
+      "at": "2026-10-15T21:37:29.384333+00:00",
+      "memory": {
+        "MemTotal": "2015040 kB",
+        "MemAvailable": "1461004 kB"
+      },
+      "processes": [
+        {
+          "name": "fullpack",
+          "pid": 360210,
+          "rss": "25448 kB",
+          "fds": 6
+        },
+        {
+          "name": "fullpack",
+          "pid": 360736,
+          "rss": "84212 kB",
+          "fds": 50
+        },
+        {
+          "name": "fullpack",
+          "pid": 361546,
+          "rss": "51492 kB",
+          "fds": 60
+        },
+        {
+          "name": "fullpack",
+          "pid": 362726,
+          "rss": "23520 kB",
+          "fds": 7
+        }
+      ],
+      "status": {
+        "TR-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 1009,
+            "completed": 1009,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        },
+        "NL-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 0,
+            "completed": 0,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 2,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorCode": "no_route",
+            "lastErrorStage": "udp_peer_handshake",
+            "lastErrorAt": "2026-10-15T21:32:58.242264091Z",
+            "errors": {
+              "no_route": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": "188.136.159.49",
+      "at": "2026-10-15T21:37:31.159332+00:00",
+      "memory": {
+        "MemTotal": "2015040 kB",
+        "MemAvailable": "1449064 kB"
+      },
+      "processes": [
+        {
+          "name": "fullpack",
+          "pid": 360210,
+          "rss": "25448 kB",
+          "fds": 6
+        },
+        {
+          "name": "fullpack",
+          "pid": 360736,
+          "rss": "84212 kB",
+          "fds": 49
+        },
+        {
+          "name": "fullpack",
+          "pid": 361546,
+          "rss": "51492 kB",
+          "fds": 60
+        },
+        {
+          "name": "fullpack",
+          "pid": 362726,
+          "rss": "23520 kB",
+          "fds": 7
+        }
+      ],
+      "status": {
+        "TR-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 1009,
+            "completed": 1009,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        },
+        "NL-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 0,
+            "completed": 0,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 2,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorCode": "no_route",
+            "lastErrorStage": "udp_peer_handshake",
+            "lastErrorAt": "2026-10-15T21:32:58.242264091Z",
+            "errors": {
+              "no_route": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": "185.114.49.230",
+      "at": "2026-10-15T21:37:32.274711+00:00",
+      "memory": {
+        "MemTotal": "2013868 kB",
+        "MemAvailable": "1278028 kB"
+      },
+      "processes": [
+        {
+          "name": "firenode",
+          "pid": 34097,
+          "rss": "39900 kB",
+          "fds": 10
+        },
+        {
+          "name": "xray",
+          "pid": 34168,
+          "rss": "136600 kB",
+          "fds": 421
+        },
+        {
+          "name": "fullpack",
+          "pid": 105560,
+          "rss": "44616 kB",
+          "fds": 158
+        },
+        {
+          "name": "fullpack",
+          "pid": 106058,
+          "rss": "54656 kB",
+          "fds": 310
+        },
+        {
+          "name": "fullpack",
+          "pid": 106859,
+          "rss": "23152 kB",
+          "fds": 6
+        }
+      ],
+      "status": {
+        "NL-unlimited-kharej": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 250,
+            "admitted": 253,
+            "completed": 3,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        }
+      }
+    },
+    {
+      "host": "188.136.159.49",
+      "at": "2026-10-15T21:37:35.904027+00:00",
+      "memory": {
+        "MemTotal": "2015040 kB",
+        "MemAvailable": "1389752 kB"
+      },
+      "processes": [
+        {
+          "name": "fullpack",
+          "pid": 360210,
+          "rss": "25448 kB",
+          "fds": 6
+        },
+        {
+          "name": "fullpack",
+          "pid": 360736,
+          "rss": "84212 kB",
+          "fds": 49
+        },
+        {
+          "name": "fullpack",
+          "pid": 361546,
+          "rss": "86308 kB",
+          "fds": 1059
+        },
+        {
+          "name": "fullpack",
+          "pid": 362726,
+          "rss": "23520 kB",
+          "fds": 7
+        }
+      ],
+      "status": {
+        "TR-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 1009,
+            "completed": 1009,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        },
+        "NL-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 1000,
+            "admitted": 1003,
+            "completed": 3,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 2,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorCode": "no_route",
+            "lastErrorStage": "udp_peer_handshake",
+            "lastErrorAt": "2026-10-15T21:32:58.242264091Z",
+            "errors": {
+              "no_route": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": "185.114.49.230",
+      "at": "2026-10-15T21:37:36.853934+00:00",
+      "memory": {
+        "MemTotal": "2013868 kB",
+        "MemAvailable": "1208996 kB"
+      },
+      "processes": [
+        {
+          "name": "firenode",
+          "pid": 34097,
+          "rss": "37048 kB",
+          "fds": 10
+        },
+        {
+          "name": "xray",
+          "pid": 34168,
+          "rss": "205452 kB",
+          "fds": 2017
+        },
+        {
+          "name": "fullpack",
+          "pid": 105560,
+          "rss": "48328 kB",
+          "fds": 1006
+        },
+        {
+          "name": "fullpack",
+          "pid": 106058,
+          "rss": "75136 kB",
+          "fds": 1060
+        },
+        {
+          "name": "fullpack",
+          "pid": 106859,
+          "rss": "23152 kB",
+          "fds": 6
+        }
+      ],
+      "status": {
+        "NL-unlimited-kharej": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 1000,
+            "admitted": 1003,
+            "completed": 3,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        }
+      }
+    },
+    {
+      "host": "188.136.159.49",
+      "at": "2026-10-15T21:37:40.368816+00:00",
+      "memory": {
+        "MemTotal": "2015040 kB",
+        "MemAvailable": "1402644 kB"
+      },
+      "processes": [
+        {
+          "name": "fullpack",
+          "pid": 360210,
+          "rss": "25448 kB",
+          "fds": 6
+        },
+        {
+          "name": "fullpack",
+          "pid": 360736,
+          "rss": "84468 kB",
+          "fds": 46
+        },
+        {
+          "name": "fullpack",
+          "pid": 361546,
+          "rss": "86820 kB",
+          "fds": 1062
+        },
+        {
+          "name": "fullpack",
+          "pid": 362726,
+          "rss": "23620 kB",
+          "fds": 7
+        }
+      ],
+      "status": {
+        "TR-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 1009,
+            "completed": 1009,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        },
+        "NL-unlimited": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 1000,
+            "admitted": 1003,
+            "completed": 3,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 2,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorCode": "no_route",
+            "lastErrorStage": "udp_peer_handshake",
+            "lastErrorAt": "2026-10-15T21:32:58.242264091Z",
+            "errors": {
+              "no_route": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": "185.114.49.230",
+      "at": "2026-10-15T21:37:41.333970+00:00",
+      "memory": {
+        "MemTotal": "2013868 kB",
+        "MemAvailable": "1210576 kB"
+      },
+      "processes": [
+        {
+          "name": "firenode",
+          "pid": 34097,
+          "rss": "37048 kB",
+          "fds": 10
+        },
+        {
+          "name": "xray",
+          "pid": 34168,
+          "rss": "189956 kB",
+          "fds": 2017
+        },
+        {
+          "name": "fullpack",
+          "pid": 105560,
+          "rss": "50760 kB",
+          "fds": 1006
+        },
+        {
+          "name": "fullpack",
+          "pid": 106058,
+          "rss": "76160 kB",
+          "fds": 59
+        },
+        {
+          "name": "fullpack",
+          "pid": 106859,
+          "rss": "23860 kB",
+          "fds": 6
+        }
+      ],
+      "status": {
+        "NL-unlimited-kharej": {
+          "state": "HEALTHY",
+          "active": "tcp-d",
+          "generation": 2,
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 0,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 0,
+            "admitted": 1003,
+            "completed": 1003,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          }
+        }
+      }
+    }
+  ],
+  "remaining": [
+    "4000-connection loopback workload exceeded its 1280 MiB cgroup; NOT VERIFIED",
+    "1000 simultaneous cold Xray handshakes timed out without Auto on TR; bounded startup and held capacity are distinct",
+    "1000-connection WAN load was only on active TCP Reverse/Direct paths, not every carrier",
+    "sustained bandwidth and 24-hour operation are NOT VERIFIED"
+  ],
+  "activation": {
+    "TR": {
+      "started": "2026-10-15T21:30:53.394738+00:00",
+      "finished": "2026-10-15T21:31:35.334124+00:00",
+      "success": true,
+      "oldFencingPreserved": true
+    },
+    "NL": {
+      "started": "2026-10-15T21:32:35.166563+00:00",
+      "finished": "2026-10-15T21:35:09.254743+00:00",
+      "success": true,
+      "oldFencingPreserved": true
+    }
+  },
+  "ciJobs": [
+    {
+      "name": "verify / Vulnerabilities and static analysis",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify / Auto Direct and L3 network namespaces",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify / Native ICMP and enrolled peer recovery",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify / Wire compatibility with the previous release",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify / Fuzz the parsers",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify / Build and test (coverage)",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify / Build and test (race)",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify / Build and test (normal)",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify / Sustained run",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify / Managed HTTPS carriers",
+      "conclusion": "success"
+    },
+    {
+      "name": "verify / Cross-build",
+      "conclusion": "success"
+    },
+    {
+      "name": "release",
+      "conclusion": "success"
+    }
+  ],
+  "operatorBackendPidsUnchangedSinceBeforeUpgrade": true
+}

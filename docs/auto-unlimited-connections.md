@@ -10,7 +10,8 @@
 تنظیمات قدیمی تا ارتقای هماهنگ دو طرف حفظ می‌شوند؛ نبود سقف نرم‌افزاری
 به معنی حافظه، سرعت یا ظرفیت نامحدود سرور نیست. نتایج آزمون و نصب باید
 جداگانه ثبت می‌شوند. آزمون محلی هزار اتصال و بار ترکیبی پاس شده‌اند؛
-این نتیجه هنوز تأیید نصب روی سرورها، ظرفیت WAN یا پایداری ۲۴ساعته نیست.
+نسخهٔ امضاشده روی سه سرور نصب و هزار اتصال هم‌زمان در هر جفت روی WAN
+تأیید شد. این آزمون کوتاه، تضمین هزار کاربر واقعی یا پایداری ۲۴ساعته نیست.
 
 </div>
 
@@ -63,8 +64,8 @@
 Local Linux checks passed for the affected peer policy/admission, legacy hash,
 Quick setup and native engine packages. Nine held-load scenarios passed: 1000
 application connections on TCP/WSS/Stealth/QUIC in both Reverse and Direct, plus
-1000 TCP with 256 UDP associations. Every held TCP stream exchanged two distinct
-integrity challenges, both peers agreed on the generation, count rejection stayed
+1000 TCP with 256 UDP associations. Every held TCP stream completed two
+integrity exchanges, both peers agreed on the generation, count rejection stayed
 zero and joined shutdown released the active flows. Native Wat separately passed
 1000 authenticated held engine streams over a bounded in-memory packet transport,
 12000 sequential retirements and both disjoint peer namespaces. Raw ICMP was
@@ -78,13 +79,57 @@ relay buffers and installed operator configuration are unchanged. The corrected 
 1000 ×2 (2000), with both peers at zero live flows after closure. Its 1000 ×4
 phase still hit the same 1280 MiB cgroup limit; **4000 connections are NOT
 VERIFIED**. Direct Xray controls and held setup concurrency are reported separately.
-An explicit `--connections-per-user=1,2` supports a completed narrower workload;
-the default `1,2,4` diagnostic keeps the larger challenge available. See
+A completed `--connections-per-user=1,2` sweep passed all 15 matched/plain/Auto
+phases for 700/800/1000 identities, including 2000 held Auto connections with
+1000 separately authenticated Xray accounts, no failures, unchanged generation
+and zero live flows at both peers after closure. Setup was bounded at 128
+concurrent handshakes; all established connections were held together. The
+fixture shares both tunnel engines, clients and echo in one process; measured
+RSS is not an installed single-engine capacity estimate.
+The default `1,2,4` diagnostic keeps the larger challenge available. See
 [the local evidence](verification/auto-unlimited-local-20261016.json).
 
-**PENDING / NOT VERIFIED:** full CI/race acceptance, completion of the encrypted
-application sweep, signed release, installed pair migration, WAN capacity and
-24-hour operation. A target count or a passing socket open is not a successful
-user/application transaction. Historical 64/192 rejection reports remain preserved.
+The signed **v1.9.4-beta.2** source
+`42164d93523771853ec98e3af90008e1ed0723a2` passed all eleven CI verification jobs,
+including normal/race/coverage, both bounded/unlimited admission gates, native
+ICMP recovery, Direct/L3, managed HTTPS, wire compatibility and static/security
+checks in [release run 38806904756](https://github.com/firegoood/FullPack/actions/runs/38806904756).
+Every published archive, exact-tag fork signature, legal members and Go 1.27.2
+build record was independently verified before installation on all three hosts.
 
-*Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; new unlimited behavior requires the separately recorded tests above).*
+The prior TR/NL shared policy remained 64 until controlled fresh enrollment.
+`TR-unlimited` / `TR-unlimited-kharej` and `NL-unlimited` /
+`NL-unlimited-kharej` now explicitly enroll zero. All 38 approved candidates and
+forwarded ports remain unchanged. Original configurations, original fencing files
+and private binary rollbacks are retained; no forensic fencing snapshot was
+restored. `max_connections = 64` may remain as the ignored legacy field beside
+`connection_limit = 0`; the new field determines actual admission. CLI status
+reports `flows.unlimited = true` and `flows.limit = 0` on both peers.
+
+Installed WAN verification passed **1000 separate synthetic accounts and 1000
+held application connections per pair**, through TCP Reverse on TR and TCP Direct
+on NL. Every connection completed both HTTP response/body checks through Xray;
+sampled active Auto flows reached 1000, generations stayed at 2 and new admission
+rejections were zero. Setup was bounded to 128 unfinished handshakes and all
+successful connections remained open together for five seconds before the second
+check. This is a short held-capacity check, not 1000 handshakes completing at once.
+The secondary forwarded ports 8880/8889 passed separate application smoke checks.
+All runtime test accounts were independently verified absent, every running
+FullPack process matched the signed binary, operator backend PIDs stayed unchanged
+and owned temporary directories/active units were removed. See
+[the installed WAN evidence](verification/auto-unlimited-wan-20261016.json).
+
+A separate control burst of 1000 new handshakes directly into the installed TR
+Xray, bypassing Auto, verified only five and timed out on 995. Its specific cause
+was not established. Both backends subsequently passed 1000 held connections with
+128 concurrent starts. Preserve this distinction; removing Auto's ceiling does
+not prove unlimited backend authentication rate. Existing unavailable carrier
+routes/prerequisites remain distinct from the active paths tested under load.
+
+**NOT VERIFIED:** the 4000-connection workload that exceeded its isolated memory
+budget, 1000 simultaneous cold Xray handshakes, every carrier under WAN load,
+sustained application bandwidth and 24-hour operation. Historical rejection and
+failed fixture/control reports remain preserved. These results are not a claim
+of guaranteed production capacity for 1000 real users.
+
+*Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-16; bounded evidence and remaining gates are recorded above).*
