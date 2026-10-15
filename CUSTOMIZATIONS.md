@@ -34,6 +34,10 @@ data and distinguish the 700/800/1000-identity test from admitted connections.
 Extend only the diagnostic identity ceiling to 1000; production remains at its
 actual enrolled ceiling. Preserve previous raw evidence and record deployment
 and WAN outcomes separately in `docs/auto-admission-deployment.md`.
+Prerelease version extraction must retain the full suffix in Make/CI. The
+release must compare the complete tag to the binary's declared version and
+verify public installation using that exact tag, including for prereleases;
+keep `TestReleaseToolingKeepsPrereleaseIdentity` and the full CI dependency.
 
 ## Auto admission repair approved on 2026-10-15
 

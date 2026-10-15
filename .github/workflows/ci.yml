@@ -64,6 +64,12 @@ jobs:
         if: matrix.mode == 'normal'
         run: go vet ./...
 
+      - name: Verify exact stable and prerelease version identity
+        if: matrix.mode == 'normal'
+        run: |
+          command -v make
+          go test ./internal/app -run '^TestReleaseToolingKeepsPrereleaseIdentity$' -count=1
+
       - name: Test
         if: matrix.mode == 'normal'
         # The e2e tests bind loopback ports and wait on real handshakes, so
@@ -381,7 +387,7 @@ jobs:
         # had drifted. A guard that cannot fire is worse than no guard, because
         # it is read as one.
         run: |
-          embedded="$(grep -oE 'Version = "v[0-9.]+"' internal/app/app.go | grep -oE 'v[0-9.]+')"
+          embedded="$(grep -oE 'Version = "v[0-9.]+(-[0-9A-Za-z.]+)?"' internal/app/app.go | cut -d '"' -f2)"
           declared="$(tr -d ' \n' < VERSION)"
           echo "embedded=$embedded declared=$declared"
           if [ "$embedded" != "$declared" ]; then

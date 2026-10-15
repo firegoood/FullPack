@@ -69,6 +69,7 @@
       "BIN      := fullpack",
       "release/fullpack_linux_$$a.tar.gz",
       "RELEASE_TAG ?=",
+      "(-[0-9A-Za-z.]+)?",
       "release/SHA256SUMS \"$(RELEASE_TAG)\""
     ],
     "install.sh": [
@@ -86,6 +87,8 @@
       "release/fullpack_linux_*.tar.gz",
       "Verify FullPack customizations",
       "needs: verify",
+      "if [ \"$tag\" != \"$declared\" ]",
+      "sudo env BP_RELEASE_TAG=\"$TAG\"",
       "make release RELEASE_TAG=\"$TAG\"",
       "tools/verifysums",
       "release/RELEASE_TAG",
@@ -321,6 +324,7 @@
     "internal/webui/panel/js/lib/tstate.js": ["dataWarning", "At capacity", "Data errors"],
     "docs/auto-admission-repair.md": ["NOT VERIFIED", "two-second", "one quarter", "fresh enrollment"],
     "docs/verification/auto-admission-20261015.json": ["\"peakQueuedTcp\"", "\"udpAssociations\": 16", "\"productionDeployment\": \"NOT DONE\""],
-    "docs/auto-admission-deployment.md": ["NOT VERIFIED", "v1.9.4-beta.1", "Never restore", "currently 64"]
+    "docs/auto-admission-deployment.md": ["NOT VERIFIED", "v1.9.4-beta.1", "Never restore", "currently 64"],
+    "internal/app/releaseversion_test.go": ["TestReleaseToolingKeepsPrereleaseIdentity", "v1.9.4-beta.1"]
   }
 }

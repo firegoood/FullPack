@@ -104,10 +104,8 @@ jobs:
         run: |
           tag="$TAG"
           declared="$(tr -d ' \n' < VERSION)"
-          # A pre-release tag (v1.6.0-beta.1) carries the version it is a
-          # pre-release of, so compare only the part before the suffix.
-          base="${tag%%-*}"
-          if [ "$base" != "$declared" ]; then
+          # Stable and prerelease binaries retain the exact signed tag identity.
+          if [ "$tag" != "$declared" ]; then
             echo "Tag $tag does not match VERSION ($declared)."
             exit 1
           fi
@@ -173,7 +171,7 @@ jobs:
           set -euo pipefail
           curl -fsSL --retry 3 https://raw.githubusercontent.com/firegoood/FullPack/main/install.sh -o /tmp/fullpack-install.sh
           cmp install.sh /tmp/fullpack-install.sh
-          sudo bash /tmp/fullpack-install.sh </dev/null
+          sudo env BP_RELEASE_TAG="$TAG" bash /tmp/fullpack-install.sh </dev/null
           version="$(/usr/local/bin/fullpack version)"
           printf '%s\n' "$version"
           case "$version" in *"$TAG"*) ;; *) echo 'Installed version differs from published tag'; exit 1 ;; esac
