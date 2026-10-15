@@ -15,6 +15,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/backpack/backpack/internal/app"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -221,13 +222,5 @@ func write(fields []field) {
 		"</div>\n")
 
 	fmt.Fprintf(out, "\n---\n\n*Generated from `config/` on %s. Last verified against FullPack %s.*\n",
-		time.Now().Format("2006-01-02"), version())
-}
-
-func version() string {
-	b, err := os.ReadFile("VERSION")
-	if err != nil {
-		return "(unknown)"
-	}
-	return strings.TrimSpace(string(b))
+		time.Now().Format("2006-01-02"), app.Version)
 }

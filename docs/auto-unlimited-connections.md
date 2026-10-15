@@ -72,11 +72,14 @@ zero and joined shutdown released the active flows. Native Wat separately passed
 
 The independent Xray account audit initially passed 700 identities with 1/2/4
 held connections each (up to 2800), then its isolated 1280 MiB cgroup ran out of
-memory during the 800-identity sweep. Preserve this failure. The harness is being
-corrected to wait for **both** peers' permitted half-close drain and to release
+memory during the 800-identity sweep. Preserve this failure. The harness now waits for **both** peers' permitted half-close drain and releases
 already completed fixture buffers between matched phases; production GC settings,
-relay buffers and installed operator configuration are unchanged. Direct Xray
-controls and held setup concurrency are reported separately. See
+relay buffers and installed operator configuration are unchanged. The corrected sweep passed 800 identities ×4 (3200 held connections) and
+1000 ×2 (2000), with both peers at zero live flows after closure. Its 1000 ×4
+phase still hit the same 1280 MiB cgroup limit; **4000 connections are NOT
+VERIFIED**. Direct Xray controls and held setup concurrency are reported separately.
+An explicit `--connections-per-user=1,2` supports a completed narrower workload;
+the default `1,2,4` diagnostic keeps the larger challenge available. See
 [the local evidence](verification/auto-unlimited-local-20261016.json).
 
 **PENDING / NOT VERIFIED:** full CI/race acceptance, completion of the encrypted

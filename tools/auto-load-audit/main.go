@@ -459,7 +459,17 @@ func main() {
 	unlimited := flag.Bool("unlimited", false, "also verify held unlimited Auto at 1, 2 and 4 simultaneous connections per synthetic user")
 	unlimitedOnly := flag.Bool("unlimited-only", false, "run direct/unlimited comparisons without repeating historical capped cases")
 	setupConcurrency := flag.Int("setup-concurrency", 128, "simultaneous new handshakes for held unlimited comparisons; all accepted connections remain open together")
+	connectionCounts := flag.String("connections-per-user", "1,2,4", "held unlimited comparisons per identity; explicit comma-separated subset of 1,2,4")
 	flag.Parse()
+	var perUserCounts []int
+	for _, v := range strings.Split(*connectionCounts, ",") {
+		n, err := strconv.Atoi(v)
+		if err != nil || n != 1 && n != 2 && n != 4 || slices.Contains(perUserCounts, n) {
+			fmt.Fprintln(os.Stderr, "diagnostic connections per user must be a distinct subset of 1,2,4")
+			os.Exit(2)
+		}
+		perUserCounts = append(perUserCounts, n)
+	}
 	if *setupConcurrency < 1 || *setupConcurrency > 4000 {
 		fmt.Fprintln(os.Stderr, "diagnostic setup concurrency must be in 1..4000")
 		os.Exit(2)
@@ -493,7 +503,7 @@ func main() {
 		r.XraySHA256 = hex.EncodeToString(sum[:])
 	}
 	emit(map[string]any{"event": "start", "source": r.Source, "users": counts, "xray": r.XrayVersion})
-	err := execute(ctx, *binary, counts, *skipUDP, *unlimited || *unlimitedOnly, *unlimitedOnly, *setupConcurrency, &r)
+	err := execute(ctx, *binary, counts, *skipUDP, *unlimited || *unlimitedOnly, *unlimitedOnly, *setupConcurrency, perUserCounts, &r)
 	if err != nil {
 		r.InvariantErrors = append(r.InvariantErrors, err.Error())
 	}
@@ -511,7 +521,7 @@ func main() {
 	}
 }
 
-func execute(ctx context.Context, binary string, counts []int, skipUDP, unlimited, unlimitedOnly bool, setupConcurrency int, r *report) error {
+func execute(ctx context.Context, binary string, counts []int, skipUDP, unlimited, unlimitedOnly bool, setupConcurrency int, perUserCounts []int, r *report) error {
 	echo, err := startEcho(ctx)
 	if err != nil {
 		return err
@@ -558,7 +568,7 @@ func execute(ctx context.Context, binary string, counts []int, skipUDP, unlimite
 			add(runPhase(ctx, "plain-direct", echo.address, echo.address, users, 1, users, 0, x, nil))
 			perUser := []int{1, 2}
 			if unlimited {
-				perUser = append(perUser, 4)
+				perUser = perUserCounts
 			}
 			for _, per := range perUser {
 				name, window := "xray-direct", users*per

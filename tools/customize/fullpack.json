@@ -56,6 +56,7 @@
     "internal/manage/managedwebapi.go"
   ],
   "required": {
+    "tools/configref/main.go": ["github.com/backpack/backpack/internal/app", "app.Version"],
     "internal/app/app.go": [
       "RepoOwner = \"firegoood\"",
       "RepoName  = \"FullPack\"",
