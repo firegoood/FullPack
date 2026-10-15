@@ -310,7 +310,7 @@
     "internal/e2e/peerauto_pool_test.go": ["TestPeerAutoPoolReplenishesFourAfterTwoStandbyFailures", "failed path retained", "two-route shortfall"],
     "internal/e2e/testdata/auto-pool-netns.sh": ["FULLPACK_AUTO_NETNS", "same active generation and TUN", "ifindex"],
     "internal/e2e/testdata/auto-pool-config.go": ["QuickAutoL3Carriers()", "peerauto.Validate(c)"],
-    "tools/auto-load-audit/main.go": ["synthetic identities must be in 1..1000", "udpCapacityReleaseMs", "usersAllConnectionsVerified", "auto-paced", "[]int{64, 192}", "heldUntilAllAttemptsFinished", "auto-unlimited-held", "setup-concurrency"],
+    "tools/auto-load-audit/main.go": ["synthetic identities must be in 1..1000", "udpCapacityReleaseMs", "usersAllConnectionsVerified", "auto-paced", "[]int{64, 192}", "heldUntilAllAttemptsFinished", "auto-unlimited-held", "setup-concurrency", "peerFlowsAfterClose"],
     "tools/auto-load-audit/fixture.go": ["127.0.0.1:0", "peerauto.New", "iv_check", "synthetic-only", "finalRules", "\"port\": echoPort"],
     "tools/auto-load-audit/shadowsocks.go": ["ss-subkey", "ssDestination", "a.IP.IsLoopback()", "advanceNonce"],
     "tools/auto-load-audit/run-isolated.sh": ["PrivateNetwork=yes", "MemoryMax=512M", "--users=500,800", "InaccessiblePaths=/etc/fullpack /var/lib/firenode /opt/firenode"],

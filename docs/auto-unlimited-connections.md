@@ -9,7 +9,8 @@
 مدیر است و سقف ۱۹۲ ندارد. شمارش اتصال از صف موقت احراز هویت جدا می‌شود.
 تنظیمات قدیمی تا ارتقای هماهنگ دو طرف حفظ می‌شوند؛ نبود سقف نرم‌افزاری
 به معنی حافظه، سرعت یا ظرفیت نامحدود سرور نیست. نتایج آزمون و نصب باید
-جداگانه ثبت شوند و فعلاً تأیید نشده‌اند.
+جداگانه ثبت می‌شوند. آزمون محلی هزار اتصال و بار ترکیبی پاس شده‌اند؛
+این نتیجه هنوز تأیید نصب روی سرورها، ظرفیت WAN یا پایداری ۲۴ساعته نیست.
 
 </div>
 
@@ -59,10 +60,28 @@
 
 ## Verification
 
-**PENDING / NOT VERIFIED:** full affected Linux/race and carrier tests, actual
-concurrent encrypted application tests, signed release, installed pair migration,
-WAN capacity and 24-hour operation. A target count or a passing socket open is
-not a successful user/application transaction. Historical 64/192 rejection
-reports are preserved and do not verify this new policy.
+Local Linux checks passed for the affected peer policy/admission, legacy hash,
+Quick setup and native engine packages. Nine held-load scenarios passed: 1000
+application connections on TCP/WSS/Stealth/QUIC in both Reverse and Direct, plus
+1000 TCP with 256 UDP associations. Every held TCP stream exchanged two distinct
+integrity challenges, both peers agreed on the generation, count rejection stayed
+zero and joined shutdown released the active flows. Native Wat separately passed
+1000 authenticated held engine streams over a bounded in-memory packet transport,
+12000 sequential retirements and both disjoint peer namespaces. Raw ICMP was
+**SKIPPED** in the unprivileged package run; these are not filtered-ICMP WAN tests.
+
+The independent Xray account audit initially passed 700 identities with 1/2/4
+held connections each (up to 2800), then its isolated 1280 MiB cgroup ran out of
+memory during the 800-identity sweep. Preserve this failure. The harness is being
+corrected to wait for **both** peers' permitted half-close drain and to release
+already completed fixture buffers between matched phases; production GC settings,
+relay buffers and installed operator configuration are unchanged. Direct Xray
+controls and held setup concurrency are reported separately. See
+[the local evidence](verification/auto-unlimited-local-20261016.json).
+
+**PENDING / NOT VERIFIED:** full CI/race acceptance, completion of the encrypted
+application sweep, signed release, installed pair migration, WAN capacity and
+24-hour operation. A target count or a passing socket open is not a successful
+user/application transaction. Historical 64/192 rejection reports remain preserved.
 
 *Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; new unlimited behavior requires the separately recorded tests above).*

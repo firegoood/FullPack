@@ -19,6 +19,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"runtime"
+	"runtime/debug"
 	"slices"
 	"strconv"
 	"strings"
@@ -41,34 +42,35 @@ type resources struct {
 }
 
 type phaseResult struct {
-	Name             string               `json:"name"`
-	Users            int                  `json:"syntheticUsers"`
-	Connections      int                  `json:"connectionsPerUser"`
-	Attempts         int                  `json:"connectionAttempts"`
-	Concurrency      int                  `json:"attemptConcurrency"`
-	HoldAll          bool                 `json:"heldUntilAllAttemptsFinished"`
-	Capacity         int                  `json:"enrolledCapacity,omitempty"`
-	InitialSuccess   int                  `json:"initialSuccess"`
-	VerifiedSuccess  int                  `json:"verifiedSuccess"`
-	UsersAll         int                  `json:"usersAllConnectionsVerified"`
-	UsersPartial     int                  `json:"usersPartiallyConnected"`
-	UsersNone        int                  `json:"usersWithoutVerifiedConnection"`
-	Failures         map[string]int       `json:"initialErrors"`
-	LostAfterOpen    map[string]int       `json:"errorsAfterEstablishment"`
-	SuccessP50MS     float64              `json:"successP50Ms"`
-	SuccessP95MS     float64              `json:"successP95Ms"`
-	FailureP95MS     float64              `json:"failureP95Ms"`
-	DurationMS       int64                `json:"durationMs"`
-	Peak             resources            `json:"peak"`
-	HarnessCPUTicks  uint64               `json:"harnessCpuTicks"`
-	XrayCPUTicks     uint64               `json:"xrayCpuTicks"`
-	StateWhileFull   string               `json:"stateWhileLoaded,omitempty"`
-	GenerationBefore uint64               `json:"generationBefore,omitempty"`
-	GenerationAfter  uint64               `json:"generationAfter,omitempty"`
-	FlowsWhileLoaded *peerauto.FlowStatus `json:"flowsWhileLoaded,omitempty"`
-	FlowsAfterClose  *peerauto.FlowStatus `json:"flowsAfterClose,omitempty"`
-	DataWhileLoaded  *peerauto.DataStatus `json:"dataWhileLoaded,omitempty"`
-	PeakQueued       int                  `json:"peakQueuedTcp"`
+	Name                string               `json:"name"`
+	Users               int                  `json:"syntheticUsers"`
+	Connections         int                  `json:"connectionsPerUser"`
+	Attempts            int                  `json:"connectionAttempts"`
+	Concurrency         int                  `json:"attemptConcurrency"`
+	HoldAll             bool                 `json:"heldUntilAllAttemptsFinished"`
+	Capacity            int                  `json:"enrolledCapacity,omitempty"`
+	InitialSuccess      int                  `json:"initialSuccess"`
+	VerifiedSuccess     int                  `json:"verifiedSuccess"`
+	UsersAll            int                  `json:"usersAllConnectionsVerified"`
+	UsersPartial        int                  `json:"usersPartiallyConnected"`
+	UsersNone           int                  `json:"usersWithoutVerifiedConnection"`
+	Failures            map[string]int       `json:"initialErrors"`
+	LostAfterOpen       map[string]int       `json:"errorsAfterEstablishment"`
+	SuccessP50MS        float64              `json:"successP50Ms"`
+	SuccessP95MS        float64              `json:"successP95Ms"`
+	FailureP95MS        float64              `json:"failureP95Ms"`
+	DurationMS          int64                `json:"durationMs"`
+	Peak                resources            `json:"peak"`
+	HarnessCPUTicks     uint64               `json:"harnessCpuTicks"`
+	XrayCPUTicks        uint64               `json:"xrayCpuTicks"`
+	StateWhileFull      string               `json:"stateWhileLoaded,omitempty"`
+	GenerationBefore    uint64               `json:"generationBefore,omitempty"`
+	GenerationAfter     uint64               `json:"generationAfter,omitempty"`
+	FlowsWhileLoaded    *peerauto.FlowStatus `json:"flowsWhileLoaded,omitempty"`
+	FlowsAfterClose     *peerauto.FlowStatus `json:"flowsAfterClose,omitempty"`
+	PeerFlowsAfterClose *peerauto.FlowStatus `json:"peerFlowsAfterClose,omitempty"`
+	DataWhileLoaded     *peerauto.DataStatus `json:"dataWhileLoaded,omitempty"`
+	PeakQueued          int                  `json:"peakQueuedTcp"`
 }
 
 type report struct {
@@ -185,6 +187,10 @@ func percentile(v []float64, p int) float64 {
 }
 
 func runPhase(ctx context.Context, name, address, backend string, users, perUser, concurrent, capacity int, x *xrayFixture, a *autoFixture) phaseResult {
+	// Isolate each measurement from the fixture's previous, already closed
+	// sockets and pooled buffers. This is test-harness housekeeping, not a
+	// production GC setting or an allowance to evict live application flows.
+	debug.FreeOSMemory()
 	start := time.Now()
 	r := phaseResult{Name: name, Users: users, Connections: perUser, Attempts: users * perUser, Concurrency: concurrent, Capacity: capacity,
 		Failures: map[string]int{}, LostAfterOpen: map[string]int{}}
@@ -324,12 +330,17 @@ func runPhase(ctx context.Context, name, address, backend string, users, perUser
 		}
 	}
 	if a != nil {
-		until := time.Now().Add(8 * time.Second)
-		for a.iran.Snapshot().Flows.Live != 0 && time.Now().Before(until) {
+		// A backend may keep its permitted TCP half-close drain alive. Join
+		// both sides before the next held workload, rather than overlapping
+		// the previous peer's relay buffers with a new measurement.
+		until := time.Now().Add(35 * time.Second)
+		for (a.iran.Snapshot().Flows.Live != 0 || a.peer.Snapshot().Flows.Live != 0) && time.Now().Before(until) {
 			time.Sleep(20 * time.Millisecond)
 		}
 		s := a.iran.Snapshot()
 		r.FlowsAfterClose, r.GenerationAfter = &s.Flows, s.Generation
+		peer := a.peer.Snapshot()
+		r.PeerFlowsAfterClose = &peer.Flows
 	}
 	r.SuccessP50MS, r.SuccessP95MS, r.FailureP95MS = percentile(goodTimes, 50), percentile(goodTimes, 95), percentile(badTimes, 95)
 	r.DurationMS = time.Since(start).Milliseconds()
@@ -534,7 +545,7 @@ func execute(ctx context.Context, binary string, counts []int, skipUDP, unlimite
 				if p.GenerationBefore != p.GenerationAfter {
 					r.InvariantErrors = append(r.InvariantErrors, "load changed generation")
 				}
-				if p.FlowsAfterClose != nil && p.FlowsAfterClose.Live != 0 {
+				if p.FlowsAfterClose != nil && p.FlowsAfterClose.Live != 0 || p.PeerFlowsAfterClose != nil && p.PeerFlowsAfterClose.Live != 0 {
 					r.InvariantErrors = append(r.InvariantErrors, "TCP capacity was not released")
 				}
 				if p.Failures["integrity"] > 0 || p.LostAfterOpen["integrity"] > 0 {
