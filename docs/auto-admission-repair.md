@@ -1,5 +1,7 @@
 # Auto admission and data-health repair (2026-10-15)
 
+<div dir="rtl">
+
 ## خلاصهٔ فارسی
 
 آزمون پیشین نشان داد که Auto پس از رسیدن به سقف ۶۴/۱۹۲ اتصال، درخواست‌های
@@ -8,6 +10,8 @@
 محدود دوثانیه‌ای می‌گذارد. اشباع و خطای سرویس مقصد نیز مستقل از سلامت حامل
 در CLI و پنل وب نمایش داده می‌شوند. سقف اتصال و هویت جفت‌های موجود تغییر
 نمی‌کند؛ این اصلاح به‌معنی ظرفیت ۵۰۰/۸۰۰ کاربر هم‌زمان یا تأیید WAN نیست.
+
+</div>
 
 ## Behavior and compatibility
 
@@ -120,3 +124,5 @@ application traffic, production deployment, complete race/CI release acceptance,
 and a 24-hour soak. The two enrolled production pairs remain at their configured
 limit until a coordinated, verified deployment; no manifest/fencing files are
 rewritten by the diagnostic fixture. This source repair is not a signed release.
+
+*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

@@ -42,3 +42,9 @@ so the numbers do not reset when a tunnel bounces (and they carry on after a
 *Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
 
 *Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*
+
+## Admission release compatibility review (2026-10-15)
+
+Peer Auto flow status additionally reports `limit`, `liveUdp`, `udpLimit`, `queuedTcp` and `queueLimit`. `Data` reports a separate current/recent warning and bounded typed error counters. Queued/rejected connections are not successful users, and cumulative counters do not imply every later request failed.
+
+*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

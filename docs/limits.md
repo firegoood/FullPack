@@ -40,3 +40,9 @@ short loopback tests do not establish a user count or sustained WAN capacity.
 *Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
 
 *Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*
+
+## Admission release compatibility review (2026-10-15)
+
+Auto stream admission retains the enrolled total (default 64, maximum 192). UDP can occupy at most one quarter; TCP can use the full total when UDP is absent. TCP waits in a FIFO of at most twice the total for at most two seconds. Overflow remains a failed connection, not a served user. See [admission repair](auto-admission-repair.md).
+
+*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

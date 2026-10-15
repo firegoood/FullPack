@@ -93,3 +93,9 @@ results; WAN availability, 24-hour soak and 1000-user capacity remain NOT VERIFI
 </div>
 
 *Last verified against FullPack v1.9.3 (pool implementation and signed release review, 2026-10-15; expanded pool CI/signed release passed; WAN/24-hour/1000-user gates remain open).*
+
+## Admission release compatibility review (2026-10-15)
+
+Quick Auto preserves its enrolled connection policy. Carrier availability and data admission are reported separately: an online route can be at capacity. See [admission repair](auto-admission-repair.md) for queue/UDP limits and [deployment evidence](auto-admission-deployment.md) for the measured scope.
+
+*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

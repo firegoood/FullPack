@@ -190,3 +190,9 @@ forward‌های TCP گرسنه می‌مانند — سایت نصفه لود �
 *Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
 
 *Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*
+
+## Admission release compatibility review (2026-10-15)
+
+Peer Auto stream mode shares the enrolled total between TCP and UDP. UDP is limited to one quarter (one minimum when the total exceeds one); a one-slot pair reserves TCP. Existing active UDP associations retain the 60-second idle behavior and are not evicted. TCP can proceed using the remaining total. This rule does not change manual UDP or L3 transport behavior.
+
+*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

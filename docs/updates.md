@@ -66,3 +66,9 @@ release-based.
 *Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
 
 *Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*
+
+## Admission release compatibility review (2026-10-15)
+
+An explicitly selected prerelease is identified by its complete suffix. For the controlled admission deployment, the installer uses `BP_RELEASE_TAG=v1.9.4-beta.1` and verifies that tag-bound signature. Stable/latest selection remains independent. Keep current enrollment/fencing and a private binary rollback; never restore an older generation snapshot.
+
+*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

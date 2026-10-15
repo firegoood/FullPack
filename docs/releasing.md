@@ -165,3 +165,9 @@ during the incident.
 *Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
 
 *Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*
+
+## Admission release compatibility review (2026-10-15)
+
+Prerelease identity must remain exact throughout Make, CI, signing and installation: `v1.9.4-beta.1` must not become `v1.9.4`. Compare the full declared version with the tag. Public install verification sets `BP_RELEASE_TAG` to that exact tag; a prerelease does not replace stable `releases/latest`. Full CI and tag-bound signature verification remain required.
+
+*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

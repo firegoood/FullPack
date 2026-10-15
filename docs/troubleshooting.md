@@ -458,3 +458,9 @@ journalctl -u fullpack-webui -n 100
 *Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
 
 *Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*
+
+## Admission release compatibility review (2026-10-15)
+
+If peer Auto is online but clients see EOF, inspect the separate data warning and admission counters before changing carriers. The enrolled total may be full or the backend unavailable. A two-second bounded queue absorbs short bursts but cannot serve new clients when all admitted connections remain open. See [diagnosis](auto-synthetic-load-audit.md), [repair](auto-admission-repair.md) and [deployment status](auto-admission-deployment.md).
+
+*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

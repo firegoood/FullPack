@@ -406,3 +406,9 @@ them both ends have to agree on. This says what exists.
 ---
 
 *Generated from `config/` on 2026-10-15. Last verified against FullPack v1.9.3.*
+
+## Admission release compatibility review (2026-10-15)
+
+The Auto admission repair changes scheduling and diagnostics without changing `[auto].max_connections`, enrollment hashes or generation state. UDP has a bounded quarter share and TCP a two-second FIFO bounded at twice the enrolled total. Manual tunnel connection settings retain their existing meaning.
+
+*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*

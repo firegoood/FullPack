@@ -4,6 +4,8 @@ This document records the **before-fix** engine. The subsequent authorized
 [admission repair](auto-admission-repair.md) is recorded separately; these
 measurements must not be relabeled as results of the repaired engine.
 
+<div dir="rtl">
+
 ## خلاصهٔ فارسی
 
 این بررسی برای بازتولید EOF هنگام ورود بار کاربران است. هویت‌های ساختگی
@@ -15,6 +17,8 @@ EOF/Reset گرفتند. ورود کنترل‌شده با ۳۲ درخواست ه
 داد. همچنین ۶۴ نشست UDP ظرفیت TCP را تا حدود ۶۰ ثانیه پس از بستن کلاینت‌های
 UDP اشغال نگه داشتند. وضعیت گزارش‌شده همچنان HEALTHY بود.
 نتیجهٔ این آزمون کوتاه و محلی، تأیید ظرفیت ۵۰۰/۸۰۰ کاربر واقعی در WAN نیست.
+
+</div>
 
 ## Scope and method
 
@@ -167,3 +171,5 @@ WAN 500/800-user acceptance, sustained bandwidth, real application session mixes
 **NOT VERIFIED**. Accounts configured in Xray are not a count of concurrent
 independent users. Deliberately rejected overflow is an observed policy outcome,
 not successful service to the rejected users.
+
+*Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
