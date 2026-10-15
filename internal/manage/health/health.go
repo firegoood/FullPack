@@ -34,6 +34,10 @@ type Health struct {
 	// and the only record of it was a line in the client's log on the other
 	// machine.
 	ServiceDown *ServiceDownDetail
+	// DataWarning describes Auto admission/backend failures independently of
+	// carrier liveness. Capacity pressure must never trigger a service restart.
+	DataWarning string
+	DataCode    string
 }
 
 // ServiceDownDetail names the last hop that is failing.
@@ -93,12 +97,7 @@ func tunnelHealthWith(t core.Tunnel, pairs [][2]string) Health {
 				h.State, h.Detail = "unknown", "Auto coordinator status unavailable: "+err.Error()
 				return h
 			}
-			h.Connected = status.Active != ""
-			h.State = "offline"
-			if h.Connected {
-				h.State = "online"
-			}
-			h.Detail = "Auto " + status.State + ": " + status.Reason
+			applyAutoStatus(&h, status)
 			if d := serviceDown(app.ConfigDir, t.Name); d != nil && h.Connected {
 				h.ServiceDown = d
 				h.Detail += "; " + serviceDownDetail(d)
@@ -166,6 +165,19 @@ func tunnelHealthWith(t core.Tunnel, pairs [][2]string) Health {
 		}
 	}
 	return h
+}
+
+func applyAutoStatus(h *Health, status peerauto.Status) {
+	h.Connected = status.Active != ""
+	h.State = "offline"
+	if h.Connected {
+		h.State = "online"
+	}
+	h.Detail = "Auto carrier " + status.State + ": " + status.Reason
+	if d := status.Data; h.Connected && d != nil && d.Code != "available" {
+		h.DataWarning, h.DataCode = d.Detail, d.Code
+		h.Detail += "; " + d.Detail
+	}
 }
 
 // datagramPeerWindow is how long a snapshot's peer field stays meaningful. The

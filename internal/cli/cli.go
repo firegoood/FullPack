@@ -218,6 +218,8 @@ type tunnelView struct {
 	// tunnel can be perfectly healthy and every connection die one step past
 	// the end of it, and this is the only place that says so.
 	LocalService string `json:"local_service,omitempty"`
+	DataWarning  string `json:"data_warning,omitempty"`
+	DataCode     string `json:"data_code,omitempty"`
 
 	// Uptime over the last week, when there is enough history to say. Absent
 	// rather than zero for a tunnel nothing has sampled yet: not measured is
@@ -254,6 +256,7 @@ func viewOf(t manage.Tunnel, h manage.Health) tunnelView {
 		Name: t.Name, Role: t.Role, Transport: t.Transport, Addr: t.Addr,
 		Ports: manage.VisiblePorts(t.Ports, manage.TunnelToken(t.Name)),
 		State: h.State, Detail: h.Detail,
+		DataWarning: h.DataWarning, DataCode: h.DataCode,
 	}
 	attachTraffic(&v, t.Name)
 	attachUptime(&v, t.Name)

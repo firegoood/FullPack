@@ -28,18 +28,6 @@ func requestHeader(r *route, slot int, udp bool) []byte {
 	copy(b[11:], keyed(r.endpoint.w.key, "github.com/backpack/backpack/peer-auto/v1/data:", r.ticket, string(b[:11])))
 	return b
 }
-func (m *Manager) takeSlot(ctx context.Context) bool {
-	select {
-	case m.connections <- struct{}{}:
-		return true
-	case <-ctx.Done():
-		return false
-	default:
-		return false
-	}
-}
-func (m *Manager) freeSlot() { <-m.connections }
-
 func (m *Manager) trackFlow(r *route) func() {
 	m.flowAdmitted.Add(1)
 	var once sync.Once
@@ -143,11 +131,28 @@ func (m *Manager) serveData(e *candidate, c net.Conn, consumed chan<- struct{}) 
 		m.flowRejected.Add(1)
 		return
 	}
-	if !m.takeSlot(e.ctx) {
+	ticket, err := m.admission.begin(e.ctx, udp)
+	if err == nil {
+		err = ticket.wait(e.ctx, admissionWait)
+	}
+	if err != nil {
+		m.flowRejected.Add(1)
+		m.dataFailure("peer_admission", err)
+		// Additive negative response: older peers already reject every value
+		// except 1. Successful framing, authentication and wire version stay put.
+		_ = c.SetWriteDeadline(time.Now().Add(time.Second))
+		_, _ = c.Write([]byte{2})
+		return
+	}
+	defer ticket.release()
+	// A capacity wait must not extend the authorization of an old generation.
+	m.mu.Lock()
+	stillActive := m.active == r
+	m.mu.Unlock()
+	if !stillActive || r.ctx.Err() != nil {
 		m.flowRejected.Add(1)
 		return
 	}
-	defer m.freeSlot()
 	proto := "tcp"
 	if udp {
 		proto = "udp"
@@ -163,6 +168,7 @@ func (m *Manager) serveData(e *candidate, c net.Conn, consumed chan<- struct{}) 
 	}
 	if err != nil || backend == nil {
 		// Local application failure is distinct from carrier/control health.
+		_ = c.SetWriteDeadline(time.Now().Add(5 * time.Second))
 		_, _ = c.Write([]byte{0})
 		why := "unreachable"
 		if errors.Is(err, syscall.ECONNREFUSED) {
@@ -171,6 +177,7 @@ func (m *Manager) serveData(e *candidate, c net.Conn, consumed chan<- struct{}) 
 			why = "timeout"
 		}
 		metrics.ReportLocalDialFailure(lastTarget, why)
+		m.dataFailure("backend_dial", errBackend)
 		return
 	}
 	metrics.ReportLocalDialSuccess()
@@ -178,9 +185,11 @@ func (m *Manager) serveData(e *candidate, c net.Conn, consumed chan<- struct{}) 
 	if r.ctx.Err() != nil {
 		return
 	}
+	_ = c.SetWriteDeadline(time.Now().Add(5 * time.Second))
 	if _, err = c.Write([]byte{1}); err != nil {
 		return
 	}
+	_ = c.SetWriteDeadline(time.Time{})
 	defer m.trackFlow(r)()
 	if udp {
 		relayDatagrams(r.ctx, c, backend)
@@ -235,7 +244,7 @@ func (m *Manager) claim(ctx context.Context, slot int, udp bool) (net.Conn, erro
 	r := m.active
 	m.mu.Unlock()
 	if r == nil {
-		return nil, errors.New("NO_ROUTE: no committed peer route")
+		return nil, errNoDataRoute
 	}
 	t := time.NewTimer(5 * time.Second)
 	defer t.Stop()
@@ -247,7 +256,7 @@ func (m *Manager) claim(ctx context.Context, slot int, udp bool) (net.Conn, erro
 	case <-r.endpoint.ctx.Done():
 		return nil, errors.New("peer session unavailable")
 	case <-t.C:
-		return nil, errors.New("peer stream pool exhausted")
+		return nil, errDataPool
 	}
 	m.mu.Lock()
 	same := m.active == r
@@ -269,7 +278,10 @@ func (m *Manager) claim(ctx context.Context, slot int, udp bool) (net.Conn, erro
 	}
 	if ack[0] != 1 {
 		c.Close()
-		return nil, errors.New("peer backend unavailable (carrier remains healthy)")
+		if ack[0] == 2 {
+			return nil, errPeerCapacity
+		}
+		return nil, errBackend
 	}
 	stop := afterFuncJoined(r.ctx, func() { c.Close() })
 	b := &boundConn{Conn: c, stop: stop, finish: m.trackFlow(r)}
@@ -333,17 +345,25 @@ func (m *Manager) bindUsers() error {
 				if e != nil {
 					return
 				}
-				if !m.takeSlot(m.ctx) {
+				ticket, err := m.admission.begin(m.ctx, false)
+				if err != nil {
 					m.flowRejected.Add(1)
+					m.dataFailure("local_admission", err)
 					c.Close()
 					continue
 				}
 				m.launch(func() {
-					defer m.freeSlot()
+					defer ticket.release()
 					defer c.Close()
+					if err := ticket.wait(m.ctx, admissionWait); err != nil {
+						m.flowRejected.Add(1)
+						m.dataFailure("local_admission", err)
+						return
+					}
 					s, e := m.claim(m.ctx, slot, false)
 					if e != nil {
 						m.flowRejected.Add(1)
+						m.dataFailure("peer_handshake", e)
 						m.log.WithError(e).Debug("peer user stream admission failed")
 						return
 					}
@@ -384,13 +404,21 @@ func (m *Manager) serveUDP(pc net.PacketConn, slot int) {
 		key := addr.String()
 		mu.Lock()
 		f := sources[key]
-		if f == nil && m.takeSlot(m.ctx) {
+		var ticket *admissionTicket
+		if f == nil {
+			var err error
+			ticket, err = m.admission.begin(m.ctx, true)
+			if err != nil {
+				m.dataFailure("udp_admission", err)
+			}
+		}
+		if f == nil && ticket != nil {
 			f = &udpSource{q: make(chan []byte, 4), done: make(chan struct{})}
 			sources[key] = f
 			flow := f
 			peer := addr
 			m.launch(func() {
-				defer m.freeSlot()
+				defer ticket.release()
 				defer close(flow.done)
 				defer func() { mu.Lock(); delete(sources, key); mu.Unlock() }()
 				m.udpSource(pc, peer, slot, flow)
@@ -414,6 +442,7 @@ func (m *Manager) serveUDP(pc net.PacketConn, slot int) {
 func (m *Manager) udpSource(pc net.PacketConn, peer net.Addr, slot int, f *udpSource) {
 	c, err := m.claim(m.ctx, slot, true)
 	if err != nil {
+		m.dataFailure("udp_peer_handshake", err)
 		return
 	}
 	defer c.Close()

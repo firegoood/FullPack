@@ -14,6 +14,7 @@ import (
 	"github.com/backpack/backpack/internal/node"
 	"github.com/backpack/backpack/internal/quota"
 	"github.com/backpack/backpack/internal/sysstat"
+	"github.com/backpack/backpack/internal/tunnel/peerauto"
 )
 
 // TunnelInfo is one row for /api/tunnels.
@@ -66,6 +67,8 @@ type TunnelInfo struct {
 	// it that says why nothing works anyway — the reading an operator used to
 	// have to go and find in the far machine's journal.
 	ServiceDown string `json:"serviceDown,omitempty"`
+	DataWarning string `json:"dataWarning,omitempty"`
+	DataCode    string `json:"dataCode,omitempty"`
 
 	// Node is the managed server holding this tunnel's other end, when this
 	// panel built both. Empty for a tunnel whose far end was set up by hand,
@@ -256,6 +259,7 @@ func tunnelInfo(t manage.Tunnel, h manage.Health, peersByPort map[string][]peerC
 	if paired {
 		info.Node, info.PeerName = pair.Node, pair.PeerName
 	}
+	info.DataWarning, info.DataCode = h.DataWarning, h.DataCode
 	// The question is whether this side can ping the far end from its
 	// own config, or has to detect whoever connected to it. A reverse
 	// server listens and a reverse client dials; a direct tunnel has
@@ -506,6 +510,12 @@ func fillMetrics(info *TunnelInfo, snap metrics.Snapshot) {
 func fillConfig(info *TunnelInfo, t manage.Tunnel) {
 	cfg, err := manage.LoadTunnelConfig(t.Name)
 	if err != nil {
+		return
+	}
+	if cfg.Auto.Enabled {
+		if cfg.Auto.Mode != "l3" {
+			info.MaxConnections = peerauto.Defaults(cfg.Auto).MaxConnections
+		}
 		return
 	}
 	// The direct kinds keep their settings in their own tables. Reading

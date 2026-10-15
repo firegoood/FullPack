@@ -12,7 +12,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isUp, serviceDown, stateLabel, stateTone } from '../panel/js/lib/tstate.js';
+import { isUp, serviceDown, dataWarning, stateLabel, stateTone } from '../panel/js/lib/tstate.js';
 
 /* The state string itself is not exported — every screen that decided for
  * itself what it was got it wrong, so the only thing a screen may use is this
@@ -57,4 +57,16 @@ test('the three tones say three different things', () => {
 test('serviceDown is false rather than undefined when the server says nothing', () => {
   assert.equal(serviceDown({ state: 'online' }), false);
   assert.equal(serviceDown(undefined), false);
+});
+
+test('Auto admission saturation and recent data errors are warnings while carrier stays connected', () => {
+  for (const [dataCode, label] of [['capacity', 'At capacity'], ['queueing', 'Busy'], ['recent_errors', 'Data errors']]) {
+    const t = { state: 'online', dataWarning: 'Data admission needs attention', dataCode };
+    assert.equal(dataWarning(t), true);
+    assert.equal(isUp(t), true);
+    assert.equal(stateLabel(t), label);
+    assert.equal(stateTone(t), 'warn');
+  }
+  assert.equal(dataWarning(undefined), false);
+  assert.equal(stateLabel({ state: 'online' }), 'Online');
 });

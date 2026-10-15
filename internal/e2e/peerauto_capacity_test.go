@@ -144,4 +144,7 @@ func TestPeerAutoBoundedApplicationConnectionCapacity(t *testing.T) {
 	if err == nil || m.Snapshot().Flows.Live > 192 {
 		t.Fatal("193rd connection escaped the admission ceiling")
 	}
+	if s := m.Snapshot(); s.Data == nil || s.Data.Code != "capacity" || s.Data.Errors["queue_timeout"] == 0 || s.Flows.QueuedTCP != 0 {
+		t.Fatalf("overflow was hidden or left a queued socket: %+v", s)
+	}
 }

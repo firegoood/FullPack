@@ -18,6 +18,70 @@
 | 2026-10-14 | Inspect the operator's offline Auto and add approved Reverse/Direct endpoints | Re-enroll a fresh four-candidate pair, preserve retired configuration/fencing and verify TCP/WSS passes separately from Direct/Wat failures |
 | 2026-10-14 | Simplify Auto setup and publish an updated release | Shared CLI/web Quick Auto builder, explicit endpoint review, private peer link, advanced setup preservation and signed v1.9.2 source/tag/assets |
 | 2026-10-15 | Include every protocol in easy Auto and replenish selected routes | Explicit complete stream/L3 pools, four measured stable paths, authenticated reserve replenishment at two healthy paths, unchanged generation and bounded recovery policy |
+| 2026-10-15 | Diagnose EOF with 500/800 synthetic users | Opt-in loopback load audit with fresh Xray identities, matched direct/Auto workloads, connection-per-user accounting, bounded resources and UDP/TCP shared-capacity evidence; no production capacity/enrollment change |
+| 2026-10-15 | Fix the diagnosed Auto admission and misleading-health problems | Bound UDP occupancy, queue short TCP bursts with a bounded deadline, preserve enrollment totals and generation fencing, and expose capacity/backend data warnings in CLI/web independently of carrier health |
+| 2026-10-15 | Install the repaired build and test 700–1000 simulated users | Identifiable verified fork build with rollback, coordinated tunnel/panel restarts, preserved manifests/fencing and scoped synthetic/WAN traffic checks; do not claim simultaneous-user capacity above enrolled limits |
+
+## Controlled admission deployment approved on 2026-10-15
+
+The operator explicitly requested installation and further load tests. Prepare
+the identifiable `v1.9.4-beta.1` fork prerelease with the existing signature and
+full CI gates, then retain a private binary rollback on each enrolled server.
+Keep manifests, keys and evolving generation/history intact through upgrade and
+rollback; a saved fencing snapshot is forensic evidence, not state to restore.
+Restart only the relevant FullPack services, leave FireNode/Xray running, verify
+data and distinguish the 700/800/1000-identity test from admitted connections.
+Extend only the diagnostic identity ceiling to 1000; production remains at its
+actual enrolled ceiling. Preserve previous raw evidence and record deployment
+and WAN outcomes separately in `docs/auto-admission-deployment.md`.
+
+## Auto admission repair approved on 2026-10-15
+
+- Keep the original total connection ceiling (default 64, maximum 192) and
+  existing enrollment hashes. A larger capacity requires a separately verified
+  design and fresh enrollment; this repair never changes an operator's manifest.
+- UDP may occupy at most one quarter of the total, rounded down (minimum one
+  when the total exceeds one). This retains TCP capacity despite UDP's existing
+  60-second idle retention. A one-slot enrollment reserves that slot for TCP.
+  Active UDP is not evicted to conceal overload. TCP can use the entire total
+  when UDP is absent; overload of either protocol remains explicitly bounded.
+- TCP uses a FIFO of at most twice the enrolled total, with a two-second wait.
+  Reserve queue admission before launching a worker. Timeout, cancellation and
+  close must free exactly one ticket and preserve active sessions. A waiter
+  cannot extend an old generation's authorization after a carrier commit.
+- Export current live/UDP/queued counts, limits and bounded typed error counters.
+  Report recent failures for 30 seconds independently of carrier status. Do not
+  switch a healthy carrier or restart the engine because of local capacity or
+  backend failure. An available slot is not proof of application delivery.
+- Preserve the before-fix raw load measurements and distinguish them from
+  after-fix tests. Record validation and remaining limits in
+  `docs/auto-admission-repair.md`; no release/deployment/24-hour claim is implied.
+
+## Synthetic-user load diagnosis approved on 2026-10-15
+
+- Preserve the opt-in `tools/auto-load-audit` fixture and its reproducible results
+  in `docs/auto-synthetic-load-audit.md`. All addresses are generated loopback
+  listeners. No production accounts, certificates, endpoints or configuration
+  are loaded by the test program.
+- The explicit receiver-local Xray binary is an isolated diagnostic fixture,
+  not an Auto helper installation or runtime enrollment. Record its version
+  and SHA-256; never copy the operator's credentials into a fixture/report.
+- Distinguish synthetic identities, connections per identity, attempted and
+  authenticated/integrity-verified connections. Overflow is measured without
+  bypassing the existing 64-default/192-maximum admission policy or its hash.
+- Compare the same valid Shadowsocks traffic directly with Xray and through
+  Auto, simultaneous bursts with paced admission, and UDP occupancy with TCP
+  recovery. Keep active-generation, cleanup and accepted-stream integrity checks.
+- A private Linux network namespace and resource limits keep the load separate
+  from production traffic. Short loopback results are not WAN/24-hour or
+  500/800-real-user production acceptance. Production changes require their
+  own verified implementation and coordinated enrollment, not a test flag.
+- The 2026-10-15 measured run completed sixteen 500/800-identity cases: direct
+  Xray passed up to 1600 simultaneous connections, Auto bursts admitted exactly
+  64/192, and externally paced 32-at-a-time admission passed all 1000/1600.
+  Sixty-four valid UDP associations denied new TCP until approximately 60 seconds
+  after UDP client closure, while status remained HEALTHY. Preserve the raw
+  evidence and its short-loopback limits; no production capacity fix is implied.
 
 ## Full protocol pool and replenishment approved on 2026-10-15
 

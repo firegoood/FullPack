@@ -51,3 +51,11 @@ func TestPanelHTTPSDoesNotReportItsLocalHelperAsTheRemotePeer(t *testing.T) {
 		}
 	}
 }
+
+func TestPanelAutoAdmissionWarningUsesSharedHealth(t *testing.T) {
+	h := manage.Health{State: "online", Connected: true, DataCode: "capacity", DataWarning: "connection capacity full (64/64)"}
+	info := tunnelInfo(manage.Tunnel{Name: "auto-admission-fixture", Role: "server", Transport: "auto"}, h, nil, nil)
+	if info.State != "online" || info.DataCode != "capacity" || info.DataWarning != h.DataWarning {
+		t.Fatalf("panel lost admission warning or changed carrier health: %+v", info)
+	}
+}

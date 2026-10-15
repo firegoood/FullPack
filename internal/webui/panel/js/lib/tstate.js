@@ -28,13 +28,14 @@ export const isStopped = t => !!t && t.state === 'stopped';
  * to, on the other machine, is refusing every connection. The server sends the
  * sentence; this is the one place that decides what to do with it. */
 export const serviceDown = t => !!(t && t.serviceDown);
+export const dataWarning = t => !!(t && t.dataWarning);
 
 /* A tunnel that has carried its traffic limit is offline on purpose: the
  * engine stopped it and holds it until the limit is raised. Said as that, not
  * as "Offline", which sends somebody looking for a fault. */
 const limitReached = t => !!(t && t.quotaHit);
 
-export const stateLabel = t => (limitReached(t) ? 'Limit reached' : serviceDown(t) ? 'No service' : ({
+export const stateLabel = t => (limitReached(t) ? 'Limit reached' : serviceDown(t) ? 'No service' : dataWarning(t) ? (t.dataCode === 'capacity' ? 'At capacity' : t.dataCode === 'queueing' ? 'Busy' : 'Data errors') : ({
   online: 'Online',
   offline: 'Offline',
   stopped: 'Stopped',
@@ -44,4 +45,4 @@ export const stateLabel = t => (limitReached(t) ? 'Limit reached' : serviceDown(
  * unanswered, it is not up at all. A tunnel whose far service is missing takes
  * the middle one — it is up, and it is not carrying anything. */
 export const stateTone = t =>
-  (limitReached(t) || serviceDown(t) ? 'warn' : (isUp(t) ? 'ok' : (t && t.state === 'offline' ? 'warn' : 'off')));
+  (limitReached(t) || serviceDown(t) || dataWarning(t) ? 'warn' : (isUp(t) ? 'ok' : (t && t.state === 'offline' ? 'warn' : 'off')));

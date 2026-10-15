@@ -75,6 +75,17 @@ updating this repository. These files record the user's persistent preferences.
   Never overwrite an existing manifest or fencing state with a quick preset.
   Keep native/Auto role-marker checks separate from real socket/user ports,
   and retain the CLI's full engine enrollment validation.
+- Preserve the opt-in loopback-only synthetic-user audit in `tools/auto-load-audit`
+  and its measured limits in `docs/auto-synthetic-load-audit.md`. Distinguish
+  identities from connection concurrency. Keep synthetic credentials separate,
+  resource/network isolation and direct-Xray comparisons; never bypass Auto's
+  admission/enrollment limits or present these short tests as WAN acceptance.
+- Preserve the authorized Auto admission repair in `docs/auto-admission-repair.md`:
+  retain the enrolled total, UDP's bounded share and TCP's bounded two-second
+  FIFO, joined cancellation and generation revalidation after a capacity wait.
+  Keep capacity/backend diagnostics separate from carrier health and recovery;
+  queued/rejected sockets are not successful users. Never silently raise or
+  rewrite an existing pair's admission policy or fencing state.
 - Preserve every recorded customization when integrating a newer BackPack
   release. Do not replace this checkout with an upstream archive or reset it to
   upstream. Fetch and merge/rebase the upstream source, resolve conflicts with

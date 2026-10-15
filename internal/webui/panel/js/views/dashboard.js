@@ -8,7 +8,7 @@
  */
 
 import { $, delegate, esc } from '../lib/dom.js';
-import { isUp, stateLabel, stateTone, serviceDown } from '../lib/tstate.js';
+import { isUp, stateLabel, stateTone, serviceDown, dataWarning } from '../lib/tstate.js';
 import { bytes, speed, kindLabel, flag } from '../lib/format.js';
 import * as store from '../store.js';
 import * as api from '../api.js';
@@ -272,6 +272,7 @@ ${field(t, idx)}
   <!-- Said in full, on the card, because it is the one failure where every
        other reading on this card is green and correct. -->
   ${serviceDown(t) ? `<div class="nosvc">${esc(t.serviceDown)}</div>` : ''}
+  ${dataWarning(t) ? `<div class="nosvc">${esc(t.dataWarning)}</div>` : ''}
 
   <!-- The headline is the ping: the one figure that says how this tunnel is
        behaving right now. What it has carried is a total, and a total is a
@@ -361,7 +362,7 @@ function updateSpark(el, t, idx) {
  * down; one colour has to mean one thing. */
 function paintTrend(el, t) {
   el.classList.remove('st-online', 'st-offline', 'st-stopped', 'st-unknown');
-  el.classList.add('st-' + (serviceDown(t) ? 'offline' : (t.state || 'unknown')));
+  el.classList.add('st-' + (serviceDown(t) || dataWarning(t) ? 'offline' : (t.state || 'unknown')));
   const st = statsOf(seriesOf(t).map(p => p.v));
   if (!st) return;
   const fmt = fmtOf(t.name);
@@ -419,7 +420,7 @@ function quotaMeter(t) {
  */
 function cardSig(t) {
   return JSON.stringify([
-    t.state, t.serviceDown, t.role, t.direction, t.transport, t.carrier, t.addr, t.ports,
+    t.state, t.serviceDown, t.dataWarning, t.dataCode, t.role, t.direction, t.transport, t.carrier, t.addr, t.ports,
     t.ping, t.uptime, t.bytesIn, t.bytesOut, t.bytesTotal, t.country, t.peerCountry,
     t.peerLocation, t.peerISP, t.botRelay, t.botRelayPort, t.tunnelPort,
     t.kcpLossPercent, t.pool, t.preset, t.certType, t.certDomain, t.certExpiry,

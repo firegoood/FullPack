@@ -92,6 +92,7 @@ type Status struct {
 	History     []Event           `json:"history"`
 	Candidates  []CandidateStatus `json:"candidates"`
 	Flows       FlowStatus        `json:"flows"`
+	Data        *DataStatus       `json:"data,omitempty"`
 	Mode        string            `json:"mode,omitempty"`
 	Packets     *PacketStatus     `json:"packets,omitempty"`
 }
@@ -99,6 +100,11 @@ type Status struct {
 // Stream outcomes are reported after closure. Interrupted includes route/session
 // fencing; delivered bytes cannot prove that an application transaction finished.
 type FlowStatus struct {
+	Limit         int    `json:"limit"`
+	LiveUDP       int    `json:"liveUdp"`
+	UDPLimit      int    `json:"udpLimit"`
+	QueuedTCP     int    `json:"queuedTcp"`
+	QueueLimit    int    `json:"queueLimit"`
 	Live          int    `json:"live"`
 	Admitted      uint64 `json:"admitted"`
 	Completed     uint64 `json:"completed"`
@@ -125,6 +131,8 @@ type Manager struct {
 	recentTx                                                                               map[string]time.Time
 	workers                                                                                sync.WaitGroup
 	connections                                                                            chan struct{}
+	admission                                                                              *admissionGate
+	dataDiagnostics                                                                        dataDiagnostics
 	actions                                                                                chan actionRequest
 	pendingProbes                                                                          map[string]*pendingProbe
 	unavailableSince                                                                       time.Time
@@ -160,6 +168,7 @@ func New(ctx context.Context, cfg *config.Config, statePath string) (*Manager, e
 	m := &Manager{ctx: mctx, cancel: cancel, policy: a, iran: cfg.Server.BindAddr != "", manifest: h, incarnation: fresh(), store: store,
 		log: logrus.New(), endpoints: map[string]*candidate{}, recentTx: map[string]time.Time{}, connections: make(chan struct{}, a.MaxConnections), actions: make(chan actionRequest, 8), pendingProbes: map[string]*pendingProbe{}}
 	m.token = cfg.Client.Token
+	m.admission = &admissionGate{live: m.connections}
 	level, format := cfg.Client.LogLevel, cfg.Client.LogFormat
 	if m.iran {
 		level, format = cfg.Server.LogLevel, cfg.Server.LogFormat
@@ -235,7 +244,11 @@ func (m *Manager) Snapshot() Status {
 	} else {
 		s.NextSwitch = time.Time{}
 	}
-	s.Flows = FlowStatus{len(m.connections), m.flowAdmitted.Load(), m.flowCompleted.Load(), m.flowDrained.Load(), m.flowInterrupted.Load(), m.flowRejected.Load(), m.udpQueueDrops.Load()}
+	live, udp, queued := m.admission.snapshot()
+	s.Flows = FlowStatus{Live: live, Limit: m.policy.MaxConnections, LiveUDP: udp, UDPLimit: m.admission.udpLimit(), QueuedTCP: queued, QueueLimit: m.admission.queueLimit(), Admitted: m.flowAdmitted.Load(), Completed: m.flowCompleted.Load(), Drained: m.flowDrained.Load(), Interrupted: m.flowInterrupted.Load(), Rejected: m.flowRejected.Load(), UDPQueueDrops: m.udpQueueDrops.Load()}
+	if m.policy.Mode != "l3" {
+		s.Data = m.dataSnapshot(s.Flows, time.Now())
+	}
 	s.Candidates = append([]CandidateStatus(nil), s.Candidates...)
 	for i := range s.Candidates {
 		if m.policy.Selection != nil {
