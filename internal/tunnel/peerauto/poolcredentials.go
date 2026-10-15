@@ -1,8 +1,10 @@
 package peerauto
 
 import (
+	"crypto"
 	"crypto/ecdh"
-	"crypto/ed25519"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/hkdf"
 	"crypto/rand"
 	"crypto/sha256"
@@ -13,6 +15,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"io"
 	"math/big"
 	"net"
 	"os"
@@ -23,6 +26,15 @@ import (
 
 	"github.com/backpack/backpack/config"
 )
+
+// Chrome/uTLS clients need a supported ECDSA TLS certificate. RFC 6979 signing
+// makes its public DER reproducible at the enrolled peer without a global RNG
+// override, exported private key or a certificate-verification exception.
+type deterministicPoolSigner struct{ *ecdsa.PrivateKey }
+
+func (s deterministicPoolSigner) Sign(_ io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
+	return s.PrivateKey.Sign(nil, digest, opts)
+}
 
 // Fresh-pair identities are purpose-separated from transport keys. Paired
 // nodes already share the enrollment secret; neither existing operator keys
@@ -79,11 +91,20 @@ func PoolHelperIdentity(a config.AutoConfig, p config.AutoCandidate, token strin
 }
 
 func poolTLSMaterial(a config.AutoConfig, p config.AutoCandidate, token string) ([]byte, []byte, error) {
-	seed, err := poolCredential(a, p, token, "tls-ed25519")
-	if err != nil {
-		return nil, nil, err
+	var key *ecdsa.PrivateKey
+	for i := range 256 {
+		seed, err := poolCredential(a, p, token, fmt.Sprintf("tls-p256-%d", i))
+		if err != nil {
+			return nil, nil, err
+		}
+		key, err = ecdsa.ParseRawPrivateKey(elliptic.P256(), seed)
+		if err == nil {
+			break
+		}
 	}
-	key := ed25519.NewKeyFromSeed(seed)
+	if key == nil {
+		return nil, nil, errors.New("cannot derive a valid pool TLS key")
+	}
 	host, _, err := net.SplitHostPort(p.Endpoint)
 	if err != nil {
 		return nil, nil, err
@@ -92,9 +113,13 @@ func poolTLSMaterial(a config.AutoConfig, p config.AutoCandidate, token string) 
 		return nil, nil, errors.New("generated pool TLS requires an explicit IP endpoint")
 	}
 	start := time.Unix(a.Selection.HelperEpoch, 0).UTC()
-	serial := sha256.Sum256(append([]byte("pool certificate serial:"), key.Public().(ed25519.PublicKey)...))
+	public, err := x509.MarshalPKIXPublicKey(key.Public())
+	if err != nil {
+		return nil, nil, err
+	}
+	serial := sha256.Sum256(append([]byte("pool certificate serial:"), public...))
 	tmpl := &x509.Certificate{SerialNumber: new(big.Int).SetBytes(serial[:16]), Subject: pkix.Name{CommonName: p.Helper.ServerName}, NotBefore: start.Add(-24 * time.Hour), NotAfter: start.AddDate(1, 0, 0), KeyUsage: x509.KeyUsageDigitalSignature, ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}, BasicConstraintsValid: true, DNSNames: []string{p.Helper.ServerName}, IPAddresses: []net.IP{net.ParseIP(host)}}
-	der, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, key.Public(), key)
+	der, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, key.Public(), deterministicPoolSigner{key})
 	if err != nil {
 		return nil, nil, err
 	}

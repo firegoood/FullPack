@@ -189,3 +189,5 @@ hash همه‌جا درست reload می‌شود. هر صفحه‌ای در ای
 *Last verified against FullPack v1.9.0.*
 
 *Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
+
+*Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*

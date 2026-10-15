@@ -48,6 +48,9 @@ four-candidate pairs or granting runtime authority to invent new endpoints.
   REALITY still needs the actual authenticated cover probe. Missing pinned
   helper executables/raw privileges are SKIPPED, never silently downloaded or
   borrowed from unrelated applications.
+- Pool TLS uses Chrome-compatible P-256 certificates and the standard Go
+  RFC 6979 signer for reproducible public trust. Do not reintroduce the
+  Ed25519 certificate handshake mismatch or disable certificate verification.
 - Preserve registry parity, CLI/web pool counts and rescan actions, bounded
   handshake/control polling, existing manual/observe/lock policy, connection
   bounds and joined cleanup. No arbitrary upstream binary or signing change.

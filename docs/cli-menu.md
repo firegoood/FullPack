@@ -31,7 +31,7 @@ long form. For *how to set a tunnel up*, use the
 ## Quick Auto setup
 
 Choose **Setup Iran → Reverse → Auto → Quick TCP/UDP Setup**. Enter the two
-server IPv4 addresses and forwarded ports, review the four enrolled endpoints,
+server IPv4 addresses and forwarded ports, review the complete approved pool,
 then create the pair. On Kharej, apply the private setup link printed by Iran.
 Quick setup reviews the complete stream pool in Reverse/Direct or a separate
 L3 datagram pool, selects four measured paths and rescans at two healthy paths.
@@ -488,3 +488,5 @@ FEC؛ و zero-copy (فقط روی tcp ساده).
 *Last verified against FullPack v1.9.0.*
 
 *Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
+
+*Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*

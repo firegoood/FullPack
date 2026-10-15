@@ -303,7 +303,7 @@
     "internal/tunnel/peerauto/probe_budget_test.go": ["TestProbeReplayWindowAllowsAnHourOfPacedHealthChecks", "TestProbeReplayBudgetStaysBoundedAndDoesNotQuarantineACarrier", "TestProbeBudgetRejectKeepsProductionControlUsable"],
     "internal/tunnel/peerauto/wire.go": ["errProbePressure, errProbeBusy, errProbeReplayBudget", "POOL_SELECT", "POOL_ACK"],
     "internal/tunnel/peerauto/pool.go": ["poolStableLocked", "e.stablePasses >= 3", "acceptPoolSelectionLocked", "fellToRefill", "m.store.save(st)"],
-    "internal/tunnel/peerauto/poolcredentials.go": ["hkdf.Key", "validatePoolHelperIdentity", "PoolHelperIdentity", "identity/v1:", "ed25519.NewKeyFromSeed"],
+    "internal/tunnel/peerauto/poolcredentials.go": ["hkdf.Key", "validatePoolHelperIdentity", "PoolHelperIdentity", "identity/v1:", "deterministicPoolSigner", "ecdsa.ParseRawPrivateKey", "s.PrivateKey.Sign(nil, digest, opts)"],
     "internal/e2e/peerauto_pool_test.go": ["TestPeerAutoPoolReplenishesFourAfterTwoStandbyFailures", "failed path retained", "two-route shortfall"],
     "internal/e2e/testdata/auto-pool-netns.sh": ["FULLPACK_AUTO_NETNS", "same active generation and TUN", "ifindex"],
     "internal/e2e/testdata/auto-pool-config.go": ["QuickAutoL3Carriers()", "peerauto.Validate(c)"]

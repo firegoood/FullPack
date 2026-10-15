@@ -95,3 +95,5 @@ FullPack پیدا نشد. کنترل اشغال پورت در ساخت Auto/Wat 
 </div>
 
 *Last verified against FullPack v1.9.2 (setup/documentation compatibility review, 2026-10-14; original measurements and pending acceptance gates unchanged).*
+
+*Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*

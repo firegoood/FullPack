@@ -292,7 +292,9 @@ Connection Test remains at 4 s.
   backend paths. TCP half-close and framed UDP are real application traffic.
   Direct GRE/L3 does not reuse this stream adapter.
 - Auto router admits at most 64 simultaneous user flows by default/192 maximum,
-  1-32 enrolled port maps and 1-4 approved candidates. Backend selection is a
+  1-32 enrolled port maps and 1-4 legacy approved candidates. Opt-in pool
+  enrollment additionally allows at most 48 approved candidates with four
+  measured selected routes; see `quick-auto-setup.md`. Backend selection is a
   mapping index with HMAC/generation/ticket, not an arbitrary peer-supplied
   destination. UDP queues are bounded at four frames/flow with idle expiry.
   Old approved flows drain for at most 30 s; new ones immediately require the
@@ -428,3 +430,5 @@ wattun در FullPack ادغام شده است. جهت درخواست‌های IC
 *Last verified against FullPack v1.9.0 (source review and local acceptance with documented limits, 2026-10-13).*
 
 *Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
+
+*Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*

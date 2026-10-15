@@ -8,8 +8,11 @@ remaining environment gates belong in `waticmp-verification.md`.
 ## Carriers and packet planes
 
 `config.AutoCarriers()` is the shared registry used by CLI, panel and engine
-validation. An enrollment selects **one to four** approved candidates, not all
-eighteen simultaneously. Every candidate supports Reverse (Kharej initiates)
+validation. Legacy/advanced enrollment keeps **one to four** approved candidates.
+Quick Auto explicitly enrolls a larger immutable pool (38 stream or 12 L3
+options, at most 48), selecting at most four measured stable paths. At two
+healthy selected paths it rescans only those original approved reserves; see
+[Quick Auto](quick-auto-setup.md). Every candidate supports Reverse (Kharej initiates)
 or Direct (Iran initiates). Iran remains the sole switching authority in both.
 
 | Registry choices | Auto session protection | L3 IP datagrams |
@@ -58,7 +61,10 @@ interfaces and helper identities. A direct HTTPS listener on Kharej needs its
 matching certificate/key or the REALITY private key corresponding to the
 enrolled public key. Generate/provision that identity before enrollment; do
 not generate a different identity independently on the receiving endpoint.
-Generic `fullpack link apply` is suitable only when required local material
+For new Quick pool identities, both enrolled peers derive the fresh credentials
+from their shared secret. The matching public trust is enrolled, private keys
+remain local, and pinned helpers must already be installed. No existing
+operator key is adopted or exported. Generic `fullpack link apply` is suitable only when required local material
 is already available; use the setup wizard or panel import to provide it.
 
 Naive dial endpoints and certificate names must match. XHTTP checks its TLS
@@ -158,3 +164,5 @@ L3 یک TUN ثابت دارد و بسته‌ها احراز هویت و محدو
 </div>
 
 *Last verified against FullPack v1.9.2 (documentation compatibility review, 2026-10-14; historical measurements and pending gates retain their recorded scope).*
+
+*Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*

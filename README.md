@@ -125,10 +125,11 @@ existing pairs are not rewritten. See [Quick Auto](docs/quick-auto-setup.md).
 
 
 Opt-in Auto supports eighteen stream carriers with Reverse or Direct initiation
-and six datagram carriers for a stable L3 TUN. Select one to four explicitly
-approved candidates, create the Iran enrollment, and import its private peer
+and six datagram carriers for a stable L3 TUN. Advanced setup retains one to four
+approved candidates; Quick mode enrolls the complete pool and selects four.
+Create the Iran enrollment, and import its private peer
 link on Kharej with the required local identities. Iran remains the switching
- authority. Advanced setup offers observe-only mode; local tests do not establish WAN
+authority. Advanced setup offers observe-only mode; local tests do not establish WAN
 readiness or seamless TCP migration. See [Auto setup and carrier matrix](docs/auto-carrier-completion.md)
 and the [verification report](docs/waticmp-verification.md#8-approved-auto-reversedirectl3-completion).
 

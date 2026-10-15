@@ -19,7 +19,7 @@ unprivileged user with Go 1.27.2.
 ## Authorized mixed re-enrollment
 
 The operator approved additional endpoints and asked for Reverse plus Direct.
-Each pair remains limited to four candidates, so a fresh `TR-auto` /
+At the time, each pair was limited to four candidates, so a fresh `TR-auto` /
 `TR-auto-kharej` pair enrolled:
 
 | Candidate | Direction | Listener | Outcome in this bounded window |
@@ -104,3 +104,5 @@ WSS هم گذشت. Direct Noise و Wat در این بازه تأیید نشدن�
 </div>
 
 *Last verified against FullPack v1.9.2 (setup/documentation compatibility review, 2026-10-14; original measurements and pending acceptance gates unchanged).*
+
+*Last verified against FullPack v1.9.3 (source/documentation compatibility review, 2026-10-15; original measurements, earlier release results and pending acceptance gates retain their recorded dates and scope).*
