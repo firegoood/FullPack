@@ -17,7 +17,6 @@
 | 2026-10-14 | Inspect occupied 2052/8880 ports on Iran/Kharej2 and skipped HTTPS CLI tests | Preserve unrelated port owners, reject occupied Auto/Wat user listeners before CLI host changes, retain explicit-address and helper prerequisite checks |
 | 2026-10-14 | Inspect the operator's offline Auto and add approved Reverse/Direct endpoints | Re-enroll a fresh four-candidate pair, preserve retired configuration/fencing and verify TCP/WSS passes separately from Direct/Wat failures |
 | 2026-10-14 | Simplify Auto setup and publish an updated release | Shared CLI/web Quick Auto builder, explicit endpoint review, private peer link, advanced setup preservation and signed v1.9.2 source/tag/assets |
-
 | 2026-10-15 | Include every protocol in easy Auto and replenish selected routes | Explicit complete stream/L3 pools, four measured stable paths, authenticated reserve replenishment at two healthy paths, unchanged generation and bounded recovery policy |
 
 ## Full protocol pool and replenishment approved on 2026-10-15
@@ -54,9 +53,12 @@ four-candidate pairs or granting runtime authority to invent new endpoints.
 - Preserve registry parity, CLI/web pool counts and rescan actions, bounded
   handshake/control polling, existing manual/observe/lock policy, connection
   bounds and joined cleanup. No arbitrary upstream binary or signing change.
-- Acceptance remains pending until the actual four-to-two-to-four data,
-  helper/raw/L3, race and full release gates pass. Model/unit tests do not imply
-  real-hour/24-hour or 1000-user acceptance.
+- Signed v1.9.3 source `057f69d2a9d418f95196c1a9d54759e348e945d4` passed all
+  eleven full-CI gates and public signed installation in run `38679834616`.
+  Strict four-to-two-to-four stream faults, real L3/TUN replenishment, generated
+  HTTPS in both directions, race and 58.2% coverage passed. Preserve the bounded
+  evidence in `docs/fullpack-release-verification.md`; this does not imply
+  WAN-wide, real-hour/24-hour or 1000-user acceptance.
 
 ## Historical four-endpoint Quick implementation (2026-10-14)
 

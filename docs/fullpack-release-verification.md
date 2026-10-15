@@ -1,5 +1,53 @@
 # FullPack signed release verification
 
+## v1.9.3 — full Quick Auto pools and measured reserve replenishment
+
+Date: 2026-10-15. Status: **PUBLISHED; FULL CI AND SIGNED PUBLIC INSTALL PASSED**.
+
+[v1.9.3](https://github.com/firegoood/FullPack/releases/tag/v1.9.3) is bound to
+source `057f69d2a9d418f95196c1a9d54759e348e945d4`.
+[Release run 38679834616](https://github.com/firegoood/FullPack/actions/runs/38679834616)
+passed all eleven verification jobs and the signed public-install release job.
+
+- Quick stream enrollment covers eighteen registry carriers in Reverse/Direct,
+  plus both Wat Echo modes: 38 candidates. Quick L3 covers six datagrams in both
+  directions: 12. At most four measured paths are selected; reaching two healthy
+  selected paths triggers a fresh approved-pool sweep and paired acknowledgment.
+- The strict six-carrier fault test waits for the initial sweep to finish,
+  breaks two selected standbys, observes the refill threshold and returns from
+  four to two to four. A held TCP stream, 32 KiB exchanges and 8000-byte UDP
+  retain integrity; reserve replacement preserves the active generation. A
+  later active failure with only two physical routes remaining recovers at a
+  fenced generation and reports two, without fabricating extra availability.
+  Two isolated unprivileged Linux runs passed in 85.00/85.47 seconds; final
+  whole-project normal/race/coverage and privileged peer suites passed too.
+- A real twelve-candidate L3 namespace fixture retires two selected datagrams
+  at the authority, replenishes the subset, and proves the same active route,
+  generation and TUN ifindex with bidirectional IP traffic, TCP and UDP. This
+  fixture tests explicit path retirement; the separate stream test faults the
+  network. Existing small/full-MTU raw/QUIC matrices also passed.
+- Pinned Naive, XHTTP and REALITY integration passed in both directions for
+  legacy and generated pool identities. Chrome-compatible P-256 certificates
+  use standard RFC 6979 signing for reproducible enrolled public trust. TLS
+  verification and the actual authenticated REALITY cover gate remain enabled.
+- Full normal/race tests, 100/192 bounded connection-admission scenarios,
+  native/raw recovery/degradation, fuzzing, two-minute soak, patched-toolchain
+  security analysis and actual v1.9.2 wire compatibility passed. Coverage was
+  **58.2%**, with all fourteen unchanged package floors satisfied. Socket
+  admission counts do not establish independent user capacity.
+- Independent public download verified all twelve assets, seven archive hashes,
+  the fork's tag-bound Ed25519 signature, exact ELF/legal members, compiled key,
+  raw-main/tag/release installer equality and Go 1.27.2 in every binary's build
+  record. No `11/`, private enrollment/key material or server credentials were
+  published. The existing fork signing pin was preserved.
+
+Development failures for stale reserve reuse and unsupported generated TLS
+certificates were repaired before this accepted source. The first failed CI
+run is not acceptance evidence. Existing production pairs were not expanded
+or silently re-enrolled; the wider pool requires explicit new enrollment on
+matching feature versions at both peers. Network-dependent availability,
+24-hour soak and 1000-user production capacity remain **NOT VERIFIED**.
+
 ## v1.9.2 — Quick Auto and probe uptime repair
 
 Date: 2026-10-14. Status: **PUBLISHED; FULL CI AND SIGNED PUBLIC INSTALL PASSED**.

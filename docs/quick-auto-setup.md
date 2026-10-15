@@ -61,21 +61,22 @@ fresh shared pair secret. Both trusted enrolled peers can compute those new
 credentials; they are not independent secrets from the counterpart. Existing
 operator keys are never adopted. Export carries matching public CA/REALITY trust
 and account settings; temporary private keys, executable paths and interfaces
-remain local. TLS hostname, certificate/public-key and authenticated carrier
+remain local. Generated TLS identities are valid for one year from creation;
+re-enroll before expiry. TLS hostname, certificate/public-key and authenticated carrier
 checks stay enabled. Keep the enrollment link private and use a trusted channel.
 
 ## Verification scope
 
-The registry/peer-link, generated public trust/private redaction, invalid input,
-legacy hash compatibility and budget/fencing Linux regressions passed during
-expansion. The stricter real six-carrier test passed four-to-two-to-four after the
-initial sweep, preserving a held user stream and route generation. Active
-loss with only two physical routes remaining also recovered without inventing
-availability. Real generated HTTPS/raw/L3 matrices and full CI/release
-verification are still pending. Historical v1.9.2 release evidence
-is in [release verification](fullpack-release-verification.md); it does not
-validate this expansion. WAN availability, 24-hour soak and 1000-user capacity
-remain NOT VERIFIED.
+The signed v1.9.3 release passed all eleven CI verification jobs and public
+installation. Whole-project normal/race/coverage, generated HTTPS in both
+directions and real raw/L3 matrices passed; coverage is 58.2% with all unchanged
+package floors. Strict stream network faults confirmed four-to-two-to-four
+without breaking a held user connection or changing the active generation.
+Actual twelve-candidate L3 replenishment preserved the same TUN and generation.
+The two-physical-route shortfall case recovered without claiming extra paths.
+See [release verification](fullpack-release-verification.md) for the exact
+source, run, artifacts and bounded evidence. These are isolated acceptance
+results; WAN availability, 24-hour soak and 1000-user capacity remain NOT VERIFIED.
 
 <div dir="rtl">
 
@@ -91,4 +92,4 @@ remain NOT VERIFIED.
 
 </div>
 
-*Last verified against FullPack v1.9.3 (development expansion review, 2026-10-15; expanded pool release/CI and remaining acceptance gates are pending).*
+*Last verified against FullPack v1.9.3 (pool implementation and signed release review, 2026-10-15; expanded pool CI/signed release passed; WAN/24-hour/1000-user gates remain open).*
