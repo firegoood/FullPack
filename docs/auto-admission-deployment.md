@@ -54,3 +54,14 @@ and is not used as a memory-peak claim. Production services were not deployed
 or restarted by this isolated test. Actual WAN testing remains pending.
 
 *Last verified against FullPack v1.9.4-beta.1 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+
+## Release gate interruption
+
+Run `38758569067` passed ten verification jobs, including normal, coverage,
+native recovery and managed HTTPS, but its race job failed the L3 handover
+bootstrap. Every probe was skipped by the existing process pressure guard;
+the old failure output did not distinguish RSS from CPU. Race instrumentation
+and preceding stress tests share that process. The L3 fixture now explicitly
+budgets 2048 MiB and reports measured RSS/CPU on future bootstrap failure.
+The production default remains 256 MiB; CPU/admission guards and all CI gates
+remain enabled. No release or server deployment is accepted by that failed run.

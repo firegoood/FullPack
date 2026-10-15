@@ -38,6 +38,10 @@ Prerelease version extraction must retain the full suffix in Make/CI. The
 release must compare the complete tag to the binary's declared version and
 verify public installation using that exact tag, including for prereleases;
 keep `TestReleaseToolingKeepsPrereleaseIdentity` and the full CI dependency.
+The L3 handover test must budget its shared race/stress instrumentation RSS
+explicitly (2048 MiB) and report measured RSS/CPU on bootstrap failure. Keep
+the production 256 MiB default and all real pressure/CPU/admission guards;
+this fixture allowance is not a production-capacity increase or a skipped gate.
 
 ## Auto admission repair approved on 2026-10-15
 

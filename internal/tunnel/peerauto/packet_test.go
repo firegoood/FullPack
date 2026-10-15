@@ -174,7 +174,10 @@ func freePacketPort(t *testing.T) string {
 }
 
 func TestAutoL3DirectAndReverseDatagramHandover(t *testing.T) {
-	a := config.AutoConfig{Enabled: true, Mode: "l3", TunnelID: "l3-test-enrolled-tunnel", IranID: "l3-test-enrolled-iran", KharejID: "l3-test-enrolled-kharej", L3: &config.AutoL3Config{IranIP: "10.55.0.1/30", KharejIP: "10.55.0.2/30", MTU: 9000}, Candidates: []config.AutoCandidate{{ID: "udp", Transport: config.UDP, Mode: "direct", Endpoint: freePacketPort(t)}, {ID: "quic", Transport: config.QUIC, Endpoint: freePacketPort(t)}}}
+	// Race instrumentation and the preceding stress tests share this process's
+	// RSS. Budget that fixture overhead explicitly; production keeps its 256 MiB
+	// default and the real pressure guard still runs, including its CPU check.
+	a := config.AutoConfig{Enabled: true, Mode: "l3", MaxMemoryMB: 2048, TunnelID: "l3-test-enrolled-tunnel", IranID: "l3-test-enrolled-iran", KharejID: "l3-test-enrolled-kharej", L3: &config.AutoL3Config{IranIP: "10.55.0.1/30", KharejIP: "10.55.0.2/30", MTU: 9000}, Candidates: []config.AutoCandidate{{ID: "udp", Transport: config.UDP, Mode: "direct", Endpoint: freePacketPort(t)}, {ID: "quic", Transport: config.QUIC, Endpoint: freePacketPort(t)}}}
 	token := "0123456789abcdef0123456789abcdef"
 	srv := &config.Config{Auto: a, Server: config.ServerConfig{BindAddr: "127.0.0.1:1", Token: token}}
 	cli := &config.Config{Auto: a, Client: config.ClientConfig{RemoteAddr: "127.0.0.1:1", Token: token}}
@@ -212,7 +215,10 @@ func TestAutoL3DirectAndReverseDatagramHandover(t *testing.T) {
 		time.Sleep(25 * time.Millisecond)
 	}
 	if m.Snapshot().Active != "udp" {
-		t.Fatalf("bootstrap: %+v %+v", m.Snapshot(), p.Snapshot())
+		resources.Lock()
+		rss, cpu := resources.rss, resources.cpu
+		resources.Unlock()
+		t.Fatalf("bootstrap (RSS %d KiB, CPU %.1f%%, fixture budget %d MiB): %+v %+v", rss/1024, cpu, m.policy.MaxMemoryMB, m.Snapshot(), p.Snapshot())
 	}
 	roundTrip := func(from, to *testPacketDevice) {
 		t.Helper()
