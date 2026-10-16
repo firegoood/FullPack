@@ -75,10 +75,10 @@ func TestMuxIsolationRequiresAcceptedProductionEnrollment(t *testing.T) {
 			}
 			if mode == "accepted" {
 				until := time.Now().Add(time.Second)
-				for !muxFlowStatus(local).Isolated && time.Now().Before(until) {
+				for (!muxFlowStatus(local).Isolated || !muxFlowStatus(local).ControlPriority) && time.Now().Before(until) {
 					time.Sleep(time.Millisecond)
 				}
-				if !muxFlowStatus(local).Isolated {
+				if !muxFlowStatus(local).Isolated || !muxFlowStatus(local).ControlPriority {
 					t.Fatal("accepted production session kept a shared deadlock budget")
 				}
 			} else {
@@ -87,7 +87,7 @@ func TestMuxIsolationRequiresAcceptedProductionEnrollment(t *testing.T) {
 				case <-time.After(time.Second):
 					t.Fatal("rejected session did not stop")
 				}
-				if muxFlowStatus(local).Isolated {
+				if muxFlowStatus(local).Isolated || muxFlowStatus(local).ControlPriority {
 					t.Fatal("unaccepted production session bypassed its receive budget")
 				}
 			}

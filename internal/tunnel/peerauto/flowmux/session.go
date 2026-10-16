@@ -96,6 +96,9 @@ type Session struct {
 	// not stop parsing other streams or control/window-update frames globally.
 	authenticatedFlow atomic.Bool
 	bufferedBytes     atomic.Int64
+	controlStream     atomic.Uint32
+	controlWrites     chan writeRequest // bounded, owner-enrolled control only
+	handshakeWrites   chan writeRequest // bounded SYN / finite new-stream prefixes
 	conn              io.ReadWriteCloser
 
 	config           *Config
@@ -148,6 +151,8 @@ func newSession(config *Config, conn io.ReadWriteCloser, client bool) *Session {
 	s.bucket = int32(config.MaxReceiveBuffer)
 	s.bucketNotify = make(chan struct{}, 1)
 	s.shaper = make(chan writeRequest, maxShaperSize)
+	s.controlWrites = make(chan writeRequest, 8)
+	s.handshakeWrites = make(chan writeRequest, 32)
 	s.chSocketReadError = make(chan struct{})
 	s.chSocketWriteError = make(chan struct{})
 	s.chProtoError = make(chan struct{})
@@ -627,6 +632,7 @@ func (s *Session) sendLoop() {
 		buf = make([]byte, (1<<16)+headerSize)
 	}
 
+	controlBurst := 0
 EVENT_LOOP:
 	for {
 		select {
@@ -634,7 +640,7 @@ EVENT_LOOP:
 			return
 		case <-s.chShaperPending:
 			for {
-				request, ok := s.sq.Pop()
+				request, ok := s.nextWrite(&controlBurst)
 				if !ok {
 					// notify shaperLoop to accept new requests
 					s.notifyShaperConsumed()
@@ -698,8 +704,16 @@ func (s *Session) writeFrameInternal(f Frame, deadline <-chan time.Time, class C
 		seq:    atomic.AddUint32(&s.requestID, 1),
 		result: resultCh,
 	}
+	queue := s.shaper
+	priority := s.authenticatedFlow.Load() && f.sid != 0 && f.sid == s.controlStream.Load()
+	handshake := s.authenticatedFlow.Load() && class == CLSCTRL && (f.cmd == cmdSYN || f.cmd == cmdPSH)
+	if priority {
+		queue = s.controlWrites
+	} else if handshake {
+		queue = s.handshakeWrites
+	}
 	select {
-	case s.shaper <- req:
+	case queue <- req:
 	case <-s.die:
 		resultChanPool.Put(resultCh)
 		return 0, io.ErrClosedPipe
@@ -709,6 +723,9 @@ func (s *Session) writeFrameInternal(f Frame, deadline <-chan time.Time, class C
 	case <-deadline:
 		resultChanPool.Put(resultCh)
 		return 0, ErrTimeout
+	}
+	if priority || handshake {
+		s.notifyShaperPending()
 	}
 
 	select {

@@ -71,6 +71,8 @@ func TestPeerAutoPoolReplenishesFourAfterTwoStandbyFailures(t *testing.T) {
 			}
 			time.Sleep(100 * time.Millisecond)
 		}
+		logAutoFixtureResources(t, "pool bootstrap failure")
+		t.Logf("pool details: Iran=%+v Kharej=%+v", m.Snapshot().Selection, p.Snapshot().Selection)
 		t.Fatalf("four measured paths never agreed: Iran=%+v Kharej=%+v", m.Snapshot(), p.Snapshot())
 	}
 	waitFour()

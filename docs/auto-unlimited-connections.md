@@ -134,4 +134,4 @@ of guaranteed production capacity for 1000 real users.
 
 *Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-16; bounded evidence and remaining gates are recorded above).*
 
-*Last verified against FullPack v1.9.4-beta.5 (compatibility review of authenticated Auto smux isolation, 2026-10-16; historical measurements keep their original scope; deployment and soak require separate evidence).*
+*Last verified against FullPack v1.9.4-beta.6 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*

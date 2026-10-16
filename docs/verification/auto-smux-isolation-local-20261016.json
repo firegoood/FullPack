@@ -73,7 +73,17 @@
     }
   ],
   "earlierFixtureFailure": "First full-tunnel fixture used identities shorter than 16 characters and was correctly rejected before traffic; IDs fixed, validator unchanged.",
-  "ci": "PENDING",
+  "ci": {
+    "candidate": "v1.9.4-beta.5",
+    "source": "7a115437372a7de8d1a5104c6ec42ca6453b6863",
+    "run": 38942638366,
+    "conclusion": "failure",
+    "native": "shared-process pool bootstrap never reached four measured paths",
+    "race": "same pool failure followed by further bootstraps failing after the heavy slow-reader fixture",
+    "pressureSubtype": "not recorded by the old bootstrap failure output; resource retention is an inference, not a measurement",
+    "release": "skipped",
+    "installed": false
+  },
   "deployment": "PENDING",
   "remaining": [
     "Race/full CI and signed deployment pending.",

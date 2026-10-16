@@ -19,6 +19,8 @@
     "Optional standard v2 negotiated by Auto authenticated carrier handshakes; old peers retain v1.",
     "Finite global budget before complete production enrollment; finite per-stream receive windows after enrollment.",
     "Validate receive credit and modular byte counts, preserve control progress with many slow streams, expose bounded payload accounting.",
-    "Retain unmodified upstream dependency for all manual transports."
+    "Retain unmodified upstream dependency for all manual transports.",
+    "Bounded enrolled-control and initial data-handshake write lanes, with finite 256-byte per-stream allowance and bulk fairness.",
+    "Coalesce tiny receive frames into bounded 4 KiB allocation metadata, preserving payload credit, partial reads and allocator ownership."
   ]
 }

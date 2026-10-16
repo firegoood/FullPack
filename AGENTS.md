@@ -111,6 +111,14 @@ updating this repository. These files record the user's persistent preferences.
   only after complete peer enrollment/incarnation checks; preserve manual engines,
   native Wat/QUIC, wire compatibility, slow-reader regressions and MIT attribution
   in binaries/releases. Never hide EOF with a huge bucket or a fixed user ceiling.
+  Retain bounded local transmit lanes for the enrolled control stream and the
+  first 256 handshake bytes of new streams, with bulk fairness and unchanged
+  framing. Run all six slow-reader carrier/direction cases in fresh instances
+  of the same instrumented test binary, preserve child coverage and verify each
+  workload marker; never raise production pressure limits or accept empty runs.
+  Coalesce tiny receive frames with bounded allocation metadata, preserving
+  byte order, partial reads, receive credit and original allocator ownership.
+  Slow-reader fixtures must retain unread Stream wrappers through cleanup.
 - Preserve every recorded customization when integrating a newer BackPack
   release. Do not replace this checkout with an upstream archive or reset it to
   upstream. Fetch and merge/rebase the upstream source, resolve conflicts with

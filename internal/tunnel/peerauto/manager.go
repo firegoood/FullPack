@@ -508,7 +508,7 @@ func (m *Manager) runSession(p config.AutoCandidate, s carrierSession, dialRelea
 	}
 	// Only a production session that passed complete enrollment and incarnation
 	// checks may replace the pre-enrollment shared budget with per-stream credit.
-	if err := enableAuthenticatedFlowControl(s); err != nil {
+	if err := enableAuthenticatedFlowControl(s, ctrl); err != nil {
 		m.mu.Unlock()
 		m.candidateFailure(p.ID, "mux_enrollment", "stream flow control unavailable", err)
 		return

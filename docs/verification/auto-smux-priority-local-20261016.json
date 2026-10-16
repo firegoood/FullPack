@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-16",
+  "candidate": "v1.9.4-beta.6",
+  "scope": "Isolated Linux loopback regressions and Windows pure-Go unit checks; not production/WAN acceptance",
+  "go": "1.27.2",
+  "manualDependency": "github.com/xtaci/smux v1.5.57 (unchanged)",
+  "authenticatedReceiveIsolation": "passed; finite per-stream credit, pre-enrollment shared budget retained",
+  "boundedTransmitPriority": {
+    "controlLane": 8,
+    "handshakeLane": 32,
+    "initialSmallBytesPerStream": 256,
+    "maximumPriorityBurstBeforeQueuedData": 16,
+    "windowsUnitTests": "passed",
+    "synthetic128QueuedWriterControlMs": "about 17; compressed 300ms baseline timeout, not WAN RTT"
+  },
+  "tinyFrameMemory": {
+    "queuedOneByteFrames": 131072,
+    "maximumRingEntries": 34,
+    "exactOrderPartialHeadAndPayloadAccounting": "passed"
+  },
+  "fullTunnelSlowReaderCases": [
+    "tcp/reverse",
+    "tcp/direct",
+    "wss/reverse",
+    "wss/direct",
+    "stealth/reverse",
+    "stealth/direct"
+  ],
+  "slowReaderConnectionsPerCase": 64,
+  "queuedReceiveBytesMin": 5554176,
+  "queuedReceiveBytesMax": 7970816,
+  "otherApplicationAndHeartbeats": "passed across 10 exchanges over 10 seconds, unchanged generations and zero new interrupted/rejected flows",
+  "poolRecovery": "passed 4 -> 2 -> 4 at unchanged generation 2; subsequent intentional switch generation 3",
+  "processIsolation": "all six mandatory cases run in fresh same-instrumentation executable; exact workload marker checked",
+  "childCoverage": {
+    "mergedPositiveMuxEnrollmentProfileEntries": 9,
+    "verified": true
+  },
+  "sourceSha256": {
+    "internal/tunnel/peerauto/flowmux/session.go": "3a7fc03271a4f8b04ec8e6cd56cd114fe6b98ede42fb8327d1688e428e3a464c",
+    "internal/tunnel/peerauto/flowmux/stream.go": "072e00becd82d2d5a56f4d06a646b28424055f6fc51d89dd3ee4deafe79a3043",
+    "internal/tunnel/peerauto/flowmux/enrollment.go": "73531e583827540b44766ca1de37d9a4e5a3d772c7fd2bed5b4a4a58b5ddc1da",
+    "internal/tunnel/peerauto/flowmux/ORIGIN.json": "ce869521d61ecb10e52546f9d816bf4ee87307312e73ac70eccef89b0a792cab",
+    "internal/tunnel/peerauto/flowmux/receive_memory_test.go": "2f3b8f87121212fa034cab8dd39b10c9a566c8facd6ad83f9fd5a55d30df5ef0",
+    "internal/tunnel/peerauto/flowmux/isolation_test.go": "f9bc857d8152ea5055a73292e7bca850528a1a95274f7852cddeaa7a667879e1",
+    "internal/e2e/peerauto_muxflow_test.go": "ef727b38bb5a55339cbe355a9fab95eb861cbc7e7d13cb001f6c477512d18373",
+    "internal/tunnel/peerauto/muxflow.go": "037ef5dab571fc3ac2bdca91c56e02a599566322155fe90e850f2f2e30eeffb7"
+  },
+  "privateLogSha256": "0fc7732788cf4f7091c849ffe1d8922e2ff58d85f83b0895f4a72168acd184a2",
+  "beta5": {
+    "ciRun": 38942638366,
+    "conclusion": "failure",
+    "release": "skipped",
+    "installed": false
+  },
+  "productionInstalledAtThisRecord": "v1.9.4-beta.4; repeated WAN timeout and data failure, temporarily recovered with enrolled TCP Reverse",
+  "fullCi": "PENDING",
+  "signedRelease": "PENDING",
+  "productionDeployment": "PENDING",
+  "extendedWanDelivery": "NOT VERIFIED",
+  "realHourOr24HourStability": "NOT VERIFIED",
+  "guaranteed1000RealUserCapacity": "NOT VERIFIED"
+}

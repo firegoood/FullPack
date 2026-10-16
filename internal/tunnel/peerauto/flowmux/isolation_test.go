@@ -45,7 +45,7 @@ func flowStream(t *testing.T, a, b *Session) (*Stream, *Stream) {
 func TestLegacySharedBucketReproducesControlStarvation(t *testing.T) {
 	a, b := flowPair(t, 1)
 	control, peerControl := flowStream(t, a, b)
-	data, _ := flowStream(t, a, b)
+	data, peerData := flowStream(t, a, b)
 	var sent atomic.Int64
 	done := make(chan struct{})
 	go func() {
@@ -59,13 +59,14 @@ func TestLegacySharedBucketReproducesControlStarvation(t *testing.T) {
 			}
 		}
 	}()
-	t.Cleanup(func() { a.Close(); b.Close(); <-done })
+	// Retain the deliberately unread receiver: Stream has a Close finalizer.
+	t.Cleanup(func() { a.Close(); b.Close(); peerData.Close(); <-done })
 	until := time.Now().Add(3 * time.Second)
-	for sent.Load() < 256<<10 && time.Now().Before(until) {
+	for (sent.Load() < 256<<10 || atomic.LoadInt32(&b.bucket) > 0) && time.Now().Before(until) {
 		time.Sleep(time.Millisecond)
 	}
-	if sent.Load() < 256<<10 {
-		t.Fatal("fixture did not exhaust the shared receive bucket")
+	if sent.Load() < 256<<10 || atomic.LoadInt32(&b.bucket) > 0 {
+		t.Fatalf("fixture did not exhaust the shared receive bucket: sent=%d bucket=%d buffered=%d closed=%t", sent.Load(), atomic.LoadInt32(&b.bucket), b.BufferedBytes(), b.IsClosed())
 	}
 	echo := make(chan struct{})
 	go func() { defer close(echo); io.Copy(peerControl, peerControl) }()
@@ -96,8 +97,10 @@ func TestAuthenticatedWindowsKeepControlAndOtherUsersMoving(t *testing.T) {
 			control, peerControl := flowStream(t, a, b)
 			var wg sync.WaitGroup
 			var sent atomic.Int64
+			var receivers []*Stream
 			for range 64 {
-				data, _ := flowStream(t, a, b)
+				data, receiver := flowStream(t, a, b)
+				receivers = append(receivers, receiver)
 				wg.Add(1)
 				go func() {
 					defer wg.Done()
@@ -111,7 +114,14 @@ func TestAuthenticatedWindowsKeepControlAndOtherUsersMoving(t *testing.T) {
 					}
 				}()
 			}
-			t.Cleanup(func() { a.Close(); b.Close(); wg.Wait() })
+			t.Cleanup(func() {
+				a.Close()
+				b.Close()
+				for _, receiver := range receivers {
+					receiver.Close()
+				}
+				wg.Wait()
+			})
 			until := time.Now().Add(5 * time.Second)
 			for sent.Load() < 2<<20 && time.Now().Before(until) {
 				time.Sleep(time.Millisecond)

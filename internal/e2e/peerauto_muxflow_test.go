@@ -5,10 +5,14 @@ package e2e
 import (
 	"bytes"
 	"context"
+	"flag"
 	"fmt"
 	"io"
 	"net"
+	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -20,9 +24,20 @@ import (
 // Slow applications must exhaust only their own finite byte credit. These
 // loopback connections are not synthetic identities or a WAN/long-soak claim.
 func TestPeerAutoSlowReadersPreserveControlAndOtherApplications(t *testing.T) {
+	logAutoFixtureResources(t, "slow-reader fixture start")
+	t.Cleanup(func() { logAutoFixtureResources(t, "slow-reader fixture after joined children") })
+	selected := os.Getenv("FULLPACK_AUTO_SLOW_READER_CASE")
 	for _, transport := range []config.TransportType{config.TCP, config.WSS, config.STEALTH} {
 		for _, mode := range []string{"reverse", "direct"} {
 			t.Run(string(transport)+"/"+mode, func(t *testing.T) {
+				name := string(transport) + "/" + mode
+				if selected == "" {
+					runSlowReaderChild(t, string(transport), mode)
+					return
+				}
+				if selected != name {
+					t.Fatalf("child selection mismatch: %s", selected)
+				}
 				backend, err := net.Listen("tcp", "127.0.0.1:0")
 				if err != nil {
 					t.Fatal(err)
@@ -118,7 +133,7 @@ func TestPeerAutoSlowReadersPreserveControlAndOtherApplications(t *testing.T) {
 				}
 				for _, peer := range []*peerauto.Manager{m, p} {
 					mux := peer.Snapshot().Candidates[0].Mux
-					if mux == nil || mux.Version != 2 || !mux.Isolated {
+					if mux == nil || mux.Version != 2 || !mux.Isolated || !mux.ControlPriority {
 						t.Fatalf("full enrollment did not enable bounded v2 flow isolation: %+v", mux)
 					}
 				}
@@ -180,7 +195,38 @@ func TestPeerAutoSlowReadersPreserveControlAndOtherApplications(t *testing.T) {
 					}
 					time.Sleep(time.Second)
 				}
+				t.Logf("slow-reader %s: all application/control invariants verified", name)
 			})
 		}
 	}
+}
+
+// Reuse the same normal/race/coverage-instrumented executable. Each child must
+// actually execute its case, then exit and release load/race metadata before a
+// later fixture applies the unchanged 256MiB production pressure threshold.
+func runSlowReaderChild(t *testing.T, transport, mode string) {
+	t.Helper()
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	args := []string{"-test.run=^TestPeerAutoSlowReadersPreserveControlAndOtherApplications$/^" + transport + "$/^" + mode + "$", "-test.v", "-test.count=1", "-test.timeout=90s"}
+	// Go merges all counter files in this directory. Preserve child coverage
+	// rather than allowing isolation to hide the exercised production branches.
+	if dir := flag.Lookup("test.gocoverdir"); dir != nil && dir.Value.String() != "" {
+		args = append(args, "-test.gocoverdir="+dir.Value.String())
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), 100*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, exe, args...)
+	cmd.Env = append(os.Environ(), "FULLPACK_AUTO_SLOW_READER_CASE="+transport+"/"+mode)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("isolated slow-reader case: %v\n%s", err, output)
+	}
+	marker := "slow-reader " + transport + "/" + mode + ": all application/control invariants verified"
+	if !strings.Contains(string(output), marker) {
+		t.Fatalf("child did not execute required workload:\n%s", output)
+	}
+	t.Logf("%s", output)
 }

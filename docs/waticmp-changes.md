@@ -202,4 +202,4 @@ baseline, not a claim that the published source has no Git commit.
 
 *Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
 
-*Last verified against FullPack v1.9.4-beta.5 (compatibility review of authenticated Auto smux isolation, 2026-10-16; historical measurements keep their original scope; deployment and soak require separate evidence).*
+*Last verified against FullPack v1.9.4-beta.6 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*

@@ -132,7 +132,24 @@ observed WAN timeout churn. Its five-minute passes must never be represented
 as a lasting EOF fix. The additional receive-bucket mechanism, compatibility
 review and bounded Auto adaptation are documented in `smux-flow-control.md`.
 
+A later explicit delivery check captured the distinction on beta.4: the direct
+NL synthetic account returned the exact expected HTTP response, but Iran port
+8889 reset after five seconds with `stream_pool_timeout` while both peers
+reported `HEALTHY`, `spoof-d`, generation 107. An official manual switch to the
+already enrolled SNI Reverse path, generation 108, did not restore the check.
+A subsequent official TCP Reverse switch restored the short port-8889 check;
+the generation/configuration receipts and independent test-account removal are
+retained privately. This is temporary recovery with the old installed binary,
+not acceptance of the pending receive/transmit repair.
+TCP Reverse generation 109 subsequently timed out at 18:46:26 UTC, about
+23 minutes after manual activation, and Auto committed SNI Reverse generation
+110 at 18:46:49. This additional recurrence is retained with the short passes.
+
+Beta.5's full release gate failed and its release job was skipped; no beta.5
+binary was installed. The failed native/race pool bootstraps, subsequent race
+failures and the isolated-fixture change remain recorded in `smux-flow-control.md`.
+
 **NOT VERIFIED:** continuous real-hour/24-hour operation, sustained bandwidth,
 every carrier under load and guaranteed production capacity for 1000 real users.
 
-*Last verified against FullPack v1.9.4-beta.5 (compatibility review of authenticated Auto smux isolation, 2026-10-16; historical measurements keep their original scope; deployment and soak require separate evidence).*
+*Last verified against FullPack v1.9.4-beta.6 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*

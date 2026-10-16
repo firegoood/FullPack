@@ -49,6 +49,31 @@ manifests, crypto domains, authorization and fencing state are not rewritten.
 `docs/auto-control-liveness.md` records beta.4's repeated WAN timeouts after its
 short successful delivery tests; never report that deployment as a lasting fix.
 
+Receive isolation alone does not prevent control or new-stream handshakes
+waiting behind queued bulk writers. Preserve a bounded eight-frame lane for
+the one enrolled control stream and a bounded 32-frame lane for SYN/initial
+data-handshake writes. Only an enrolled v2 stream's first 256 small bytes have
+handshake priority; a larger first write retires that allowance. Keep one
+ordinary queued frame after at most sixteen priority frames, standard receive
+credit and framing, legacy/manual behavior and native Wat/QUIC. Priority cannot
+preempt bytes already in the underlying connection or guarantee WAN bandwidth.
+
+Coalesce tiny received frames into bounded 4 KiB allocations so receive-ring
+metadata scales with buffered payload rather than a one-byte frame count.
+Preserve byte order, partial-read offsets, allocator ownership and receive
+credit. Keep regressions for tiny frames and partial heads. Slow-reader fixtures
+must retain their unread Stream wrappers so their Close finalizers cannot turn
+the intended blocked-reader workload into discarded traffic.
+
+Beta.5 (`7a115437372a7de8d1a5104c6ec42ca6453b6863`) was not released or
+installed: CI `38942638366` failed the shared-process pool recovery checks in
+native/race runs and subsequent race bootstraps. Preserve that failed evidence.
+Each of the six new slow-reader cases must run in a fresh instance of the same
+normal/race/coverage test executable, with an exact selected workload marker.
+Forward Go's coverage directory so its child counters remain in the profile.
+Keep resource diagnostics and all cases; do not raise the 256 MiB production
+pressure threshold or convert pre-bootstrap pressure skips into successful work.
+
 ## Auto control liveness repair approved on 2026-10-16
 
 Slow isolated reserve probes must never starve production control heartbeats.

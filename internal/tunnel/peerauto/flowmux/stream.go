@@ -67,10 +67,11 @@ type stream struct {
 	writeDeadline atomic.Value
 
 	// v2 stream fields(flow control)
-	numRead    uint32 // count num of bytes read
-	received   uint32 // accepted bytes, guarded by bufferLock; modular like numRead
-	numWritten uint32 // count num of bytes written
-	incr       uint32 // bytes sent since last window update
+	numRead           uint32       // count num of bytes read
+	received          uint32       // accepted bytes, guarded by bufferLock; modular like numRead
+	priorityRemaining atomic.Int32 // finite initial data-handshake bytes, never a flow count
+	numWritten        uint32       // count num of bytes written
+	incr              uint32       // bytes sent since last window update
 
 	// UPD command
 	peerConsumed          uint32        // num of bytes the peer has consumed
@@ -137,6 +138,37 @@ func (r *bufferRing) push(buf []byte, head *[]byte) {
 	r.size++
 }
 
+// Tiny frames must not allocate a ring entry and allocator object per byte.
+// Fill the last owned allocation, then use a small aggregate for a short tail.
+// The original head keeps its full capacity for correct allocator recycling.
+func (r *bufferRing) pushReceived(head *[]byte) {
+	data := *head
+	if r.size > 0 {
+		i := (r.tail - 1) & r.mask
+		tail := r.bufs[i]
+		n := min(cap(tail)-len(tail), len(data))
+		if n > 0 {
+			before := len(tail)
+			tail = tail[:before+n]
+			copy(tail[before:], data[:n])
+			r.bufs[i] = tail
+			data = data[n:]
+		}
+	}
+	if len(data) == 0 {
+		defaultAllocator.Put(head)
+		return
+	}
+	if len(data) < 4096 {
+		aggregate := defaultAllocator.Get(4096)
+		copy(*aggregate, data)
+		r.push((*aggregate)[:len(data)], aggregate)
+		defaultAllocator.Put(head)
+		return
+	}
+	r.push(data, head)
+}
+
 func (r *bufferRing) pop() (buf []byte, head *[]byte, ok bool) {
 	if r.size == 0 {
 		return nil, nil, false
@@ -185,6 +217,7 @@ func newStream(id uint32, frameSize int, sess *Session) *stream {
 	s.chUpdate = make(chan struct{}, 1)
 	s.frameSize = frameSize
 	s.sess = sess
+	s.priorityRemaining.Store(256)
 	s.die = make(chan struct{})
 	s.chFinEvent = make(chan struct{})
 	s.chWriteClosed = make(chan struct{})                             // half-close support
@@ -605,7 +638,7 @@ func (s *stream) writeV2(b []byte) (n int, err error) {
 				frame.data = bts[:size]
 
 				// transmit of frame
-				nw, err := s.sess.writeFrameInternal(frame, deadline, CLSDATA)
+				nw, err := s.sess.writeFrameInternal(frame, deadline, s.dataClass(len(frame.data)))
 				atomic.AddUint32(&s.numWritten, uint32(size))
 				sent += nw
 				if err != nil {
@@ -638,6 +671,29 @@ func (s *stream) writeV2(b []byte) (n int, err error) {
 			return sent, s.sess.socketWriteError.Load().(error)
 		case <-s.chUpdate: // notify of remote data consuming and window update
 			continue
+		}
+	}
+}
+
+// Only an enrolled v2 stream's first small handshake bytes can precede bulk
+// data. A large first write retires the allowance instead of promoting payload.
+// This keeps SYN/type/request/ACK progress independent of already busy users;
+// stream ordering and all receive-credit limits remain unchanged.
+func (s *stream) dataClass(n int) CLASSID {
+	if !s.sess.authenticatedFlow.Load() || s.sess.config.Version != 2 {
+		return CLSDATA
+	}
+	for {
+		remaining := s.priorityRemaining.Load()
+		if remaining <= 0 {
+			return CLSDATA
+		}
+		if n > int(remaining) {
+			if s.priorityRemaining.CompareAndSwap(remaining, 0) {
+				return CLSDATA
+			}
+		} else if s.priorityRemaining.CompareAndSwap(remaining, remaining-int32(n)) {
+			return CLSCTRL
 		}
 	}
 }
@@ -770,7 +826,7 @@ func (s *stream) pushBytes(pbuf *[]byte) bool {
 	}
 	s.received += uint32(len(*pbuf))
 	s.sess.bufferedBytes.Add(int64(len(*pbuf)))
-	s.bufferRing.push(*pbuf, pbuf)
+	s.bufferRing.pushReceived(pbuf)
 	return true
 }
 

@@ -1,10 +1,16 @@
 package peerauto
 
-import smux "github.com/backpack/backpack/internal/tunnel/peerauto/flowmux"
+import (
+	"errors"
+	"net"
+
+	smux "github.com/backpack/backpack/internal/tunnel/peerauto/flowmux"
+)
 
 // MuxFlowStatus describes local transport behavior, never enrollment policy.
 // Old peers retain v1 and the bounded shared bucket until both are upgraded.
 type MuxFlowStatus struct {
+	ControlPriority   bool  `json:"controlPriority"`
 	BufferedReceive   int64 `json:"bufferedReceive"`
 	Version           int   `json:"version"`
 	Isolated          bool  `json:"isolated"`
@@ -26,11 +32,18 @@ func muxSession(s carrierSession) *smux.Session {
 	}
 }
 
-func enableAuthenticatedFlowControl(s carrierSession) error {
+func enableAuthenticatedFlowControl(s carrierSession, control net.Conn) error {
 	if mux := muxSession(s); mux != nil {
 		version, _, _ := mux.FlowControl()
 		if version == 2 {
-			return mux.EnableAuthenticatedFlowControl()
+			stream, ok := control.(*smux.Stream)
+			if !ok {
+				return errors.New("enrolled mux control stream is unavailable")
+			}
+			if err := mux.EnableAuthenticatedFlowControl(); err != nil {
+				return err
+			}
+			return mux.PrioritizeControl(stream)
 		}
 	}
 	return nil
@@ -39,7 +52,7 @@ func enableAuthenticatedFlowControl(s carrierSession) error {
 func muxFlowStatus(s carrierSession) *MuxFlowStatus {
 	if mux := muxSession(s); mux != nil {
 		version, isolated, window := mux.FlowControl()
-		return &MuxFlowStatus{BufferedReceive: mux.BufferedBytes(), Version: version, Isolated: isolated, MaxBufferedStream: window}
+		return &MuxFlowStatus{ControlPriority: mux.ControlPriority(), BufferedReceive: mux.BufferedBytes(), Version: version, Isolated: isolated, MaxBufferedStream: window}
 	}
 	return nil
 }

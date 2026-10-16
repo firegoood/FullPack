@@ -191,4 +191,4 @@ profile is capped at 256 streams), followed by coordinated enrollment. Merely
 changing the displayed/configuration maximum cannot prove capacity. Existing
 manifests and fencing were not silently rewritten during this installation.
 
-*Last verified against FullPack v1.9.4-beta.5 (compatibility review of authenticated Auto smux isolation, 2026-10-16; historical measurements keep their original scope; deployment and soak require separate evidence).*
+*Last verified against FullPack v1.9.4-beta.6 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*

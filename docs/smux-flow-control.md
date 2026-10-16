@@ -70,6 +70,28 @@ Memory scales with accepted streams and their finite windows; unlimited
 enrollment does not guarantee unlimited OS memory, descriptors or bandwidth.
 There is no new fixed application connection ceiling or enormous global bucket.
 
+Tiny frames share 4 KiB receive allocations instead of retaining a ring entry
+and allocator object for every byte. Payload credit remains unchanged; partial
+read offsets and original allocation capacities are preserved for recycling.
+The regression queues 128 KiB of one-byte frames with at most 34 ring entries,
+then checks exact byte order and zero remaining payload accounting. A second
+case checks appending after a partial head read.
+
+The transmit side also needs separation. With 128 bulk writers queued behind
+synthetic frame pacing, the receive-only candidate's control write exceeded a
+compressed 300 ms deadline. The same private fixture with control priority
+completed in about 17 ms. These are local scheduler measurements, not WAN RTTs.
+The adapted engine has an eight-frame lane for its single enrolled control
+stream and a separate 32-frame lane for new stream SYN/initial handshake writes.
+Only the first 256 small outgoing bytes per enrolled v2 stream can use handshake
+priority; a large initial write retires the allowance. Existing receive credit,
+FIFO framing within normal application writes and native Wat/QUIC are unchanged.
+One queued bulk frame progresses after at most sixteen priority frames, and
+control is chosen ahead of the handshake lane. This prevents both heartbeat and
+new-connection admission from waiting behind megabytes of queued user payload.
+It cannot preempt bytes already in an underlying socket/helper or create WAN
+bandwidth. `mux.controlPriority` reports the local enrolled control lane.
+
 ## Verification status
 
 The deterministic legacy test fills a 256 KiB shared receive budget and observes
@@ -95,7 +117,33 @@ TCP, WSS and Stealth in Reverse and Direct. A skipped or failed workload is not
 a pass. The earlier beta.4 timeout recurrence is retained in
 `auto-control-liveness.md`.
 
+The beta.6 isolated Linux rerun passed all six mandatory workloads, with
+5,554,176–7,970,816 buffered receive bytes and a 17,024 KiB parent RSS after
+joined children. The following pool recovery passed 4 -> 2 -> 4 at unchanged
+generation 2. A separate instrumented parent/child check retained nine positive
+profile entries in the mux enrollment file. Source hashes and bounded evidence
+are recorded in `verification/auto-smux-priority-local-20261016.json`; full CI,
+deployment and post-repair WAN delivery are still pending in that local record.
+
+The receive-only beta.5 source `7a115437372a7de8d1a5104c6ec42ca6453b6863`
+failed CI `38942638366`; it was **not released or installed**. Normal, coverage,
+HTTPS, Direct/L3, static/security, fuzz, sustained and compatibility jobs passed,
+but native/race shared-process pool bootstraps failed, followed by additional
+race bootstraps. The earlier output did not record the pressure subtype; resource
+retention is an inference. Raising production thresholds is not the repair.
+All six slow-reader cases now run in fresh instances of the same instrumented
+test executable. Each parent verifies its child's exact workload marker, and
+forwards `test.gocoverdir` so Go includes child counter files in coverage. No case
+is skipped by default, the race detector stays enabled when compiled in, and
+the original 256 MiB production guard remains. Bootstrap failures now record
+process resources and expanded pool diagnostics. The legacy receive baseline
+waits for the receiver's actual bucket exhaustion before testing timeout, avoiding
+a race where sender completion preceded receive accounting.
+Unread receiver wrappers also remain referenced until cleanup: otherwise the
+upstream Stream Close finalizer can discard the fixture's intended slow-reader
+traffic. This is a fixture repair, not a change to production stream ownership.
+
 **NOT VERIFIED:** real-hour/24-hour stability, all carriers under sustained load,
 or guaranteed capacity for 1000 real users.
 
-*Last verified against FullPack v1.9.4-beta.5 (source review, 2026-10-16; pending runtime gates are explicit above).*
+*Last verified against FullPack v1.9.4-beta.6 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*
