@@ -2,7 +2,14 @@
 
 All notable changes to Backpack are documented here.
 
-## v1.9.4-beta.3 — 2026-10-16 (FullPack prerelease)
+## v1.9.4-beta.4 — 2026-10-16 (FullPack prerelease)
+
+- Include the control-liveness repair below with all original release gates.
+  Run every held-connection carrier/direction in a fresh race-test process and
+  log fixture RSS/heap/goroutine counts. Production pressure protection and all
+  1000-connection and mixed TCP/UDP assertions remain unchanged.
+
+## v1.9.4-beta.3 — 2026-10-16 (unpublished candidate)
 
 - Keep authenticated control heartbeats progressing independently of slow Auto
   reserve scans so a usable active carrier does not expire its control lease
@@ -12,6 +19,9 @@ All notable changes to Backpack are documented here.
   in heartbeat status, retain high-water reconciliation, join cancellation and
   record typed control-loss events. See `docs/auto-control-liveness.md` for the
   NL incident, regressions and remaining real-hour/24-hour verification gates.
+- Publication was blocked by the held-connection audit: two Stealth cases hit
+  the shared test process's resource-pressure guard before bootstrap. No release
+  or production deployment was made from this candidate.
 
 ## v1.9.4-beta.2 — 2026-10-16 (FullPack prerelease)
 

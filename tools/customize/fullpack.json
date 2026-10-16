@@ -262,7 +262,7 @@
     "internal/tunnel/peerauto/config.go": ["plaintext Auto adapters are not verified", "Auto is the sole switching owner", "manifestHash", "candidate listeners conflict", "streamReserve(a)", "incomingStreams(a config.AutoConfig)"],
     "internal/tunnel/peerauto/store.go": ["Generation++", "f.Sync()", "os.Rename", "d.Sync()"],
     "internal/tunnel/peerauto/lock_linux.go": ["unix.O_NOFOLLOW", "unix.O_NONBLOCK", "unix.LOCK_EX|unix.LOCK_NB"],
-    "internal/tunnel/peerauto/manager.go": ["PREPARE_SWITCH", "COMMIT_ACK", "fenceLocked", "FlowStatus", "stateStore", "ErrorCode", "ErrorStage", "afterFuncJoined", "m.launch(m.controlLoop)", "if r.Op == \"STATUS\""],
+    "internal/tunnel/peerauto/manager.go": ["PREPARE_SWITCH", "COMMIT_ACK", "fenceLocked", "FlowStatus", "stateStore", "ErrorCode", "ErrorStage", "afterFuncJoined", "m.launch(m.controlLoop)", "m.controlCommit.Lock()", "if r.Op == \"STATUS\""],
     "internal/tunnel/peerauto/control.go": ["func (m *Manager) controlLoop()", "!e.mu.TryLock()", "!m.controlCommit.TryRLock()", "CONTROL_LOST", "current := m.active", "wg.Wait()"],
     "internal/tunnel/peerauto/control_test.go": ["TestControlLivenessSurvivesBlockedReserveAndAuthority", "TestControlTickSkipsBusyTransactionAndKeepsGenerationFencing", "TestControlLoopCancellationJoinsInFlightHeartbeat", "TestControlHeartbeatCannotCrossBilateralCommitBoundary", "TestControlStatusSeparatesLiveRouteFromPreparedFencingEpoch"],
     "docs/auto-control-liveness.md": ["NOT VERIFIED", "90-second", "STATE_SYNC", "خلاصهٔ فارسی"],
@@ -276,7 +276,7 @@
     "internal/webui/server.go": ["/api/tunnel/auto", "/api/tunnel/peer-enrollment"],
     "internal/webui/panel/js/ui/peerauto.js": ["Import an enrolled Kharej endpoint", "peerSetupPayload", "peerEditForm", "api.autoAction", "n.closest('.grp3')", "localAutoFields", "readLocalAuto", "quickAutoFields()", "wireQuickAuto", "result.quickAuto", "Optional application connection limit", "s.flows.unlimited"],
     "internal/webui/paneltest/peerauto.test.js": ["Auto edit changes only local fields", "Auto Direct HTTPS", "Auto L3", "Quick Auto sends only the reviewed IP/port inputs"],
-    ".github/workflows/ci.yml": ["Verify FullPack customizations", "FULLPACK_AUTO_HELPERS", "FULLPACK_AUTO_NETNS", "FULLPACK_AUTO_OUTER_MTU=1500", "FULLPACK_AUTO_LOAD", "TestPeerAutoBoundedApplicationConnectionCapacity", "go-version: '1.27.2'", "mode: [normal, race, coverage]", "fail-fast: false", "TestPeerAutoPoolGeneratedHTTPSBothDirections", "bash internal/e2e/testdata/auto-pool-netns.sh", "FULLPACK_AUTO_UNLIMITED_LOAD", "TestPeerAutoUnlimitedApplicationConnections"],
+    ".github/workflows/ci.yml": ["Verify FullPack customizations", "FULLPACK_AUTO_HELPERS", "FULLPACK_AUTO_NETNS", "FULLPACK_AUTO_OUTER_MTU=1500", "FULLPACK_AUTO_LOAD", "TestPeerAutoBoundedApplicationConnectionCapacity", "go-version: '1.27.2'", "mode: [normal, race, coverage]", "fail-fast: false", "TestPeerAutoPoolGeneratedHTTPSBothDirections", "bash internal/e2e/testdata/auto-pool-netns.sh", "FULLPACK_AUTO_UNLIMITED_LOAD", "TestPeerAutoUnlimitedApplicationConnections", "12m sh tools/test-auto-unlimited.sh"],
     "docs/auto-carrier-completion.md": ["one to four", "4096-packet replay window", "NOT VERIFIED", "same explicitly enrolled receive port"],
     "internal/cli/licenses.go": ["wat.License", "wat.Origin"],
     "internal/menu/system.go": ["Configuration And Fencing State Were Kept", "manage.RemoveInstalledHelpers()", "Remaining Installation Files Were Kept"],
@@ -334,7 +334,8 @@
     "docs/verification/auto-admission-wan-20261015.json": ["\"sweepConcurrency\": 16", "\"installedEnrolledLimit\": 64", "\"remainingOwnedUsers\": 0", "\"NLInitial\"", "TIMEOUT", "700-1000 simultaneous users"],
     "internal/tunnel/peerauto/unlimited_test.go": ["TestUnlimitedEnrollmentPreservesLegacyAndFencesDifferentCapacity", "TestUnlimitedFlowCountDoesNotSkipProbesOrReportCapacity"],
     "internal/tunnel/waticmp/engine/unlimited_test.go": ["TestAutoStreamOverrideExceedsLegacyLimitAndKeepsTombstoneGuard", "TestUnlimitedNativeEngineKeeps1000HeldAuthenticatedStreams", "TestAutoRetirementRemainsBoundedAcrossStreamChurnAndNeverResurrects", "TestAutoRetirementTracksBothPeerNamespacesAndRejectsLocalIDs"],
-    "internal/e2e/peerauto_unlimited_test.go": ["FULLPACK_AUTO_UNLIMITED_LOAD", "const count = 1000", "no enrollment ceiling"],
+    "internal/e2e/peerauto_unlimited_test.go": ["FULLPACK_AUTO_UNLIMITED_LOAD", "const count = 1000", "no enrollment ceiling", "logUnlimitedFixtureResources", "after joined cleanup"],
+    "tools/test-auto-unlimited.sh": ["FULLPACK_AUTO_UNLIMITED_LOAD", "tcp wss stealth quic", "reverse direct", "mixed-tcp-udp", "-race", "-timeout=3m"],
     "docs/auto-unlimited-connections.md": ["NOT VERIFIED", "connection_limit = 0", "65536", "legacy", "خلاصهٔ فارسی"],
     "internal/app/releaseversion_test.go": ["TestReleaseToolingKeepsPrereleaseIdentity", "v1.9.4-beta.1"]
   }

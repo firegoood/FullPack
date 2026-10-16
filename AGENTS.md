@@ -101,6 +101,9 @@ updating this repository. These files record the user's persistent preferences.
   route; STATE_SYNC/RECOVER retain the durable high-water epoch. Never reset
   fencing or remove recovery limits to hide repeated EOF; distinguish incident
   observations and bounded regressions from a real-hour/24-hour soak.
+  Retain all eight 1000-connection directions and the mixed TCP/UDP release test;
+  isolate each race case in a fresh process within the twelve-minute total
+  bound, retain resource diagnostics and never turn pressure skips into passes.
 - Preserve every recorded customization when integrating a newer BackPack
   release. Do not replace this checkout with an upstream archive or reset it to
   upstream. Fetch and merge/rebase the upstream source, resolve conflicts with

@@ -76,6 +76,15 @@ jobs:
         # they need more than the default 10 minute budget on a shared runner.
         run: go test ./... -timeout 20m
 
+      - name: Verify unlimited Auto held connections on Reverse and Direct carriers
+        if: matrix.mode == 'race'
+        env:
+          FULLPACK_AUTO_UNLIMITED_LOAD: '1'
+        # TestPeerAutoUnlimitedApplicationConnections keeps every assertion;
+        # fresh processes separate per-case load from retained race metadata.
+        # Run this first for prompt feedback; all later gates remain required.
+        run: timeout --signal=TERM --kill-after=10s 12m sh tools/test-auto-unlimited.sh
+
       - name: Test with the race detector
         if: matrix.mode == 'race'
         # Enforced. The transports are heavily concurrent and a data race there
@@ -87,12 +96,6 @@ jobs:
         env:
           FULLPACK_AUTO_LOAD: '1'
         run: go test ./internal/e2e -run '^TestPeerAutoBoundedApplicationConnectionCapacity$' -race -count=1 -timeout 4m
-
-      - name: Verify unlimited Auto held connections on Reverse and Direct carriers
-        if: matrix.mode == 'race'
-        env:
-          FULLPACK_AUTO_UNLIMITED_LOAD: '1'
-        run: go test ./internal/e2e -run '^TestPeerAutoUnlimitedApplicationConnections$' -race -count=1 -timeout 12m
 
       - name: Coverage
         if: matrix.mode == 'coverage'

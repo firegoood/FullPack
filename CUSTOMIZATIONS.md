@@ -37,6 +37,11 @@ an active route from disk, erase generations, relax authentication or remove
 the five-second/twelve-commit recovery gate to conceal repeated EOF. Preserve
 the incident's bounded evidence and remaining soak gates in
 `docs/auto-control-liveness.md`; old short load tests remain historical.
+Keep all eight 1000-held-connection carrier/direction cases and the mixed
+TCP/UDP case in the release gate. Run each in a fresh race-test process within
+the existing twelve-minute total audit bound; log fixture RSS/heap/goroutines.
+Do not remove a case, raise production pressure limits or treat a pressure
+skip before bootstrap as a passing application workload.
 
 ## Unlimited Auto connection policy approved on 2026-10-15
 

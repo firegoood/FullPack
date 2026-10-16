@@ -72,6 +72,38 @@ remain separate observations.
 
 ## Verification
 
+The `v1.9.4-beta.3` candidate at `67d06f3` was **not published or installed**.
+CI run `38902957256` passed the full normal/race suites, coverage, native/raw
+recovery, HTTPS, Direct/L3, security, fuzz, sustained and compatibility gates,
+but the final explicitly enabled held-connection audit failed. Both Stealth
+directions hit `SKIPPED: local CPU/memory/application pressure` before bootstrap:
+zero application flows were admitted in those two cases. They are failures,
+not 1000-connection passes. The old fixture did not record the pressure subtype.
+
+The replacement `v1.9.4-beta.4` candidate runs each of the same eight
+carrier/direction cases and the mixed TCP/UDP case in a fresh race-test process,
+within the original twelve-minute aggregate bound. Each retains 1000 held TCP
+connections, both integrity passes, zero rejection/unchanged-generation checks,
+and the mixed case's 256 UDP associations. RSS, heap and goroutine diagnostics
+are recorded. This separates accumulated instrumentation/fixture resources from
+each carrier's measured load, without raising the 2048 MiB test budget or the
+production 256 MiB default, bypassing pressure guards or omitting any scenario.
+
+A private isolated comparison copied the original `ed42022` control batch
+without changing its scheduling. Holding a reserve transaction blocked the next
+active heartbeat and expired a compressed **six-second** follower idle deadline.
+The repaired loop maintained four authenticated checks over **eight seconds**
+with the same reserve held busy. Both tests passed their expected outcomes;
+this demonstrates the scheduling defect, not a real-hour WAN reproduction.
+
+Before updating production, a fresh synthetic Xray identity completed **300 new
+connections over five minutes** through NL, with both HTTP integrity checks per
+connection passing and generation **66** unchanged. A separate **five-minute
+single persistent connection** passed **144** application exchanges. Both
+accounts were removed and independently queried absent. The incident did not
+repeat during these short pre-repair windows; they do not invalidate the earlier
+outage or establish its only cause.
+
 Linux Go 1.27.2 control regressions passed in an isolated, unprivileged
 network namespace. The server has no C compiler, so race validation is
 explicitly delegated to the full CI gate. All peerauto package tests also passed in that isolated Linux run. Release CI,
@@ -83,4 +115,4 @@ epochs, and joined cancellation. No new application connection ceiling is added.
 **NOT VERIFIED:** continuous real-hour/24-hour operation, sustained bandwidth,
 every carrier under load and guaranteed production capacity for 1000 real users.
 
-*Last verified against FullPack v1.9.4-beta.3 (source compatibility review, 2026-10-16; pending runtime gates are explicit above).*
+*Last verified against FullPack v1.9.4-beta.4 (source compatibility review, 2026-10-16; pending runtime gates are explicit above).*

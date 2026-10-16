@@ -10,12 +10,14 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/backpack/backpack/config"
 	"github.com/backpack/backpack/internal/tunnel/peerauto"
+	"github.com/shirou/gopsutil/v4/process"
 )
 
 // These are held application connections, not a count of authenticated users.
@@ -33,6 +35,8 @@ func TestPeerAutoUnlimitedApplicationConnections(t *testing.T) {
 }
 
 func testUnlimitedConnections(t *testing.T, carrier config.TransportType, mode string, mixed bool) {
+	logUnlimitedFixtureResources(t, "start")
+	t.Cleanup(func() { logUnlimitedFixtureResources(t, "after joined cleanup") })
 	const count = 1000
 	backend := startEchoBackend(t)
 	if mixed {
@@ -102,6 +106,7 @@ func testUnlimitedConnections(t *testing.T, carrier config.TransportType, mode s
 		time.Sleep(25 * time.Millisecond)
 	}
 	if m.Snapshot().Active != "route" {
+		logUnlimitedFixtureResources(t, "bootstrap failure")
 		t.Fatalf("unlimited pair did not bootstrap: %+v", m.Snapshot())
 	}
 	gen := m.Snapshot().Generation
@@ -213,4 +218,17 @@ func testUnlimitedConnections(t *testing.T, carrier config.TransportType, mode s
 		}
 	}
 	t.Logf("%s %s: %d held application connections verified twice, no enrollment ceiling, generation %d", carrier, mode, count, gen)
+}
+
+func logUnlimitedFixtureResources(t *testing.T, phase string) {
+	t.Helper()
+	var memory runtime.MemStats
+	runtime.ReadMemStats(&memory)
+	var rss uint64
+	if p, err := process.NewProcess(int32(os.Getpid())); err == nil {
+		if info, err := p.MemoryInfo(); err == nil {
+			rss = info.RSS
+		}
+	}
+	t.Logf("unlimited fixture %s: RSS=%d KiB heap=%d KiB goroutines=%d GOMAXPROCS=%d; production pressure guards retained", phase, rss/1024, memory.HeapAlloc/1024, runtime.NumGoroutine(), runtime.GOMAXPROCS(0))
 }
