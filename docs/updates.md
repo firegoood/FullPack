@@ -72,3 +72,5 @@ release-based.
 An explicitly selected prerelease is identified by its complete suffix. For the controlled admission deployment, the installer uses `BP_RELEASE_TAG=v1.9.4-beta.1` and verifies that tag-bound signature. Stable/latest selection remains independent. Keep current enrollment/fencing and a private binary rollback; never restore an older generation snapshot.
 
 *Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+
+*Last verified against FullPack v1.9.4-beta.3 (compatibility review of the control-liveness repair, 2026-10-16; historical evidence keeps its original scope and runtime/soak gates require separate receipts).*

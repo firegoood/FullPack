@@ -22,6 +22,21 @@
 | 2026-10-15 | Fix the diagnosed Auto admission and misleading-health problems | Bound UDP occupancy, queue short TCP bursts with a bounded deadline, preserve enrollment totals and generation fencing, and expose capacity/backend data warnings in CLI/web independently of carrier health |
 | 2026-10-15 | Install the repaired build and test 700–1000 simulated users | Identifiable verified fork build with rollback, coordinated tunnel/panel restarts, preserved manifests/fencing and scoped synthetic/WAN traffic checks; do not claim simultaneous-user capacity above enrolled limits |
 | 2026-10-15 | Remove compulsory Auto connection ceilings, as in manual forwarding | Explicit unlimited new enrollment, optional operator cap without a 192 maximum, dynamic active-flow accounting, independent bounded handshake work and carrier stream-policy parity; preserve legacy enrollment/fencing and measure actual concurrency |
+| 2026-10-16 | Investigate and fix NL EOF after hours of traffic | Independent authenticated control liveness during slow reserve scans, live-route status distinct from prepared durable epochs, bounded joined cancellation and retained WAN incident evidence |
+
+## Auto control liveness repair approved on 2026-10-16
+
+Slow isolated reserve probes must never starve production control heartbeats.
+Keep one switching authority and candidate-local transaction serialization;
+the independent joined heartbeat loop may only check liveness and fence an
+authenticated generation disagreement. Busy streams are skipped without
+queuing requests or blocking heartbeats for other candidates. STATUS reports
+the currently live committed route; STATE_SYNC/RECOVER retain the durable
+high-water fencing epoch, including an uncommitted preparation. Never restore
+an active route from disk, erase generations, relax authentication or remove
+the five-second/twelve-commit recovery gate to conceal repeated EOF. Preserve
+the incident's bounded evidence and remaining soak gates in
+`docs/auto-control-liveness.md`; old short load tests remain historical.
 
 ## Unlimited Auto connection policy approved on 2026-10-15
 

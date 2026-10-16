@@ -171,3 +171,5 @@ during the incident.
 Prerelease identity must remain exact throughout Make, CI, signing and installation: `v1.9.4-beta.1` must not become `v1.9.4`. Compare the full declared version with the tag. Public install verification sets `BP_RELEASE_TAG` to that exact tag; a prerelease does not replace stable `releases/latest`. Full CI and tag-bound signature verification remain required.
 
 *Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+
+*Last verified against FullPack v1.9.4-beta.3 (compatibility review of the control-liveness repair, 2026-10-16; historical evidence keeps its original scope and runtime/soak gates require separate receipts).*

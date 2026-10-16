@@ -48,3 +48,5 @@ Sockets and short loopback tests do not establish sustained WAN user capacity.
 The earlier capped admission repair retained the enrolled total (default 64, maximum 192). That historical policy is recorded in [admission repair](auto-admission-repair.md). Optional positive caps still use the UDP quarter share and bounded two-second TCP FIFO. New unlimited enrollment has no connection-count gate; physical resources and native transport constraints remain.
 
 *Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+
+*Last verified against FullPack v1.9.4-beta.3 (compatibility review of the control-liveness repair, 2026-10-16; historical evidence keeps its original scope and runtime/soak gates require separate receipts).*

@@ -2,6 +2,17 @@
 
 All notable changes to Backpack are documented here.
 
+## v1.9.4-beta.3 — 2026-10-16 (FullPack prerelease)
+
+- Keep authenticated control heartbeats progressing independently of slow Auto
+  reserve scans so a usable active carrier does not expire its control lease
+  while another candidate is being tested. Preserve the sole switching owner,
+  enrollment, replay protection, bounded recovery and unlimited flow policy.
+- Distinguish the runtime committed route from a prepared durable fencing epoch
+  in heartbeat status, retain high-water reconciliation, join cancellation and
+  record typed control-loss events. See `docs/auto-control-liveness.md` for the
+  NL incident, regressions and remaining real-hour/24-hour verification gates.
+
 ## v1.9.4-beta.2 — 2026-10-16 (FullPack prerelease)
 
 - New CLI/web Auto setup explicitly selects no application connection ceiling;

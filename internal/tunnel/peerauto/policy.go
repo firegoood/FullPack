@@ -228,31 +228,6 @@ func (m *Manager) leaderLoop() error {
 			}
 		}
 		m.mu.Unlock()
-		// Independent streams can be pinged concurrently. This is liveness only;
-		// no goroutine may propose/commit a transport change.
-		var wg sync.WaitGroup
-		for _, e := range m.poolControlBatch(eps, active) {
-			e := e
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				e.mu.Lock()
-				r, err := e.w.ask(message{Op: "STATUS"}, "STATUS")
-				e.mu.Unlock()
-				if err != nil {
-					e.cancel()
-					return
-				}
-				e.lastSeen.Store(time.Now().UnixNano())
-				if active != nil && active.endpoint == e && (r.Active != e.spec.ID || r.Generation != active.generation) {
-					e.cancel()
-				}
-			}()
-		}
-		wg.Wait()
-		m.mu.Lock()
-		active = m.active
-		m.mu.Unlock()
 		m.refreshPool(active)
 		if active != nil && active.endpoint.ctx.Err() == nil {
 			m.unavailableSince = time.Time{}

@@ -1,0 +1,104 @@
+{
+  "incidentCapturedAt": "2026-10-16T12:33:37Z",
+  "privateReceiptSha256": "1122a9fa25da190fc499d6af9f6c5318a26bbf832e6c18d4c17fdbde5734537b",
+  "installedVersion": "v1.9.4-beta.2",
+  "peers": [
+    {
+      "role": "iran",
+      "processStart": "2026-10-15T21:32:42Z",
+      "systemdRestarts": 0,
+      "state": "HEALTHY",
+      "active": "tcpmux-d",
+      "generation": 63,
+      "flows": {
+        "unlimited": true,
+        "limit": 0,
+        "liveUdp": 55,
+        "udpLimit": 0,
+        "queuedTcp": 0,
+        "queueLimit": 0,
+        "live": 113,
+        "admitted": 293685,
+        "completed": 263921,
+        "drained": 0,
+        "interrupted": 29654,
+        "rejected": 244250,
+        "udpQueueDrops": 257187
+      },
+      "data": {
+        "code": "recent_errors",
+        "detail": "recent data admission failures: no_route; inspect counters and capacity",
+        "lastErrorCode": "no_route",
+        "lastErrorStage": "peer_handshake",
+        "lastErrorAt": "2026-10-16T12:33:27.867141243Z",
+        "errors": {
+          "handshake_timeout": 2907,
+          "no_route": 619451,
+          "stream_pool_timeout": 2397,
+          "stream_unavailable": 3756
+        }
+      },
+      "selection": {
+        "target": 4,
+        "refillAt": 2,
+        "healthy": 4,
+        "scanning": false,
+        "selected": [
+          "tcpmux-d",
+          "wss-d",
+          "stealth-d",
+          "tcp-r"
+        ],
+        "reason": "selected paths are measured; active traffic retains its agreed generation"
+      }
+    },
+    {
+      "role": "kharej",
+      "processStart": "2026-10-15T21:32:42Z",
+      "systemdRestarts": 0,
+      "state": "HEALTHY",
+      "active": "tcpmux-d",
+      "generation": 63,
+      "flows": {
+        "unlimited": true,
+        "limit": 0,
+        "liveUdp": 73,
+        "udpLimit": 0,
+        "queuedTcp": 0,
+        "queueLimit": 0,
+        "live": 151,
+        "admitted": 298881,
+        "completed": 275109,
+        "drained": 0,
+        "interrupted": 23621,
+        "rejected": 0,
+        "udpQueueDrops": 0
+      },
+      "data": {
+        "code": "available",
+        "detail": "data admission available; application delivery is not verified",
+        "lastErrorAt": "0001-01-01T00:00:00Z",
+        "errors": {}
+      },
+      "selection": {
+        "target": 4,
+        "refillAt": 2,
+        "healthy": 4,
+        "scanning": false,
+        "selected": [
+          "tcpmux-d",
+          "wss-d",
+          "stealth-d",
+          "tcp-r"
+        ],
+        "reason": ""
+      }
+    }
+  ],
+  "limits": [
+    "Existing counters overlap and do not count independent users or application EOFs.",
+    "Historical closure reasons were not fully logged; one root cause cannot be assigned to every EOF.",
+    "Post-repair CI, signed deployment and application checks pending.",
+    "No real-hour/24-hour acceptance."
+  ]
+}

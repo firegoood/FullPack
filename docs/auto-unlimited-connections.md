@@ -133,3 +133,5 @@ failed fixture/control reports remain preserved. These results are not a claim
 of guaranteed production capacity for 1000 real users.
 
 *Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-16; bounded evidence and remaining gates are recorded above).*
+
+*Last verified against FullPack v1.9.4-beta.3 (compatibility review of the control-liveness repair, 2026-10-16; historical evidence keeps its original scope and runtime/soak gates require separate receipts).*

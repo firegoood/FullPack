@@ -176,3 +176,5 @@ vector در بالا آمده؛ هر دو journald را می‌خوانند.
 Peer Auto data admission emits bounded typed reasons including `queue_full`, `queue_timeout`, `udp_capacity`, `peer_capacity`, `backend_unavailable`, `no_route`, `stream_pool_timeout`, `handshake_timeout` and `peer_closed`. These data errors are separate from carrier diagnostics; capacity/backend pressure must not quarantine an otherwise healthy carrier. Warnings are rate-limited to ten seconds.
 
 *Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
+
+*Last verified against FullPack v1.9.4-beta.3 (compatibility review of the control-liveness repair, 2026-10-16; historical evidence keeps its original scope and runtime/soak gates require separate receipts).*

@@ -125,6 +125,7 @@ type Manager struct {
 	log                                                                                    *logrus.Logger
 	mappings                                                                               []portmap.Mapping
 	mu                                                                                     sync.Mutex
+	controlCommit                                                                          sync.RWMutex // heartbeat batches cannot overlap a two-peer commit
 	endpoints                                                                              map[string]*candidate
 	peerIncarnation                                                                        string
 	active                                                                                 *route
@@ -327,6 +328,7 @@ func (m *Manager) Start() error {
 		})
 	}
 	if m.iran {
+		m.launch(m.controlLoop)
 		return m.leaderLoop()
 	}
 	<-m.ctx.Done()
@@ -628,6 +630,17 @@ func (m *Manager) transition(e *candidate, r message) message {
 		}
 		out.Op = "STATUS"
 		out.Transaction = r.Transaction
+		if r.Op == "STATUS" {
+			// Heartbeats describe the live route. A durable PREPARE on
+			// another control stream may already have raised the fencing
+			// epoch, while the previous committed route still serves data.
+			// STATE_SYNC/RECOVER retain the durable high-water generation.
+			out.Active = ""
+			if m.active != nil && m.active.ctx.Err() == nil {
+				out.Active = m.active.endpoint.spec.ID
+				out.Generation = m.active.generation
+			}
+		}
 		return out
 	}
 	if r.Op == "ABORT" {
@@ -937,6 +950,11 @@ func (m *Manager) activate(e *candidate, reason string) error {
 			return e.ctx.Err()
 		}
 	}
+	// A peer installs COMMIT before its ACK reaches the authority. Heartbeats
+	// across that brief bilateral boundary would compare different routes and
+	// prematurely cancel an old carrier that should be allowed to drain.
+	m.controlCommit.Lock()
+	defer m.controlCommit.Unlock()
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	r, err := e.w.ask(message{Op: "STATE_SYNC"}, "STATUS")

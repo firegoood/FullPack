@@ -95,6 +95,12 @@ updating this repository. These files record the user's persistent preferences.
   Keep capacity/backend diagnostics separate from carrier health and recovery;
   queued/rejected sockets are not successful users. Never silently raise or
   rewrite an existing pair's admission policy or fencing state.
+- Preserve `docs/auto-control-liveness.md`: independent joined control heartbeats
+  must progress during slow reserve scans, skip busy candidate transactions and
+  retain authenticated generation fencing. STATUS describes the live committed
+  route; STATE_SYNC/RECOVER retain the durable high-water epoch. Never reset
+  fencing or remove recovery limits to hide repeated EOF; distinguish incident
+  observations and bounded regressions from a real-hour/24-hour soak.
 - Preserve every recorded customization when integrating a newer BackPack
   release. Do not replace this checkout with an upstream archive or reset it to
   upstream. Fetch and merge/rebase the upstream source, resolve conflicts with
