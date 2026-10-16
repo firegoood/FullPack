@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/backpack/backpack/config"
+	smux "github.com/backpack/backpack/internal/tunnel/peerauto/flowmux"
 	"github.com/backpack/backpack/internal/tunnel/waticmp"
 	"github.com/backpack/backpack/internal/utils/network"
 	"github.com/gorilla/websocket"
 	"github.com/quic-go/quic-go"
-	"github.com/xtaci/smux"
 )
 
 // Session preserves native Wat multiplexing. Only byte-stream carriers receive
@@ -70,8 +70,11 @@ func (s noiseCarrier) Accept(ctx context.Context) (net.Conn, error) {
 }
 func (s noiseCarrier) Binding(_ string) (string, error) { return "authenticated-Noise-NNpsk0", nil }
 func (s noiseCarrier) Close() error                     { return s.s.Close() }
-func multiplex(c net.Conn, iran bool) (carrierSession, error) {
+func multiplex(c net.Conn, iran bool, version ...int) (carrierSession, error) {
 	cfg := smux.DefaultConfig()
+	if len(version) > 0 && version[0] == 2 {
+		cfg.Version = 2
+	}
 	cfg.MaxReceiveBuffer = 4 << 20
 	cfg.MaxStreamBuffer = 128 << 10
 	cfg.KeepAliveInterval = 5 * time.Second
@@ -158,7 +161,8 @@ func dialCarrier(ctx context.Context, a config.AutoConfig, p config.AutoCandidat
 		}
 		return quicCarrier{q}, nil
 	case config.WSS, config.WSSMUX:
-		w, e := network.WebSocketDialer(ctx, nil, p.Endpoint, "", "/peer-auto/v1", 10*time.Second, 5*time.Second, true, token, config.WSS, false, 1, 0, 0, 0)
+		muxVersion := 1
+		w, e := network.WebSocketDialer(ctx, nil, p.Endpoint, "", "/peer-auto/v1", 10*time.Second, 5*time.Second, true, token, config.WSS, false, 1, 0, 0, 0, &muxVersion)
 		if e != nil {
 			return nil, e
 		}
@@ -167,7 +171,7 @@ func dialCarrier(ctx context.Context, a config.AutoConfig, p config.AutoCandidat
 			w.Close()
 			return nil, e
 		}
-		c, e := multiplex(newWSConn(w), false)
+		c, e := multiplex(newWSConn(w), false, muxVersion)
 		if e != nil {
 			return nil, e
 		}
@@ -200,14 +204,7 @@ func dialCarrier(ctx context.Context, a config.AutoConfig, p config.AutoCandidat
 		if e != nil {
 			return nil, e
 		}
-		stop := afterFuncJoined(ctx, func() { r.Close() })
-		defer stop()
-		n, e := network.NoiseClientConn(r, token, 10*time.Second)
-		if e != nil {
-			r.Close()
-			return nil, e
-		}
-		return multiplex(n, false)
+		return secureStream(ctx, r, token, false)
 	}
 	return nil, fmt.Errorf("no authorized carrier adapter for %s", p.Transport)
 }
@@ -222,15 +219,19 @@ func secureStream(ctx context.Context, raw net.Conn, token string, listen bool) 
 	var secured net.Conn
 	var err error
 	if listen {
-		secured, err = network.NoiseServerConn(raw, token, 10*time.Second)
+		secured, err = network.NoiseAutoServerConn(raw, token, 10*time.Second)
 	} else {
-		secured, err = network.NoiseClientConn(raw, token, 10*time.Second)
+		secured, err = network.NoiseAutoClientConn(raw, token, 10*time.Second)
 	}
 	if err != nil {
 		raw.Close()
 		return nil, err
 	}
-	return multiplex(secured, listen)
+	version := 1
+	if c, ok := secured.(interface{ NegotiatedMuxVersion() int }); ok {
+		version = c.NegotiatedMuxVersion()
+	}
+	return multiplex(secured, listen, version)
 }
 
 func listenNoiseTCP(ctx context.Context, bind, token string) (acceptCarrier, func(), error) {

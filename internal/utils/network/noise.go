@@ -1,6 +1,7 @@
 package network
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
@@ -121,7 +122,20 @@ func NoiseServerConn(raw net.Conn, token string, timeout time.Duration) (net.Con
 	return noiseHandshake(raw, token, false, timeout)
 }
 
-func noiseHandshake(raw net.Conn, token string, initiator bool, timeout time.Duration) (net.Conn, error) {
+// Auto's optional mux capability rides inside the authenticated Noise payload.
+// Existing callers keep their exact padding negotiation and mux behavior.
+func NoiseAutoClientConn(raw net.Conn, token string, timeout time.Duration) (net.Conn, error) {
+	return noiseHandshake(raw, token, true, timeout, true)
+}
+func NoiseAutoServerConn(raw net.Conn, token string, timeout time.Duration) (net.Conn, error) {
+	return noiseHandshake(raw, token, false, timeout, true)
+}
+
+var autoMuxCapability = []byte("backpack-auto-smux2")
+
+func noiseHandshake(raw net.Conn, token string, initiator bool, timeout time.Duration, autoMux ...bool) (net.Conn, error) {
+	wantMux := len(autoMux) > 0 && autoMux[0]
+	negotiatedMux := 1
 	psk, err := noisePSK(token)
 	if err != nil {
 		return nil, err
@@ -153,7 +167,11 @@ func noiseHandshake(raw net.Conn, token string, initiator bool, timeout time.Dur
 
 	if initiator {
 		// -> e
-		msg, _, _, err := hs.WriteMessage(nil, []byte{noiseVersion})
+		offer := []byte{noiseVersion}
+		if wantMux {
+			offer = append(offer, autoMuxCapability...)
+		}
+		msg, _, _, err := hs.WriteMessage(nil, offer)
 		if err != nil {
 			return nil, fmt.Errorf("noise: build first message: %w", err)
 		}
@@ -171,6 +189,9 @@ func noiseHandshake(raw net.Conn, token string, initiator bool, timeout time.Dur
 			return nil, fmt.Errorf("noise: handshake rejected: %w", err)
 		}
 		peerVersion = versionFromPayload(payload)
+		if wantMux && len(payload) > 1 && bytes.Equal(payload[1:], autoMuxCapability) {
+			negotiatedMux = 2
+		}
 		sendCS, recvCS = cs0, cs1 // initiator sends with cs0, receives with cs1
 	} else {
 		// -> e
@@ -183,6 +204,9 @@ func noiseHandshake(raw net.Conn, token string, initiator bool, timeout time.Dur
 			return nil, fmt.Errorf("noise: handshake rejected: %w", err)
 		}
 		peerVersion = versionFromPayload(payload)
+		if wantMux && len(payload) > 1 && bytes.Equal(payload[1:], autoMuxCapability) {
+			negotiatedMux = 2
+		}
 
 		// Answer in kind. A peer that sent no version cannot read one, and
 		// against an initiator that predates this the reply must look exactly
@@ -190,6 +214,9 @@ func noiseHandshake(raw net.Conn, token string, initiator bool, timeout time.Dur
 		var reply []byte
 		if peerVersion > 0 {
 			reply = []byte{noiseVersion}
+			if negotiatedMux == 2 {
+				reply = append(reply, autoMuxCapability...)
+			}
 		}
 		// <- e, ee
 		msg, cs0, cs1, err := hs.WriteMessage(nil, reply)
@@ -212,7 +239,7 @@ func noiseHandshake(raw net.Conn, token string, initiator bool, timeout time.Dur
 	// length byte would corrupt every record.
 	pad := noiseVersion >= noiseVersionPadding && peerVersion >= noiseVersionPadding
 
-	return &noiseConn{Conn: raw, send: sendCS, recv: recvCS, pad: pad}, nil
+	return &noiseConn{Conn: raw, send: sendCS, recv: recvCS, pad: pad, muxVersion: negotiatedMux}, nil
 }
 
 // versionFromPayload reads the version a peer advertised. An empty payload is
@@ -229,6 +256,7 @@ func versionFromPayload(payload []byte) byte {
 // prefixed and encrypted; ciphertext read from it is decrypted and buffered.
 type noiseConn struct {
 	net.Conn
+	muxVersion int
 
 	// pad reports whether both ends agreed to pad their records. Set once at
 	// handshake time and never written again.
@@ -259,6 +287,13 @@ type noiseConn struct {
 	// always points into inBuf, and the next record is only read once readBuf
 	// is empty, so reusing it never overwrites plaintext still owed to a caller.
 	inBuf []byte
+}
+
+func (c *noiseConn) NegotiatedMuxVersion() int {
+	if c.muxVersion == 2 {
+		return 2
+	}
+	return 1
 }
 
 // Write encrypts p and sends it as one or more Noise records. It honours

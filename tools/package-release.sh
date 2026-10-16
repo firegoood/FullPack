@@ -8,8 +8,11 @@ test -f "$binary"
 stage=$(mktemp -d)
 trap 'rm -rf -- "$stage"' EXIT HUP INT TERM
 mkdir -p "$stage/licenses/waticmp"
+mkdir -p "$stage/licenses/smux"
 cp "$binary" "$stage/fullpack"
 cp LICENSE NOTICE TRADEMARK.md "$stage/"
 cp internal/tunnel/waticmp/engine/LICENSE "$stage/licenses/waticmp/MIT.txt"
 cp internal/tunnel/waticmp/engine/ORIGIN.json "$stage/licenses/waticmp/ORIGIN.json"
+cp internal/tunnel/peerauto/flowmux/LICENSE "$stage/licenses/smux/MIT.txt"
+cp internal/tunnel/peerauto/flowmux/ORIGIN.json "$stage/licenses/smux/ORIGIN.json"
 tar -czf "$archive" -C "$stage" fullpack LICENSE NOTICE TRADEMARK.md licenses

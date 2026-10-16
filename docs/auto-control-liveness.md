@@ -104,15 +104,35 @@ accounts were removed and independently queried absent. The incident did not
 repeat during these short pre-repair windows; they do not invalidate the earlier
 outage or establish its only cause.
 
-Linux Go 1.27.2 control regressions passed in an isolated, unprivileged
-network namespace. The server has no C compiler, so race validation is
-explicitly delegated to the full CI gate. All peerauto package tests also passed in that isolated Linux run. Release CI,
-signed deployment and post-repair application delivery remain pending. The regression uses a compressed follower
-idle deadline while holding the authority/reserve transaction busy; it is not a
+Linux Go 1.27.2 control regressions and all peerauto package tests passed in an
+isolated, unprivileged network namespace. The compressed deadline is not a
 real-hour soak. It also checks generation disagreements, prepared versus live
 epochs, and joined cancellation. No new application connection ceiling is added.
+
+All eleven verification jobs and the signed release job passed for beta.4 in
+CI run `38906350352`, source `00d633a82b44c9677f3fe106fe9cdd521219fc38`.
+All nine explicitly enabled held-load cases ran, including both Stealth
+directions and mixed TCP/UDP. These are loopback connections, not WAN users.
+The verified signed binary was installed on Iran and NL at 13:43:46 UTC, with
+operator configs and fencing retained, TR engines and FireNode/Xray unchanged.
+The pair reached TCP Reverse, generation 78, at 13:46:17 UTC. Short tests passed
+300 new connections and a five-minute persistent application flow; both
+forwarded ports and an approved-pool rescan were checked. A test-harness cleanup
+RPC failed JSON parsing after the successful 300-connection workload; its
+separate cleanup was recovered and all six test-account prefixes were queried
+absent. The original harness failure receipt is preserved.
+
+**The incident recurred after those short successes.** Iran recorded active
+control timeouts on TCP Reverse at 13:58:34, WSSMUX Reverse at 13:59:58, WSSMUX
+Direct at 14:06:24 and TCP Reverse again at 14:24:04 UTC. Automatic commits
+advanced through generations 79–83 without a process restart. Final cleanup
+stopped at its health assertion before deleting diagnostic resources. Beta.4
+fixed the independently reproduced scheduling defect but did not eliminate the
+observed WAN timeout churn. Its five-minute passes must never be represented
+as a lasting EOF fix. The additional receive-bucket mechanism, compatibility
+review and bounded Auto adaptation are documented in `smux-flow-control.md`.
 
 **NOT VERIFIED:** continuous real-hour/24-hour operation, sustained bandwidth,
 every carrier under load and guaranteed production capacity for 1000 real users.
 
-*Last verified against FullPack v1.9.4-beta.4 (source compatibility review, 2026-10-16; pending runtime gates are explicit above).*
+*Last verified against FullPack v1.9.4-beta.5 (compatibility review of authenticated Auto smux isolation, 2026-10-16; historical measurements keep their original scope; deployment and soak require separate evidence).*

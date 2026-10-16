@@ -149,6 +149,9 @@ func listenWSS(ctx context.Context, p config.AutoCandidate, token string, settin
 				return
 			}
 			headers.Set(network.WSSServerProofHeader, answer)
+			if r.Header.Get(network.AutoMuxHeader) == "2" {
+				headers.Set(network.AutoMuxHeader, "2")
+			}
 		}
 		ws, e := upgrader.Upgrade(w, r, headers)
 		if e != nil {
@@ -156,7 +159,11 @@ func listenWSS(ctx context.Context, p config.AutoCandidate, token string, settin
 		}
 		var s carrierSession
 		if secure {
-			s, e = multiplex(newWSConn(ws), true)
+			version := 1
+			if headers.Get(network.AutoMuxHeader) == "2" {
+				version = 2
+			}
+			s, e = multiplex(newWSConn(ws), true, version)
 		} else {
 			s, e = secureStream(ctx, newWSConn(ws), token, true)
 		}

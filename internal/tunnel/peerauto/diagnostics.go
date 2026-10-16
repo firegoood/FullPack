@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"syscall"
+
+	smux "github.com/backpack/backpack/internal/tunnel/peerauto/flowmux"
 )
 
 var errControlRejected = errors.New("coordination identity, version, policy or replay check failed")
@@ -19,6 +21,8 @@ var errControlProtocol = errors.New("invalid coordination protocol")
 func classifyCandidateError(err error) (code, summary string) {
 	var timeout net.Error
 	switch {
+	case errors.Is(err, smux.ErrFlowControlWindow):
+		return "flow_control_error", "peer exceeded its bounded stream receive credit"
 	case errors.Is(err, errPoolPrerequisite):
 		return "prerequisite_missing", "SKIPPED: receiver-local helper or authenticated cover is unavailable"
 	case errors.Is(err, context.DeadlineExceeded), errors.Is(err, os.ErrDeadlineExceeded), errors.As(err, &timeout) && timeout.Timeout():

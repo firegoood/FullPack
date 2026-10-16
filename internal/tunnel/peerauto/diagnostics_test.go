@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"testing"
 
+	smux "github.com/backpack/backpack/internal/tunnel/peerauto/flowmux"
 	"github.com/sirupsen/logrus"
 )
 
@@ -24,6 +25,7 @@ func TestCandidateDiagnosticsSeparateTimeoutFromPeerRejectionAndHideSecrets(t *t
 		{"peer_rejected", errEnrollmentRejected},
 		{"peer_rejected", errControlRejected},
 		{"protocol_error", errControlProtocol},
+		{"flow_control_error", smux.ErrFlowControlWindow},
 		{"connection_closed", io.EOF},
 		{"connection_closed", syscall.ECONNRESET},
 		{"bind_conflict", syscall.EADDRINUSE},

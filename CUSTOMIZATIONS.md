@@ -23,6 +23,31 @@
 | 2026-10-15 | Install the repaired build and test 700–1000 simulated users | Identifiable verified fork build with rollback, coordinated tunnel/panel restarts, preserved manifests/fencing and scoped synthetic/WAN traffic checks; do not claim simultaneous-user capacity above enrolled limits |
 | 2026-10-15 | Remove compulsory Auto connection ceilings, as in manual forwarding | Explicit unlimited new enrollment, optional operator cap without a 192 maximum, dynamic active-flow accounting, independent bounded handshake work and carrier stream-policy parity; preserve legacy enrollment/fencing and measure actual concurrency |
 | 2026-10-16 | Investigate and fix NL EOF after hours of traffic | Independent authenticated control liveness during slow reserve scans, live-route status distinct from prepared durable epochs, bounded joined cancellation and retained WAN incident evidence |
+| 2026-10-16 | Review and update smux if a better version exists | Official latest tag is already v1.5.57; review upstream changes, preserve manual compatibility and test Auto's authenticated v2 flow isolation against original smux |
+
+## Auto stream isolation and smux review (2026-10-16)
+
+The dependency is already the newest official tag, `github.com/xtaci/smux
+v1.5.57` (`3b4ec04d359934256b3adea7133374e3c93a0622`). The only subsequent
+master commit `ae956bb8d67bab37a312869b1d38ee3f52a7397a` changes README files;
+it contains no implementation update to import. Library release numbers and
+smux wire protocol versions 1/2 are separate concepts.
+
+Preserve the Auto-only licensed adaptation in `internal/tunnel/peerauto/flowmux`:
+negotiate standard v2 inside the existing Noise PSK transcript or TLS-bound WSS
+proof, retain legacy v1 fallback and unchanged manual transport behavior, and
+enable receive isolation only after complete production enrollment/incarnation
+checks. Before enrollment keep the finite session receive bucket. Afterward,
+finite per-stream windows replace the shared bucket that can block all control
+behind slow applications. Reject excess receive credit, retain bounded transient
+handshakes and never replace unlimited admission with a hidden stream-count cap
+or an enormous shared buffer. Native Wat/QUIC flow control remains separate.
+Keep the original MIT license/source hashes in binaries and release archives,
+old/new negotiation and upstream wire compatibility tests, slow-reader/control
+regressions in both directions and honest local/WAN/soak limits. Existing pair
+manifests, crypto domains, authorization and fencing state are not rewritten.
+`docs/auto-control-liveness.md` records beta.4's repeated WAN timeouts after its
+short successful delivery tests; never report that deployment as a lasting fix.
 
 ## Auto control liveness repair approved on 2026-10-16
 

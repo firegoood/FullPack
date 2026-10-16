@@ -15,7 +15,7 @@ import (
 	utls "github.com/refraction-networking/utls"
 )
 
-func WebSocketDialer(ctx context.Context, out *Outbound, addr string, edgeIP string, path string, timeout time.Duration, keepalive time.Duration, nodelay bool, token string, mode config.TransportType, simpleAuth bool, retry int, SO_RCVBUF int, SO_SNDBUF int, mss int) (*websocket.Conn, error) {
+func WebSocketDialer(ctx context.Context, out *Outbound, addr string, edgeIP string, path string, timeout time.Duration, keepalive time.Duration, nodelay bool, token string, mode config.TransportType, simpleAuth bool, retry int, SO_RCVBUF int, SO_SNDBUF int, mss int, autoMux ...*int) (*websocket.Conn, error) {
 	var tunnelWSConn *websocket.Conn
 	var err error
 
@@ -24,7 +24,7 @@ func WebSocketDialer(ctx context.Context, out *Outbound, addr string, edgeIP str
 
 	for i := 0; i < retries; i++ {
 		// Attempt to dial the WebSocket
-		tunnelWSConn, err = attemptDialWebSocket(ctx, out, addr, edgeIP, path, timeout, keepalive, nodelay, token, mode, simpleAuth, SO_RCVBUF, SO_SNDBUF, mss)
+		tunnelWSConn, err = attemptDialWebSocket(ctx, out, addr, edgeIP, path, timeout, keepalive, nodelay, token, mode, simpleAuth, SO_RCVBUF, SO_SNDBUF, mss, autoMux...)
 		if err == nil {
 			// If successful, return the connection
 			if ctx.Err() != nil {
@@ -53,7 +53,7 @@ func WebSocketDialer(ctx context.Context, out *Outbound, addr string, edgeIP str
 	return nil, err
 }
 
-func attemptDialWebSocket(ctx context.Context, out *Outbound, addr string, edgeIP string, path string, timeout time.Duration, keepalive time.Duration, nodelay bool, token string, mode config.TransportType, simpleAuth bool, SO_RCVBUF int, SO_SNDBUF int, mss int) (result *websocket.Conn, resultErr error) {
+func attemptDialWebSocket(ctx context.Context, out *Outbound, addr string, edgeIP string, path string, timeout time.Duration, keepalive time.Duration, nodelay bool, token string, mode config.TransportType, simpleAuth bool, SO_RCVBUF int, SO_SNDBUF int, mss int, autoMux ...*int) (result *websocket.Conn, resultErr error) {
 	// Socket setup, both possible TLS handshakes and HTTP Upgrade share one
 	// budget. gorilla applies a deadline to Upgrade I/O but does not interrupt
 	// that I/O when a context without a deadline is cancelled.
@@ -154,6 +154,12 @@ func attemptDialWebSocket(ctx context.Context, out *Outbound, addr string, edgeI
 	// wss it carries a proof bound to the TLS session, so the token itself is
 	// never sent where something terminating the TLS could read it.
 	headers := http.Header{}
+	if len(autoMux) > 0 && autoMux[0] != nil {
+		*autoMux[0] = 1
+		if (mode == config.WSS || mode == config.WSSMUX) && !simpleAuth {
+			headers.Set(AutoMuxHeader, "2")
+		}
+	}
 	headers.Add("X-User-Id", fmt.Sprintf("%d", randomUserID))
 	headers.Add("User-Agent", randomUserAgent)
 
@@ -296,9 +302,20 @@ func attemptDialWebSocket(ctx context.Context, out *Outbound, addr string, edgeI
 			tunnelWSConn.Close()
 			return nil, err
 		}
+		// Read the optional choice only after the existing TLS-bound server
+		// proof passed. Old peers omit it and retain smux v1 compatibility.
+		if len(autoMux) > 0 && autoMux[0] != nil && resp.Header.Get(AutoMuxHeader) == "2" {
+			if resp.Header.Get(WSSServerProofHeader) == "" {
+				tunnelWSConn.Close()
+				return nil, fmt.Errorf("wss: Auto mux choice requires a TLS-bound server proof")
+			}
+			*autoMux[0] = 2
+		}
 	}
 	return tunnelWSConn, nil
 }
+
+const AutoMuxHeader = "X-Backpack-Auto-Mux"
 
 // The websocket buffers on the client side; see the server transport's
 // wsWriteBufferSize for why these sizes and why the write buffers are pooled.

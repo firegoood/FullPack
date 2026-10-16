@@ -60,3 +60,10 @@ patterniha (https://github.com/patterniha/SNI-Spoofing) and implemented in Rust
 by therealaleph (https://github.com/therealaleph/sni-spoofing-rust, MIT). The Go
 code here is original; the fake ClientHello it sends follows the shape that
 implementation established.
+
+The Auto stream multiplexer includes adapted smux v1.5.57 source by xtaci,
+Copyright (c) 2016-2017 xtaci, under the MIT license. Its original license and
+source inventory are retained in internal/tunnel/peerauto/flowmux and shipped
+in release archives under licenses/smux. FullPack's Auto-specific adaptation
+uses authenticated v2 negotiation and bounded per-stream receive isolation;
+manual transports continue to use the unmodified upstream dependency.

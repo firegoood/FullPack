@@ -59,21 +59,22 @@ type preparation struct {
 }
 
 type CandidateStatus struct {
-	Selected        bool      `json:"selected,omitempty"`
-	Stable          bool      `json:"stable,omitempty"`
-	Mode            string    `json:"mode,omitempty"`
-	ID              string    `json:"id"`
-	Transport       string    `json:"transport"`
-	Direction       string    `json:"direction,omitempty"`
-	Ready           bool      `json:"ready"`
-	Reason          string    `json:"reason,omitempty"`
-	ErrorCode       string    `json:"errorCode,omitempty"`
-	ErrorStage      string    `json:"errorStage,omitempty"`
-	UsefulMbps      float64   `json:"usefulMbps"`
-	RTTms           float64   `json:"rttMs"`
-	LastProbe       time.Time `json:"lastProbe,omitempty"`
-	QuarantineUntil time.Time `json:"quarantineUntil,omitempty"`
-	Native          any       `json:"native,omitempty"`
+	Mux             *MuxFlowStatus `json:"mux,omitempty"`
+	Selected        bool           `json:"selected,omitempty"`
+	Stable          bool           `json:"stable,omitempty"`
+	Mode            string         `json:"mode,omitempty"`
+	ID              string         `json:"id"`
+	Transport       string         `json:"transport"`
+	Direction       string         `json:"direction,omitempty"`
+	Ready           bool           `json:"ready"`
+	Reason          string         `json:"reason,omitempty"`
+	ErrorCode       string         `json:"errorCode,omitempty"`
+	ErrorStage      string         `json:"errorStage,omitempty"`
+	UsefulMbps      float64        `json:"usefulMbps"`
+	RTTms           float64        `json:"rttMs"`
+	LastProbe       time.Time      `json:"lastProbe,omitempty"`
+	QuarantineUntil time.Time      `json:"quarantineUntil,omitempty"`
+	Native          any            `json:"native,omitempty"`
 }
 type Status struct {
 	Selection   *PoolStatus       `json:"selection,omitempty"`
@@ -262,6 +263,7 @@ func (m *Manager) Snapshot() Status {
 			s.Candidates[i].Stable = m.poolStableLocked(m.endpoints[s.Candidates[i].ID], time.Now())
 		}
 		if e := m.endpoints[s.Candidates[i].ID]; e != nil {
+			s.Candidates[i].Mux = muxFlowStatus(e.session)
 			if native, ok := e.session.(watCarrier); ok {
 				s.Candidates[i].Native = native.c.Diagnostic(e.spec.Direction)
 			}
@@ -503,6 +505,13 @@ func (m *Manager) runSession(p config.AutoCandidate, s carrierSession, dialRelea
 			old.cancel()
 			delete(m.endpoints, id)
 		}
+	}
+	// Only a production session that passed complete enrollment and incarnation
+	// checks may replace the pre-enrollment shared budget with per-stream credit.
+	if err := enableAuthenticatedFlowControl(s); err != nil {
+		m.mu.Unlock()
+		m.candidateFailure(p.ID, "mux_enrollment", "stream flow control unavailable", err)
+		return
 	}
 	m.peerIncarnation = w.base.PeerIncarnation
 	m.endpoints[p.ID] = e

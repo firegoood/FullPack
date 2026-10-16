@@ -1,0 +1,83 @@
+{
+  "at": "2026-10-16T17:48:21.052830+00:00",
+  "go": "1.27.2",
+  "environment": "isolated unprivileged Linux network namespace; CGO disabled; CPU 60%, memory 768MiB lab process; no operator network/config access",
+  "privateLogSha256": "79ab6d09971fa6acf96a88cb4534def6a8bc45fcec0855e0e63406bbacf52109",
+  "upstreamReview": {
+    "currentAndLatest": "v1.5.57",
+    "commit": "3b4ec04d359934256b3adea7133374e3c93a0622",
+    "master": "ae956bb8d67bab37a312869b1d38ee3f52a7397a",
+    "changesAfterTag": "one README-only commit; no implementation upgrade"
+  },
+  "unitTests": "flowmux, Auto negotiation and all peerauto package tests passed; accepted/rejected/disabled enrollment gate passed",
+  "fullTunnelCases": [
+    {
+      "transport": "tcp",
+      "mode": "reverse",
+      "slowConnections": 64,
+      "queuedReceiveBytes": 5414912,
+      "maxStreamReceiveCredit": 262144,
+      "controlAndOtherApplication": "passed",
+      "generationChanged": false,
+      "newRejectedOrInterruptedFlows": 0
+    },
+    {
+      "transport": "tcp",
+      "mode": "direct",
+      "slowConnections": 64,
+      "queuedReceiveBytes": 5414912,
+      "maxStreamReceiveCredit": 262144,
+      "controlAndOtherApplication": "passed",
+      "generationChanged": false,
+      "newRejectedOrInterruptedFlows": 0
+    },
+    {
+      "transport": "wss",
+      "mode": "reverse",
+      "slowConnections": 64,
+      "queuedReceiveBytes": 5799936,
+      "maxStreamReceiveCredit": 262144,
+      "controlAndOtherApplication": "passed",
+      "generationChanged": false,
+      "newRejectedOrInterruptedFlows": 0
+    },
+    {
+      "transport": "wss",
+      "mode": "direct",
+      "slowConnections": 64,
+      "queuedReceiveBytes": 5316608,
+      "maxStreamReceiveCredit": 262144,
+      "controlAndOtherApplication": "passed",
+      "generationChanged": false,
+      "newRejectedOrInterruptedFlows": 0
+    },
+    {
+      "transport": "stealth",
+      "mode": "reverse",
+      "slowConnections": 64,
+      "queuedReceiveBytes": 5808128,
+      "maxStreamReceiveCredit": 262144,
+      "controlAndOtherApplication": "passed",
+      "generationChanged": false,
+      "newRejectedOrInterruptedFlows": 0
+    },
+    {
+      "transport": "stealth",
+      "mode": "direct",
+      "slowConnections": 64,
+      "queuedReceiveBytes": 5595136,
+      "maxStreamReceiveCredit": 262144,
+      "controlAndOtherApplication": "passed",
+      "generationChanged": false,
+      "newRejectedOrInterruptedFlows": 0
+    }
+  ],
+  "earlierFixtureFailure": "First full-tunnel fixture used identities shorter than 16 characters and was correctly rejected before traffic; IDs fixed, validator unchanged.",
+  "ci": "PENDING",
+  "deployment": "PENDING",
+  "remaining": [
+    "Race/full CI and signed deployment pending.",
+    "Synthetic connection counts are not independent user identities.",
+    "No real-hour/24-hour acceptance or guarantee of 1000 real users."
+  ]
+}

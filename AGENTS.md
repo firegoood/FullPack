@@ -104,6 +104,13 @@ updating this repository. These files record the user's persistent preferences.
   Retain all eight 1000-connection directions and the mixed TCP/UDP release test;
   isolate each race case in a fresh process within the twelve-minute total
   bound, retain resource diagnostics and never turn pressure skips into passes.
+- Preserve Auto's licensed smux adaptation and the review in
+  `docs/smux-flow-control.md`. Library tags differ from wire protocol versions.
+  Keep authenticated mutual v2 negotiation, legacy fallback, finite pre-enrollment
+  session budgets and bounded post-enrollment per-stream credit. Enable isolation
+  only after complete peer enrollment/incarnation checks; preserve manual engines,
+  native Wat/QUIC, wire compatibility, slow-reader regressions and MIT attribution
+  in binaries/releases. Never hide EOF with a huge bucket or a fixed user ceiling.
 - Preserve every recorded customization when integrating a newer BackPack
   release. Do not replace this checkout with an upstream archive or reset it to
   upstream. Fetch and merge/rebase the upstream source, resolve conflicts with
