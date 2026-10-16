@@ -146,4 +146,11 @@ traffic. This is a fixture repair, not a change to production stream ownership.
 **NOT VERIFIED:** real-hour/24-hour stability, all carriers under sustained load,
 or guaranteed capacity for 1000 real users.
 
-*Last verified against FullPack v1.9.4-beta.6 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*
+Beta.6 (`8bb95bc`) was not released or installed. Run `38952186871` found
+Staticcheck SA4000 in a test expression that called the stateful `dataClass(128)`
+twice within one `||` chain. Its remaining work was cancelled as superseded.
+Beta.7 expresses each allowance transition as an explicit sequential test step;
+production transport code is unchanged from the locally tested beta.6 candidate.
+The replacement still requires every original CI and signed-deployment gate.
+
+*Last verified against FullPack v1.9.4-beta.7 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*

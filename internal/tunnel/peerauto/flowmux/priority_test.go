@@ -166,8 +166,14 @@ func TestHandshakePriorityIsFiniteAndRequiresEnrollment(t *testing.T) {
 	if err := a.EnableAuthenticatedFlowControl(); err != nil {
 		t.Fatal(err)
 	}
-	if s.dataClass(128) != CLSCTRL || s.dataClass(128) != CLSCTRL || s.dataClass(1) != CLSDATA {
-		t.Fatal("handshake allowance was not bounded to 256 bytes")
+	for i, size := range []int{128, 128, 1} {
+		want := CLSCTRL
+		if i == 2 {
+			want = CLSDATA
+		}
+		if got := s.dataClass(size); got != want {
+			t.Fatalf("handshake allowance step %d: got %d, want %d", i, got, want)
+		}
 	}
 	large := newStream(5, 32768, a)
 	if large.dataClass(257) != CLSDATA || large.dataClass(1) != CLSDATA {

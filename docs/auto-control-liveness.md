@@ -152,4 +152,4 @@ failures and the isolated-fixture change remain recorded in `smux-flow-control.m
 **NOT VERIFIED:** continuous real-hour/24-hour operation, sustained bandwidth,
 every carrier under load and guaranteed production capacity for 1000 real users.
 
-*Last verified against FullPack v1.9.4-beta.6 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*
+*Last verified against FullPack v1.9.4-beta.7 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*

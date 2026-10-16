@@ -73,6 +73,9 @@ normal/race/coverage test executable, with an exact selected workload marker.
 Forward Go's coverage directory so its child counters remain in the profile.
 Keep resource diagnostics and all cases; do not raise the 256 MiB production
 pressure threshold or convert pre-bootstrap pressure skips into successful work.
+Beta.6 run `38952186871` found SA4000 in a stateful test expression and was
+cancelled as superseded without release/installation. Keep explicit sequential
+allowance checks and retain the complete gate on its beta.7 replacement.
 
 ## Auto control liveness repair approved on 2026-10-16
 
