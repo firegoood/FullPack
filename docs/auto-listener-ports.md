@@ -40,7 +40,9 @@ the retiring pair's private config/fencing for forensics, not active-state reuse
 Passing isolated Linux Go 1.27.2 regression tests cover occupied TCP/UDP, bound TCP without listen, stopped
 configured reservations, helper collisions, role-specific checks, bounded search
 and creation refusal before a config write. All 53 panel tests, including stale
-web responses, and the ten customization-tool tests passed locally. The beta.8
-candidate retains the existing release gates. Production port migration and signed-release gates are
+web responses, and the ten customization-tool tests passed locally. Beta.8's
+release run `39001411364` rejected a VERSION/app version mismatch before cross
+builds; it was not released or installed. Beta.9 synchronizes both version files
+and retains the complete release gate. Production port migration and signed-release gates are
 **PENDING** until their actual receipts are recorded. This feature is not an
 acceptance of the previous TCP WAN failures or a 24-hour stability claim.

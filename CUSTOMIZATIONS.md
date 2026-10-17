@@ -41,6 +41,8 @@ on trusted-link import. A suggestion is neither a held reservation nor proof of
 remote availability. Keep manual choices and ignore stale suggestion responses.
 Do not stop unrelated owners, scan remote addresses or rewrite an approved link
 when a receiver detects a conflict.
+Beta.8 run `39001411364` failed the VERSION/app identity check and was not
+released or installed. Its superseding beta.9 must pass all original gates.
 
 ## Auto stream isolation and smux review (2026-10-16)
 
