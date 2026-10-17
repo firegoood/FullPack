@@ -252,10 +252,11 @@ func acceptSession(conn net.Conn, cfg *Config) (*tunnelSession, error) {
 // can act on — refusing the user's connection — rather than a stream that
 // opens and closes a moment later for no visible reason.
 func openStream(session *tunnelSession, kind byte, target string, timeout time.Duration) (net.Conn, error) {
-	stream, err := session.OpenStream()
+	rawStream, err := session.OpenStream()
 	if err != nil {
 		return nil, err
 	}
+	stream := network.OwnMuxStreamWrites(rawStream)
 	_ = stream.SetDeadline(time.Now().Add(timeout))
 
 	if err := writeRequest(stream, kind, target); err != nil {

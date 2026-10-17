@@ -210,7 +210,8 @@ func (o *Origin) admit(ctx context.Context, conn net.Conn, leave func()) {
 }
 
 // serveStream joins one stream to the backend it asks for.
-func (o *Origin) serveStream(ctx context.Context, stream *smux.Stream) {
+func (o *Origin) serveStream(ctx context.Context, rawStream *smux.Stream) {
+	stream := network.OwnMuxStreamWrites(rawStream)
 	defer stream.Close()
 
 	// The request arrives first and must arrive promptly; after that the

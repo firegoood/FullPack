@@ -12,6 +12,7 @@ import (
 	"github.com/backpack/backpack/internal/metrics"
 	"github.com/backpack/backpack/internal/utils"
 	"github.com/backpack/backpack/internal/utils/handlers"
+	"github.com/backpack/backpack/internal/utils/network"
 	"github.com/backpack/backpack/internal/web"
 )
 
@@ -140,13 +141,14 @@ func (m muxSession) run(session *smux.Session) {
 				continue
 			}
 
-			stream, err := session.OpenStream()
+			rawStream, err := session.OpenStream()
 			if err != nil {
 				retired = true // failed returns the session's slot itself.
 				m.failed(&incomingConn, err)
 				return
 			}
 
+			stream := network.OwnMuxStreamWrites(rawStream)
 			// Send the target port over the tunnel connection
 			_ = stream.SetWriteDeadline(time.Now().Add(pairingWait(incomingConn.timeCreated)))
 			if err := utils.SendBinaryString(stream, incomingConn.remoteAddr); err != nil {

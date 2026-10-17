@@ -62,6 +62,16 @@ markers to the backend before measuring load; local TCP writes alone do not
 establish backend admission. Keep the original 5 MiB threshold, per-stream
 credit, fast application/control assertions, child isolation and joined cleanup.
 The fresh beta.11 candidate must pass every original release gate.
+Beta.11 run `39007479007` passed ten jobs but failed race in the original manual
+TCP-mux peer-killed-mid-transfer test: upstream smux's queued sender retained a
+caller's buffer after Write returned on cancellation. No beta.11 release was
+published or installed. Preserve request-owned payload copies in Auto flowmux,
+and the bounded 32 KiB write-ownership wrapper around the unchanged upstream
+manual smux dependency (Reverse and Direct). Keep wire versions, negotiation,
+transport defaults, half-close and unlimited enrollment unchanged. Retain the
+deadline/session-close/write-error aliasing regressions and repeated real
+mid-transfer cancellation gate. The fix does not establish the cause of the
+earlier WAN TCP failure or complete any pending soak.
 
 ## Auto stream isolation and smux review (2026-10-16)
 

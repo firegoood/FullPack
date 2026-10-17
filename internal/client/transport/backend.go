@@ -118,11 +118,12 @@ func (l *lifecycle) serveSession(session *smux.Session, from net.Addr, o backend
 		session.Close()
 	}()
 	for ctx.Err() == nil {
-		stream, err := session.AcceptStream()
+		rawStream, err := session.AcceptStream()
 		if err != nil {
 			l.logger.Trace("session is closed: ", err)
 			return
 		}
+		stream := network.OwnMuxStreamWrites(rawStream)
 		l.state.Go(func() {
 			_ = stream.SetReadDeadline(time.Now().Add(controlAckTimeout))
 			target, err := utils.ReceiveBinaryString(stream)

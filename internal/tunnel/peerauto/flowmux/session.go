@@ -23,6 +23,7 @@
 package smux
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"io"
@@ -695,6 +696,9 @@ func (s *Session) writeControlFrame(f Frame) (n int, err error) {
 
 // internal writeFrame version to support deadline used in keepalive
 func (s *Session) writeFrameInternal(f Frame, deadline <-chan time.Time, class CLASSID) (int, error) {
+	// A deadline/session close can return before sendLoop finishes this frame.
+	// Own its bounded payload before enqueueing; the caller may reuse its buffer.
+	f.data = bytes.Clone(f.data)
 	// get result channel from pool
 	resultCh := resultChanPool.Get().(chan writeResult)
 

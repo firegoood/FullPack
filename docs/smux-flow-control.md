@@ -235,4 +235,28 @@ application soak or the pending port migration. The scoped record is
 
 *Last verified against FullPack v1.9.4-beta.7 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*
 
-*Last verified against FullPack v1.9.4-beta.11 (source/documentation compatibility review of local listener preflight, status attribution and explicit backend readiness in the slow-reader fixture, 2026-10-17; original measurements and failed or pending WAN/release/deployment/soak gates retain their separately recorded dates and scope).*
+*Last verified against FullPack v1.9.4-beta.12 (source/documentation compatibility review of local listener preflight, status attribution and explicit backend readiness in the slow-reader fixture, 2026-10-17; original measurements and failed or pending WAN/release/deployment/soak gates retain their separately recorded dates and scope).*
+
+## Queued payload ownership on cancellation (2026-10-17)
+
+Beta.11 run `39007479007` failed the race gate in the original manual TCP-mux
+peer-killed-mid-transfer test. Upstream smux v1.5.57 can return from Write on
+a deadline/session close while sendLoop still references the borrowed payload.
+A receive/relay buffer can then be recycled and overwritten. This is an actual
+data race, distinct from the beta.10 slow-reader load precondition failure.
+Neither failed candidate was released or installed.
+
+Auto now owns each bounded frame before enqueueing. Manual Reverse/Direct
+streams keep the upstream library and all wire/default/half-close behavior;
+an adapter supplies request-owned copies in chunks of at most 32 KiB. Copies
+are not pooled back while an outstanding sender may still reference them.
+There is no new connection ceiling or transport credit increase. The cost is
+one extra bounded payload copy per write/frame.
+
+The deterministic queued-payload regression failed on the pre-fix adaptation
+for deadline, session-close and write-error returns and passed with ownership.
+The isolated manual-adapter ownership/short-write regressions passed. The
+Windows network package remains unsupported by pre-existing socket code;
+Linux integration, repeated mid-transfer race, full CI, signed release and
+production deployment remain PENDING. This repair does not establish the
+cause of the earlier WAN TCP failure and is not a 24-hour acceptance.

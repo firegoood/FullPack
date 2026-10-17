@@ -78,4 +78,4 @@ in an isolated Linux Go 1.27.2 process, with original application/control and
 joined-cleanup assertions. That local run was not race-instrumented; the full
 race and signed-release gates remain separate and pending.
 
-*Last verified against FullPack v1.9.4-beta.11 (source/documentation compatibility review of local listener preflight, status attribution and explicit backend readiness in the slow-reader fixture, 2026-10-17; original measurements and failed or pending WAN/release/deployment/soak gates retain their separately recorded dates and scope).*
+*Last verified against FullPack v1.9.4-beta.12 (source/documentation compatibility review of local listener preflight, status attribution and explicit backend readiness in the slow-reader fixture, 2026-10-17; original measurements and failed or pending WAN/release/deployment/soak gates retain their separately recorded dates and scope).*

@@ -130,6 +130,12 @@ updating this repository. These files record the user's persistent preferences.
   Require actual backend delivery of all 64 slow-reader markers before measuring
   buffered load; preserve the 5 MiB threshold and every application/control
   assertion. Never treat the failed beta.10 race load precondition as a pass.
+  Preserve request-owned Auto frame payloads and manual smux's bounded 32 KiB
+  ownership wrapper across Reverse/Direct writes. Cancellation/deadlines must
+  not leave the sender borrowing a reusable caller buffer. Keep upstream manual
+  smux, wire negotiation/defaults and half-close behavior; retain deterministic
+  aliasing and repeated peer-killed-mid-transfer race tests. Preserve beta.11's
+  actual upstream data-race evidence separately from earlier WAN failures.
 - Preserve every recorded customization when integrating a newer BackPack
   release. Do not replace this checkout with an upstream archive or reset it to
   upstream. Fetch and merge/rebase the upstream source, resolve conflicts with

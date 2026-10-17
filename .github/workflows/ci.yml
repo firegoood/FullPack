@@ -104,6 +104,15 @@ jobs:
           FULLPACK_AUTO_LOAD: '1'
         run: go test ./internal/e2e -run '^TestPeerAutoBoundedApplicationConnectionCapacity$' -race -count=1 -timeout 4m
 
+      - name: Verify mux payload ownership during cancellation
+        # Repeat the real cancellation case alongside deterministic ownership
+        # tests without replacing any of the complete-suite gates above.
+        if: matrix.mode == 'race'
+        run: >-
+          go test -race -count=5 -timeout 3m
+          -run '^Test(MuxWriteOwnershipSurvivesEarlyReturn|OwnedMuxWritePreservesShortWriteError|QueuedPayloadSurvivesCallerReuseAfterEarlyReturn|APeerKilledMidTransferDoesNotWedgeTheOther)$'
+          ./internal/utils/network ./internal/tunnel/peerauto/flowmux ./internal/e2e
+
       - name: Coverage
         if: matrix.mode == 'coverage'
         # Measured with -coverpkg, which is the only way this number means

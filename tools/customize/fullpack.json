@@ -58,6 +58,12 @@
     "internal/manage/managedwebapi.go"
   ],
   "required": {
+    "internal/client/transport/backend.go": ["network.OwnMuxStreamWrites(rawStream)"],
+    "internal/server/transport/muxsession.go": ["network.OwnMuxStreamWrites(rawStream)"],
+    "internal/tunnel/direct/session.go": ["network.OwnMuxStreamWrites(rawStream)"],
+    "internal/tunnel/direct/origin.go": ["network.OwnMuxStreamWrites(rawStream)"],
+    "internal/utils/network/muxwrite.go": ["muxOwnedWriteChunk = 32 << 10", "func OwnMuxStreamWrites", "bytes.Clone"],
+    "internal/tunnel/peerauto/flowmux/ownership_test.go": ["TestQueuedPayloadSurvivesCallerReuseAfterEarlyReturn", "clear(p)", "write-error"],
     "internal/e2e/peerauto_muxflow_test.go": ["slowStarted := make(chan struct{}, 64)", "case <-slowStarted:", "slow reader %d never reached the backend", "mux.BufferedReceive < 5<<20", "all application/control invariants verified"],
     "internal/manage/listenerpreflight.go": ["func SuggestQuickAutoPorts", "func refuseBusyCarrierListeners", "configuredListeners(s.Name)", "for i := range 128", "PeerCheckRequired", "p.ListenerIsIran()"],
     "internal/manage/listenerpreflight_linux_test.go": ["TestListenerPreflightDetectsBoundRawTCPReservationWithoutListen", "unix.Bind", "syscall.EADDRINUSE"],
