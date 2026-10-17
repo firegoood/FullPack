@@ -10,7 +10,7 @@ import (
 
 const (
 	// Version of the fullpack engine.
-	Version = "v1.9.4-beta.10"
+	Version = "v1.9.4-beta.11"
 
 	// RepoOwner/RepoName identify the GitHub repository used by the installer
 	// and the release-based updater.

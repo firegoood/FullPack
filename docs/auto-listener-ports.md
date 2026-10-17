@@ -65,4 +65,17 @@ and adds scoped compatibility-review stamps while retaining historical dates,
 failed WAN evidence and pending acceptance gates. All original tests remain
 mandatory; beta.10 is a new immutable candidate.
 
-*Last verified against FullPack v1.9.4-beta.10 (source/documentation compatibility review of local listener preflight and status attribution, 2026-10-17; original measurements and failed or pending WAN/release/deployment/soak gates retain their separately recorded dates and scope).*
+Beta.10 run `39003292518` passed ten verification jobs, but race failed the
+slow-reader fixture's load precondition (5,170,176 bytes, below its unchanged
+5 MiB requirement). The fast application/control assertions had not run for
+that case. It was not released or installed. The fixture now requires delivery
+of every slow-reader marker to the real backend; a successful local TCP write
+does not substitute for admission. All 64 unread connections, the original
+threshold, child instrumentation and cleanup, and fast/control assertions remain.
+Beta.11 is a fresh candidate requiring the complete release gate.
+The repaired fixture passed all six carrier/direction cases in 122.88 seconds
+in an isolated Linux Go 1.27.2 process, with original application/control and
+joined-cleanup assertions. That local run was not race-instrumented; the full
+race and signed-release gates remain separate and pending.
+
+*Last verified against FullPack v1.9.4-beta.11 (source/documentation compatibility review of local listener preflight, status attribution and explicit backend readiness in the slow-reader fixture, 2026-10-17; original measurements and failed or pending WAN/release/deployment/soak gates retain their separately recorded dates and scope).*

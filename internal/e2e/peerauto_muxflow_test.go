@@ -45,6 +45,7 @@ func TestPeerAutoSlowReadersPreserveControlAndOtherApplications(t *testing.T) {
 				var backendMu sync.Mutex
 				var backendConns []net.Conn
 				var backendWorkers sync.WaitGroup
+				slowStarted := make(chan struct{}, 64)
 				acceptDone := make(chan struct{})
 				go func() {
 					defer close(acceptDone)
@@ -65,6 +66,7 @@ func TestPeerAutoSlowReadersPreserveControlAndOtherApplications(t *testing.T) {
 								return
 							}
 							if marker[0] == 'S' {
+								slowStarted <- struct{}{}
 								buf := make([]byte, 32768)
 								for range 512 {
 									if _, err := c.Write(buf); err != nil {
@@ -153,6 +155,16 @@ func TestPeerAutoSlowReadersPreserveControlAndOtherApplications(t *testing.T) {
 					_ = c.SetWriteDeadline(time.Now().Add(3 * time.Second))
 					if _, err := c.Write([]byte{'S'}); err != nil {
 						t.Fatal(err)
+					}
+					// A write into the local TCP socket does not establish that
+					// the enrolled carrier delivered it to the backend. Apply all
+					// 64 slow readers before measuring their receive credit; do
+					// not let a burst of pending handshakes stand in for that load.
+					select {
+					case <-slowStarted:
+					case <-time.After(3 * time.Second):
+						logAutoFixtureResources(t, "slow-reader backend readiness failed")
+						t.Fatalf("slow reader %d never reached the backend: %+v / %+v", len(slow), m.Snapshot(), p.Snapshot())
 					}
 				}
 				until = time.Now().Add(25 * time.Second)

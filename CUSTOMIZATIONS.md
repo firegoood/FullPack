@@ -54,6 +54,14 @@ beta.10. Never update old measurement dates or turn pending gates into passes
 when recording compatibility with the new listener preflight.
 Run the existing document/panel contract tests early in the normal CI job,
 before the full suite, while retaining every normal/race/coverage/raw/load gate.
+Beta.10 run `39003292518` passed ten verification jobs and all nine held-load
+workloads, but its race job failed the slow-reader fixture's 5 MiB load
+precondition (`5,170,176` queued bytes). No beta.10 binary was released or
+installed. Preserve the fixture's explicit delivery of all 64 slow-reader
+markers to the backend before measuring load; local TCP writes alone do not
+establish backend admission. Keep the original 5 MiB threshold, per-stream
+credit, fast application/control assertions, child isolation and joined cleanup.
+The fresh beta.11 candidate must pass every original release gate.
 
 ## Auto stream isolation and smux review (2026-10-16)
 

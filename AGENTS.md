@@ -127,6 +127,9 @@ updating this repository. These files record the user's persistent preferences.
   Coalesce tiny receive frames with bounded allocation metadata, preserving
   byte order, partial reads, receive credit and original allocator ownership.
   Slow-reader fixtures must retain unread Stream wrappers through cleanup.
+  Require actual backend delivery of all 64 slow-reader markers before measuring
+  buffered load; preserve the 5 MiB threshold and every application/control
+  assertion. Never treat the failed beta.10 race load precondition as a pass.
 - Preserve every recorded customization when integrating a newer BackPack
   release. Do not replace this checkout with an upstream archive or reset it to
   upstream. Fetch and merge/rebase the upstream source, resolve conflicts with
