@@ -60,6 +60,7 @@
   "required": {
     "internal/manage/listenerpreflight.go": ["func SuggestQuickAutoPorts", "func refuseBusyCarrierListeners", "configuredListeners(s.Name)", "for i := range 128", "PeerCheckRequired", "p.ListenerIsIran()"],
     "internal/manage/listenerpreflight_linux_test.go": ["TestListenerPreflightDetectsBoundRawTCPReservationWithoutListen", "unix.Bind", "syscall.EADDRINUSE"],
+    "internal/tunnel/direct/direct_test.go": ["TestEdgeSpreadsAcrossSessions", "i == 0 && errors.Is(err, syscall.ECONNREFUSED)", "session carries %d streams, want %d", "backends[\"A:x\"] != 4"],
     "internal/manage/listenerpreflight_test.go": ["TestAutoListenerPreflightUsesLocalRoleAndHelperPorts", "TestQuickAutoSuggestionChecksWholeLocalPoolAndPrivateHelpers", "TestCreateRefusesCarrierConflictBeforeAnyConfigurationWrite", "TestStoppedDirectAndL3ClaimsKeepForeignPortsSeparate"],
     "internal/webui/handlers_tunnels.go": ["case \"auto-ports\":", "manage.SuggestQuickAutoPorts"],
     "internal/webui/panel/js/ui/autoports.js": ["wireAutoPortSuggestions", "api.suggestAutoPorts", "current !== request", "edited && !force"],

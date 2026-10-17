@@ -46,3 +46,14 @@ builds; it was not released or installed. Beta.9 synchronizes both version files
 and retains the complete release gate. Production port migration and signed-release gates are
 **PENDING** until their actual receipts are recorded. This feature is not an
 acceptance of the previous TCP WAN failures or a 24-hour stability claim.
+
+The earlier diagnostic-only source `46b8c53` failed race run `39000287122`:
+the pre-existing Direct spread fixture dialed its first forwarded port after
+session authentication but before that independently started listener bound.
+The fixture now waits at most three seconds, only for that first connection's
+ECONNREFUSED. It retains exactly eight accepted flows, payload integrity and
+session/backend spread assertions; accepted-flow failures are never retried.
+The failed run is preserved and is not a passing release gate.
+The repaired fixture passed 25 isolated Linux repeats; its full race/CI result
+remains separate from that local result. This is a test startup repair; it
+does not change the production Direct engine.

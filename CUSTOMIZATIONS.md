@@ -43,6 +43,10 @@ Do not stop unrelated owners, scan remote addresses or rewrite an approved link
 when a receiver detects a conflict.
 Beta.8 run `39001411364` failed the VERSION/app identity check and was not
 released or installed. Its superseding beta.9 must pass all original gates.
+The earlier `46b8c53` diagnostic CI run `39000287122` failed the existing
+Direct-spread fixture's first-listener startup race. Preserve its failure and
+the bounded initial-ECONNREFUSED wait, exact eight-flow spread assertions and
+strict treatment of failures after a connection is accepted.
 
 ## Auto stream isolation and smux review (2026-10-16)
 

@@ -3,10 +3,12 @@ package direct
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net"
 	"sync"
+	"syscall"
 	"testing"
 	"time"
 
@@ -511,6 +513,15 @@ func TestEdgeSpreadsAcrossSessions(t *testing.T) {
 			backends := map[string]int{}
 			for i := 0; i < 8; i++ {
 				peer, err := net.DialTimeout("tcp", fmt.Sprintf("127.0.0.1:%d", port), 3*time.Second)
+				// Session authentication and the local forwarder start in
+				// independent goroutines. Wait only for the first listener's
+				// startup refusal; never retry accepted flows or payload errors,
+				// and keep exactly eight connections for the spread assertions.
+				deadline := time.Now().Add(3 * time.Second)
+				for i == 0 && errors.Is(err, syscall.ECONNREFUSED) && time.Now().Before(deadline) {
+					time.Sleep(5 * time.Millisecond)
+					peer, err = net.DialTimeout("tcp", fmt.Sprintf("127.0.0.1:%d", port), time.Until(deadline))
+				}
 				if err != nil {
 					t.Fatal(err)
 				}
