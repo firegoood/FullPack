@@ -137,3 +137,5 @@ amd64 و `aarch64` یعنی arm64. فایل‌های `install.sh`، `SHA256SUMS`
 *Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
 
 *Last verified against FullPack v1.9.4-beta.7 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*
+
+*Last verified against FullPack v1.9.4-beta.10 (source/documentation compatibility review of local listener preflight and status attribution, 2026-10-17; original measurements and failed or pending WAN/release/deployment/soak gates retain their separately recorded dates and scope).*

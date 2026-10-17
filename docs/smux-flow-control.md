@@ -222,4 +222,17 @@ reservations already owned by the TR configuration. Their no-listener/SYN
 failures must not be described as evidence of WAN filtering. The existing
 TR process, its firewall rules and both immutable endpoint manifests are kept.
 
+The subsequent WS Reverse generation-121 continuity checks both completed on
+2026-10-17: one persistent connection passed **900** exact HTTP exchanges over
+1800 seconds, and **1800** fresh connections passed **3600** exchanges over a
+separate 1800-second interval. Direct prerequisites and post-WAN checks passed;
+both owned identities were independently queried absent. Sampled counters showed
+no new rejected/interrupted flows or typed data errors, while UDP queue drops
+increased and remain separate. This is bounded evidence for the existing WS
+route on installed beta.7, not acceptance of the earlier TCP failure, a real-hour
+application soak or the pending port migration. The scoped record is
+`verification/nl-ws-followup-20261017.json`.
+
 *Last verified against FullPack v1.9.4-beta.7 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*
+
+*Last verified against FullPack v1.9.4-beta.10 (source/documentation compatibility review of local listener preflight and status attribution, 2026-10-17; original measurements and failed or pending WAN/release/deployment/soak gates retain their separately recorded dates and scope).*

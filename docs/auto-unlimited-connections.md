@@ -135,3 +135,5 @@ of guaranteed production capacity for 1000 real users.
 *Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-16; bounded evidence and remaining gates are recorded above).*
 
 *Last verified against FullPack v1.9.4-beta.7 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*
+
+*Last verified against FullPack v1.9.4-beta.10 (source/documentation compatibility review of local listener preflight and status attribution, 2026-10-17; original measurements and failed or pending WAN/release/deployment/soak gates retain their separately recorded dates and scope).*

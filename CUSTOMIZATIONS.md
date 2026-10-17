@@ -47,6 +47,13 @@ The earlier `46b8c53` diagnostic CI run `39000287122` failed the existing
 Direct-spread fixture's first-listener startup race. Preserve its failure and
 the bounded initial-ECONNREFUSED wait, exact eight-flow spread assertions and
 strict treatment of failures after a connection is accepted.
+Beta.9 run `39001491738` failed document-version stamps and the missing API
+contract sample for `suggestAutoPorts`; no beta.9 binary was released/installed.
+Preserve stream/L3 API contract samples and scoped documentation reviews in
+beta.10. Never update old measurement dates or turn pending gates into passes
+when recording compatibility with the new listener preflight.
+Run the existing document/panel contract tests early in the normal CI job,
+before the full suite, while retaining every normal/race/coverage/raw/load gate.
 
 ## Auto stream isolation and smux review (2026-10-16)
 

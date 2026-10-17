@@ -1,0 +1,201 @@
+{
+  "recordedAt": "2026-10-17T04:17:58.659843+00:00",
+  "installedRelease": "v1.9.4-beta.7",
+  "installedSource": "9d49231a1c205f13651d11eb3bc3723e489f257d",
+  "diagnosticRepairSource": "46b8c534cb3e0da9716ec08e4104af7bea8e5454",
+  "diagnosticRepairInstalled": false,
+  "diagnosticRepairCi": {
+    "run": 39000287122,
+    "verificationJobs": 11,
+    "conclusion": "failure",
+    "failedJob": "Build and test (race): Direct spread fixture first listener connection refused",
+    "releasePublished": false,
+    "supersedingReleaseRun": 39001491738,
+    "supersedingAcceptance": "PENDING; recorded separately"
+  },
+  "scope": "Subsequent owned application continuity on the existing WS Reverse route; prior TCP failure remains FAILED",
+  "workloads": [
+    {
+      "mode": "persistent",
+      "result": {
+        "counts": {
+          "connections": 1,
+          "exchanges": 900,
+          "bytes": 17100,
+          "firstHash": "b16e15764b8bc06c5c3f9f19bc8b99fa48e7894aa5a6ccdad65da49bbf564793"
+        },
+        "elapsedSeconds": 1800.000498146,
+        "kind": "result",
+        "mode": "persistent",
+        "ok": true,
+        "started": "2026-10-17T03:43:20.683672664Z"
+      },
+      "observed": {
+        "188.136.159.49": {
+          "samples": 133,
+          "stateSamples": [
+            "HEALTHY"
+          ],
+          "active": "ws-r",
+          "generation": 121
+        },
+        "185.114.49.230": {
+          "samples": 132,
+          "stateSamples": [
+            "HEALTHY"
+          ],
+          "active": "ws-r",
+          "generation": 121
+        }
+      },
+      "counterDeltasNotUsers": {
+        "188.136.159.49": {
+          "flowCounters": {
+            "admitted": 7621,
+            "completed": 7560,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 1931
+          },
+          "dataErrors": {}
+        },
+        "185.114.49.230": {
+          "flowCounters": {
+            "admitted": 7602,
+            "completed": 7545,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "dataErrors": {}
+        }
+      },
+      "resources": {
+        "188.136.159.49": {
+          "peakRssKiB": 129260,
+          "peakFd": 218
+        },
+        "185.114.49.230": {
+          "peakRssKiB": 153244,
+          "peakFd": 395
+        }
+      },
+      "directPrerequisiteAndWanAfter": "passed",
+      "temporaryIdentityRemoved": true,
+      "independentRemainingOwnedUsers": 0,
+      "operatorBackendsUnchanged": true,
+      "privateReceiptSha256": "8afeb7b7b674b33680fdeca2a08dfadc8313a89f8ecdc38f3dfd3f57c24ec096"
+    },
+    {
+      "mode": "fresh",
+      "result": {
+        "counts": {
+          "connections": 1800,
+          "exchanges": 3600,
+          "bytes": 68400,
+          "firstHash": "b16e15764b8bc06c5c3f9f19bc8b99fa48e7894aa5a6ccdad65da49bbf564793"
+        },
+        "elapsedSeconds": 1800.000847044,
+        "kind": "result",
+        "mode": "fresh",
+        "ok": true,
+        "started": "2026-10-17T03:43:53.335329704Z"
+      },
+      "observed": {
+        "188.136.159.49": {
+          "samples": 133,
+          "stateSamples": [
+            "HEALTHY"
+          ],
+          "active": "ws-r",
+          "generation": 121
+        },
+        "185.114.49.230": {
+          "samples": 132,
+          "stateSamples": [
+            "HEALTHY"
+          ],
+          "active": "ws-r",
+          "generation": 121
+        }
+      },
+      "counterDeltasNotUsers": {
+        "188.136.159.49": {
+          "flowCounters": {
+            "admitted": 7549,
+            "completed": 7521,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 1996
+          },
+          "dataErrors": {}
+        },
+        "185.114.49.230": {
+          "flowCounters": {
+            "admitted": 7546,
+            "completed": 7509,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "dataErrors": {}
+        }
+      },
+      "resources": {
+        "188.136.159.49": {
+          "peakRssKiB": 124696,
+          "peakFd": 220
+        },
+        "185.114.49.230": {
+          "peakRssKiB": 153244,
+          "peakFd": 395
+        }
+      },
+      "directPrerequisiteAndWanAfter": "passed",
+      "temporaryIdentityRemoved": true,
+      "independentRemainingOwnedUsers": 0,
+      "operatorBackendsUnchanged": true,
+      "privateReceiptSha256": "f06bd2b2c60bcefac62d9acb1985be81b5a070cdf480a9c7770b7505268daaf5"
+    }
+  ],
+  "networkObservation": {
+    "simultaneousHeaderCaptureUtc": "2026-10-17T03:44:50Z/2026-10-17T03:45:35Z",
+    "carrier": "tcp-d",
+    "approvedNlPort": 24485,
+    "observation": "Repeated Iran data/ACK packets for the observed connection absent at NL; initial exchange succeeded. Packet loss outside the application is observed; DPI is not established.",
+    "kernelCaptureDrops": {
+      "iran": 0,
+      "nl": 0
+    },
+    "qdiscDropsObserved": 0,
+    "privateHeadersSha256": "eaec8d2f937528452c5f86fa7e83a1c9be3abb27d76ccb558a159f232c03f465",
+    "privateHostPolicySha256": "06d6c37597701dea6d93b64440afc8e2292a41a17fc53a154a14ab540c58a25d",
+    "earlierTcpReverseFailureCause": "Not established by this later trace"
+  },
+  "localEndpointConflicts": [
+    {
+      "port": 24454,
+      "nlCarrier": "wss-r",
+      "trOwner": "pck-r"
+    },
+    {
+      "port": 24457,
+      "nlCarrier": "tcpmux-r",
+      "trOwner": "sni-r"
+    }
+  ],
+  "diagnosticRegression": {
+    "baseline": "FAILED as expected: extra failed attempt overwrote live readiness",
+    "repair": "passed",
+    "fullPeerautoLinux": "passed",
+    "patchedGo": "1.27.2",
+    "privateReceiptSha256": "5e14d192785304924c263a73ca3acc60628fa05c96646bc6f8ddb31785f7ec5b"
+  },
+  "limits": [
+    "These two 30-minute application tests are not a real-hour/24-hour application soak.",
+    "Existing process uptime and aggregate bytes do not prove every application transaction.",
+    "UDP queue drops remain recorded separately.",
+    "1000 independent real-user production capacity NOT VERIFIED.",
+    "Existing configs, endpoint manifests, fencing, TR and operator services were preserved."
+  ]
+}

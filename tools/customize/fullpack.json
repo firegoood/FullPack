@@ -85,6 +85,7 @@
     "tools/package-release.sh": ["licenses/smux", "internal/tunnel/peerauto/flowmux/LICENSE", "internal/tunnel/peerauto/flowmux/ORIGIN.json"],
     "docs/smux-flow-control.md": ["v1.5.57", "NOT VERIFIED", "خلاصهٔ فارسی"],
     "docs/verification/auto-smux-priority-wan-failure-20261016.json": ["\"applicationAcceptance\": \"FAILED\"", "\"temporaryIdentitiesRemoved\": true", "NOT VERIFIED"],
+    "docs/verification/nl-ws-followup-20261017.json": ["\"connections\": 1800", "\"exchanges\": 900", "prior TCP failure remains FAILED", "1000 independent real-user production capacity NOT VERIFIED"],
     "docs/verification/auto-smux-priority-local-20261016.json": ["\"controlLane\": 8", "\"handshakeLane\": 32", "\"maximumPriorityBurstBeforeQueuedData\": 16", "\"realHourOr24HourStability\": \"NOT VERIFIED\""],
     "docs/verification/auto-unlimited-wan-20261016.json": ["\"observedPeakActiveFlows\": 1000", "\"newRejectedFlows\": 0", "\"forensicStateRestored\": false", "\"operatorBackendPidsUnchangedSinceBeforeUpgrade\": true"],
     "docs/verification/auto-unlimited-local-20261016.json": ["\"completedNarrowSweep\"", "\"peerFlowsAfterClose\"", "4000"],

@@ -407,3 +407,5 @@ them both ends have to agree on. This says what exists.
 ---
 
 *Generated from `config/` on 2026-10-16. Last verified against FullPack v1.9.4-beta.7.*
+
+*Last verified against FullPack v1.9.4-beta.10 (source/documentation compatibility review of local listener preflight and status attribution, 2026-10-17; original measurements and failed or pending WAN/release/deployment/soak gates retain their separately recorded dates and scope).*

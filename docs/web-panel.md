@@ -18,6 +18,11 @@ selects four measured paths and rescans at two healthy paths. Carrier base
 ports can be changed in the port options. Apply the private link on Kharej.
 Switch to **Advanced** for custom enrollment, identities or observe-only.
 Both forms use the CLI's enrollment validators and occupied-port preflight.
+Quick Auto fills a checked local port range by default. **Find free local ports**
+refreshes it, and a late suggestion cannot overwrite a manual edit. All local
+Auto carrier/private-helper sockets are checked before creation; Kharej checks
+Direct ports on import. An occupied shared endpoint requires a fresh reviewed
+peer link, not a one-sided port edit.
 See [Quick Auto](quick-auto-setup.md) for the complete procedure.
 
 ## Getting in
@@ -155,3 +160,5 @@ Auto cards distinguish carrier health from data admission. `At capacity`, `Busy`
 *Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
 
 *Last verified against FullPack v1.9.4-beta.7 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*
+
+*Last verified against FullPack v1.9.4-beta.10 (source/documentation compatibility review of local listener preflight and status attribution, 2026-10-17; original measurements and failed or pending WAN/release/deployment/soak gates retain their separately recorded dates and scope).*

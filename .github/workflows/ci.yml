@@ -50,6 +50,13 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Check document and panel contracts before the full suite
+        if: matrix.mode == 'normal'
+        run: >-
+          go test -count=1
+          -run '^Test(EveryDocumentSaysWhenItWasVerified|EveryDocumentHasAPersianSummary|EveryPanelCallReachesAHandlerThatReadsWhatItSends)$'
+          ./internal/app ./internal/webui
+
       - name: Verify formatting
         if: matrix.mode == 'normal'
         run: |

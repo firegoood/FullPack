@@ -67,6 +67,7 @@ const samples = {
 
   tunnelDefaults: [[{ preset: 'balanced', role: 'server', transport: 'tcp' }]],
   tunnelToken: [[]], tunnelSuggest: [[]],
+  suggestAutoPorts: [['stream', '2052,8880'], ['l3', '']],
   tunnelCreate: [[{}]], directOptions: [[]], directDefaults: [['iran']], directCreate: [[{}]],
   peerEnrollment: [['peer', 'auto', 'backpack://3.private']],
   peerEnrollmentPreview: [['auto', 'backpack://3.private']],

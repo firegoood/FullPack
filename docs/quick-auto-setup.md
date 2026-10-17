@@ -101,6 +101,18 @@ results; WAN availability, 24-hour soak and 1000-user capacity remain NOT VERIFI
 
 Quick Auto preserves its enrolled connection policy. Carrier availability and data admission are reported separately: an online route can be at capacity. See [admission repair](auto-admission-repair.md) for queue/UDP limits and [deployment evidence](auto-admission-deployment.md) for the measured scope.
 
+## Listener-port review (2026-10-17)
+
+Quick CLI/web creation now suggests a free local listener block, including
+private helper targets and stopped configured reservations. Review the displayed
+endpoints; manual ports remain available. Creation rechecks TCP/UDP and bound
+raw TCP sockets before saving. Iran does not prove remote availability: Kharej
+checks its own Direct listeners during trusted-link import and refuses an
+occupied endpoint. Generate a fresh reviewed link if that shared port must
+change. See [listener-port checks](auto-listener-ports.md).
+
 *Last verified against FullPack v1.9.4-beta.2 (source/documentation compatibility review, 2026-10-15; historical measurements retain their dates and scope; release, deployment, WAN and soak gates require their separately recorded evidence).*
 
 *Last verified against FullPack v1.9.4-beta.7 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*
+
+*Last verified against FullPack v1.9.4-beta.10 (source/documentation compatibility review of local listener preflight and status attribution, 2026-10-17; original measurements and failed or pending WAN/release/deployment/soak gates retain their separately recorded dates and scope).*

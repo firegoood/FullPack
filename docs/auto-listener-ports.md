@@ -57,3 +57,12 @@ The failed run is preserved and is not a passing release gate.
 The repaired fixture passed 25 isolated Linux repeats; its full race/CI result
 remains separate from that local result. This is a test startup repair; it
 does not change the production Direct engine.
+
+Beta.9 run `39001491738` failed normal/coverage documentation-stamp checks and
+the panel API contract's missing `suggestAutoPorts` sample. It was not released
+or installed. The replacement records both stream/L3 requests in that contract
+and adds scoped compatibility-review stamps while retaining historical dates,
+failed WAN evidence and pending acceptance gates. All original tests remain
+mandatory; beta.10 is a new immutable candidate.
+
+*Last verified against FullPack v1.9.4-beta.10 (source/documentation compatibility review of local listener preflight and status attribution, 2026-10-17; original measurements and failed or pending WAN/release/deployment/soak gates retain their separately recorded dates and scope).*
