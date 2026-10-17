@@ -449,7 +449,7 @@ func ApplyTunnel(n NewTunnel) (service string, active bool, created bool, err er
 // would be written and then fail to bind it. See reverseBusyPorts.
 func refuseBusyForwards(s TunnelSpec) error {
 	if s.Role != "server" {
-		return nil
+		return refuseBusyCarrierListeners(s)
 	}
 	addresses := []string{s.BindAddr}
 	if managedTransport(selectedTransport(s)) {
@@ -465,7 +465,7 @@ func refuseBusyForwards(s TunnelSpec) error {
 			return fmt.Errorf("HTTPS listener already in use: %s", addr)
 		}
 	}
-	return nil
+	return refuseBusyCarrierListeners(s)
 }
 
 // specFromNew turns a filled setup form into the configuration it describes.

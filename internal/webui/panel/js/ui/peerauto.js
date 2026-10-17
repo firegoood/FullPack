@@ -1,5 +1,6 @@
 import { esc } from '../lib/dom.js';
 import * as api from '../api.js';
+import { wireAutoPortSuggestions } from './autoports.js';
 
 const isPeerTransport = t => t === 'waticmp' || t === 'auto';
 const forms = new WeakMap();
@@ -71,12 +72,12 @@ function autoFields(a = {}, registry = []) {
 function quickAutoFields() {
   return `<label class="f3"><span>Auto setup</span><select data-peer-field="setupMode"><option value="quick">Quick: all protocols</option><option value="advanced">Advanced: custom carriers or L3</option></select></label>
     <div data-peer-quick><label class="f3"><span>Traffic</span><select data-peer-field="quick.mode"><option value="stream">TCP/UDP ports · all 18 protocols</option><option value="l3">IP network · all six datagram protocols</option></select></label>${field('quick.iranIp', 'Iran IPv4')}${field('quick.kharejIp', 'Kharej IPv4')}
-      <details><summary>Change data listener ports</summary>${field('quick.basePort', 'First Reverse data port', 24443, 'number', 'First port of the reviewed Reverse pool on Iran.')}${field('quick.directPort', 'First Direct data port', 24475, 'number', 'First port of the reviewed Direct pool on Kharej.')}</details>
+      <details><summary>Change data listener ports</summary>${field('quick.basePort', 'First Reverse data port', 24443, 'number', 'Checked locally again before creation.')}${field('quick.directPort', 'First Direct data port', 24475, 'number', 'Kharej checks its approved ports when importing the setup link.')}<button type="button" data-peer-free-ports>Find free local ports</button></details><p data-peer-port-status role="status"></p>
       <p>Auto tests the approved pool, selects up to four stable paths and rescans at two healthy paths. Creating this pair approves the reviewed endpoints. Missing helpers or Raw privileges are SKIPPED; tools are not downloaded automatically.</p>
       <details><summary>Review approved endpoints and ports</summary><div data-peer-quick-review></div></details><p>The selected four paths depend on measured data integrity, stability and quality. Advanced setup remains available.</p></div>`;
 }
 
-function wireQuickAuto(group, choices, registry, l3Choices) {
+function wireQuickAuto(group, choices, registry, l3Choices, forwards = () => '') {
   const update = () => {
     const quick = get(group, 'setupMode') === 'quick';
     group.querySelector('[data-peer-quick]').hidden = !quick;
@@ -94,6 +95,7 @@ function wireQuickAuto(group, choices, registry, l3Choices) {
     group.querySelector(`[data-peer-field="${key}"]`).addEventListener('change', update);
   }
   update();
+  wireAutoPortSuggestions(group, update, forwards);
 }
 export function resetPeerSetup(root) {
   root.querySelectorAll('[data-peer-hidden]').forEach(n => { n.hidden = false; delete n.dataset.peerHidden; });
@@ -142,7 +144,7 @@ export function shapePeerSetup(root, transport, role, direct = false, registry =
       root.querySelector(`[data-fn="setSide"][data-args*="${role === 'client' ? 'server' : 'client'}"]`)?.click();
     };
     if (transport === 'auto' && role === 'server') {
-      wireQuickAuto(group, quickChoices, registry, l3Choices);
+      wireQuickAuto(group, quickChoices, registry, l3Choices, () => root.querySelector('[name="ports"]')?.value || '');
       wireCandidates(group, registry);
       const reshapeMode = () => {
         const l3 = get(group, 'autoMode') === 'l3'; group.querySelector('[data-peer-l3]').hidden = !l3;

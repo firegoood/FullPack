@@ -24,6 +24,23 @@
 | 2026-10-15 | Remove compulsory Auto connection ceilings, as in manual forwarding | Explicit unlimited new enrollment, optional operator cap without a 192 maximum, dynamic active-flow accounting, independent bounded handshake work and carrier stream-policy parity; preserve legacy enrollment/fencing and measure actual concurrency |
 | 2026-10-16 | Investigate and fix NL EOF after hours of traffic | Independent authenticated control liveness during slow reserve scans, live-route status distinct from prepared durable epochs, bounded joined cancellation and retained WAN incident evidence |
 | 2026-10-16 | Review and update smux if a better version exists | Official latest tag is already v1.5.57; review upstream changes, preserve manual compatibility and test Auto's authenticated v2 flow isolation against original smux |
+| 2026-10-17 | Change conflicting NL ports and prevent occupied ports in new tunnels | Coordinated fresh enrollment preserving retired configs/fencing; shared local socket/config checks in CLI/web, bounded Quick Auto free-range suggestions, visible endpoint review and receiver-local Direct validation |
+
+## Listener preflight and free Auto ports (2026-10-17)
+
+The user authorized replacing conflicting NL listener ports and choosing free
+defaults for new tunnels. Preserve other services and TR. Existing shared Auto
+endpoints change only through coordinated fresh enrollment with retired
+configuration/fencing retained; never silently patch one peer's manifest.
+New CLI/web creation checks all local Auto listeners, raw TCP reservations and
+private HTTPS helper ports, including stopped configured tunnels. Foreign
+backends and the other side's listeners are not local port conflicts. ICMP role
+markers do not reserve TCP/UDP sockets. Quick Auto suggests a bounded free local
+range, shows exact endpoints and rechecks on save; Kharej validates Direct ports
+on trusted-link import. A suggestion is neither a held reservation nor proof of
+remote availability. Keep manual choices and ignore stale suggestion responses.
+Do not stop unrelated owners, scan remote addresses or rewrite an approved link
+when a receiver detects a conflict.
 
 ## Auto stream isolation and smux review (2026-10-16)
 

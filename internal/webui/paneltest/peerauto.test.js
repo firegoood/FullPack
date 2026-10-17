@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 globalThis.document = { documentElement: { dataset: {} } };
 const { peerSetupPayload, peerEditForm, peerSetupHost } = await import('../panel/js/ui/peerauto.js');
+const { wireAutoPortSuggestions } = await import('../panel/js/ui/autoports.js');
 const controls = values => ({ querySelector: selector => {
   const key = selector.match(/data-peer-field="([^"]+)"/)?.[1];
   const value = values[key];
@@ -66,6 +67,31 @@ test('Quick Auto shows consistent default ports when custom port fields are blan
   const group=controls({setupMode:'quick', 'quick.iranIp':'192.0.2.1', 'quick.kharejIp':'192.0.2.2', 'quick.basePort':'', 'quick.directPort':''});
   const result=peerSetupPayload({querySelector:()=>group}, {role:'server',transport:'auto'});
   assert.equal(result.quickAuto.basePort,24443); assert.equal(result.quickAuto.directPort,24475);
+});
+
+test('Quick Auto fills checked suggestions and a late response cannot overwrite manual ports', async () => {
+  const previous = globalThis.fetch, pending = [], urls = [];
+  globalThis.fetch = url => { urls.push(url); return new Promise(resolve => pending.push(value => resolve({ok:true,json:async()=>value}))); };
+  const nodes = new Map(), field = key => `[data-peer-field="${key}"]`;
+  for (const [key, value] of Object.entries({setupMode:'quick','quick.mode':'stream','quick.iranIp':'192.0.2.1','quick.kharejIp':'192.0.2.2','quick.basePort':'24443','quick.directPort':'24475'})) {
+    nodes.set(field(key), {value, listeners:{}, addEventListener(event, fn) { (this.listeners[event] ||= []).push(fn); }});
+  }
+  for (const key of ['quick','advanced','quick-review','port-status','free-ports']) nodes.set(`[data-peer-${key}]`, {});
+  const group = {querySelector: selector => nodes.get(selector)};
+  try {
+    wireAutoPortSuggestions(group, () => {}, () => '2052,8880');
+    assert.match(urls[0], /what=auto-ports/); assert.match(urls[0], /ports=2052%2C8880/);
+    const base = nodes.get(field('quick.basePort')); base.value = '27000';
+    for (const fn of base.listeners.input) fn();
+    pending.shift()({basePort:24699,directPort:24731});
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(base.value,'27000');
+    assert.match(nodes.get('[data-peer-port-status]').textContent,/Manual ports/);
+    const refreshed = nodes.get('[data-peer-free-ports]').onclick();
+    pending.shift()({basePort:24955,directPort:24987}); await refreshed;
+    assert.equal(base.value,'24955'); assert.equal(nodes.get(field('quick.directPort')).value,'24987');
+    assert.match(nodes.get('[data-peer-port-status]').textContent,/Kharej verifies/);
+  } finally { globalThis.fetch = previous; }
 });
 
 test('Quick Auto L3 requests the separate datagram pool without advanced hidden fields', () => {

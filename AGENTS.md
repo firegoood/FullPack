@@ -60,6 +60,12 @@ updating this repository. These files record the user's persistent preferences.
   peer-address rejection and foreign backend ports distinct from local Iran
   listeners. Never stop unrelated port owners merely because FullPack's tunnel
   list is empty; preserve skipped HTTPS helper prerequisite diagnostics.
+  Preserve the 2026-10-17 creation preflight for every local Auto listener,
+  raw TCP reservation and private helper, plus bounded free-range suggestions.
+  Check stopped configured owners too; recheck on save and receiver import.
+  Keep remote port availability distinct and preserve manual edits against
+  stale suggestion responses. Shared endpoint changes require fresh paired
+  enrollment while keeping retired configuration/fencing.
 - Preserve CLI/web Quick Auto setup and its shared full-registry pool builder
   approved on 2026-10-15. Explicit opt-in Selection permits at most 48 approved
   endpoints, with at most four measured selected paths; legacy enrollment keeps

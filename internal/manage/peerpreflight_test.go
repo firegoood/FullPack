@@ -38,7 +38,7 @@ func TestPeerSetupRefusesOccupiedForwardsBeforeHostChanges(t *testing.T) {
 			n := peerTestNew(mode != "waticmp")
 			n.Ports = fmt.Sprintf("127.0.0.1:%s=127.0.0.1:2052,127.0.0.1:%s=127.0.0.1:8880", port, other)
 			if n.Auto != nil {
-				n.Auto.Candidates = []config.AutoCandidate{{ID: "tcp", Transport: config.TCP, Endpoint: net.JoinHostPort("192.0.2.1", controlPort), Mode: mode}}
+				n.Auto.Candidates = []config.AutoCandidate{{ID: "tcp", Transport: config.TCP, Endpoint: net.JoinHostPort("192.0.2.1", controlPort), LocalBind: net.JoinHostPort("127.0.0.1", controlPort), Mode: mode}}
 			}
 			s, err := specFromPeerNew(n)
 			if err != nil {

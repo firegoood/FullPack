@@ -82,6 +82,8 @@ export const tunnelSettings = name =>
   get('/api/tunnel/settings?name=' + encodeURIComponent(name));
 export const tunnelEdit  = payload => post('/api/tunnel/edit', payload);
 export const tunnelOptions = () => get('/api/tunnel/options');
+export const suggestAutoPorts = (mode = 'stream', ports = '') =>
+  get('/api/tunnel/suggest?what=auto-ports&mode=' + encodeURIComponent(mode) + '&ports=' + encodeURIComponent(ports));
 export const autoStatus = name => get('/api/tunnel/auto?name=' + encodeURIComponent(name));
 export const autoAction = (name, operation, candidate = '') =>
   post('/api/tunnel/auto?name=' + encodeURIComponent(name), { operation, candidate });

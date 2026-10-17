@@ -1,0 +1,46 @@
+# Local listener checks and Quick Auto port suggestions
+
+<div dir="rtl">
+
+## خلاصهٔ فارسی
+
+در ایران، پورت‌های ۲۴۴۵۴ و ۲۴۴۵۷ تونل NL با رزرو PCK و SNI تونل TR
+تداخل داشتند. یک پورت رزروشدهٔ Raw TCP الزاماً در فهرست listenerهای عادی
+دیده نمی‌شود. هنگام ساخت، CLI و وب همهٔ پورت‌های محلی Auto و helperهای خصوصی
+را با سوکت واقعی و تنظیمات تونل‌های موجود بررسی می‌کنند. Quick Auto یک بازهٔ
+آزاد پیشنهاد می‌دهد و انتخاب دستی را حفظ می‌کند. آزادبودن پورت خارج، در همان
+سرور هنگام واردکردن لینک بررسی می‌شود. تغییر جفت موجود باید هماهنگ باشد و
+تنظیمات و تاریخچهٔ قبلی نگه داشته شوند.
+
+</div>
+
+The shared creation preflight runs before saving a new configuration/service or
+CLI host tuning. It covers local Reverse/Direct Auto carrier listeners, TCP/UDP
+forwarded sockets, private helper targets and bound-only raw TCP reservations.
+It also respects stopped tunnel configurations. Foreign backend ports, the
+other peer's listener, ICMP identifiers and portless raw profiles are distinct.
+Errors identify the local address, protocol and candidate/configured owner;
+the check never stops another service or deletes firewall rules.
+
+Quick CLI and web setup search at most 128 local blocks, including the complete
+selected traffic plane's listener and private-helper ports. The exact suggested
+endpoints remain visible for enrollment review. Manual edits invalidate pending
+web suggestions; an explicit button requests a fresh suggestion. The receiver
+rechecks its Direct listeners on trusted-link import and refuses conflicts;
+Iran cannot prove remote availability and never scans arbitrary remote IPs or
+silently edits a signed/enrolled peer link.
+
+A suggestion does not hold the ports. Creation checks again, and another process
+can still bind during the interval before actual service startup. Runtime start
+status remains separate from successful configuration creation. Existing Auto
+manifests/fencing are never rewritten by a suggested default. The operator's
+authorized port replacement uses a fresh coordinated enrollment and preserves
+the retiring pair's private config/fencing for forensics, not active-state reuse.
+
+Passing isolated Linux Go 1.27.2 regression tests cover occupied TCP/UDP, bound TCP without listen, stopped
+configured reservations, helper collisions, role-specific checks, bounded search
+and creation refusal before a config write. All 53 panel tests, including stale
+web responses, and the ten customization-tool tests passed locally. The beta.8
+candidate retains the existing release gates. Production port migration and signed-release gates are
+**PENDING** until their actual receipts are recorded. This feature is not an
+acceptance of the previous TCP WAN failures or a 24-hour stability claim.

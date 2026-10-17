@@ -163,6 +163,13 @@ func setupQuickAutoServer() {
 	n.Ports = tui.Prompt("Forwarded Ports (e.g. 2052,8880; optional for Layer 3): ")
 	accept := tui.Confirm("Forward UDP As Well As TCP", false)
 	n.Tune = &FineTune{AcceptUDP: accept, sent: map[string]bool{"acceptUDP": true}}
+	ports, err := SuggestQuickAutoPorts(q.Mode, n.Ports)
+	if err != nil {
+		tui.Error(err.Error())
+		tui.PressEnter()
+		return
+	}
+	q.BasePort, q.DirectPort = ports.BasePort, ports.DirectPort
 	n.QuickAuto = &q
 	s, err := specFromPeerNew(n)
 	if err != nil {

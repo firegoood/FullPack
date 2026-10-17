@@ -68,6 +68,13 @@ func (s *server) handleTunnelSuggest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		writeJSON(w, map[string]any{"port": p})
+	case "auto-ports":
+		ports, err := manage.SuggestQuickAutoPorts(r.URL.Query().Get("mode"), r.URL.Query().Get("ports"))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
+		writeJSON(w, ports)
 	default:
 		http.Error(w, "ask for token or port", http.StatusBadRequest)
 	}

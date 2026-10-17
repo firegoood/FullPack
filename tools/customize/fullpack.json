@@ -58,6 +58,12 @@
     "internal/manage/managedwebapi.go"
   ],
   "required": {
+    "internal/manage/listenerpreflight.go": ["func SuggestQuickAutoPorts", "func refuseBusyCarrierListeners", "configuredListeners(s.Name)", "for i := range 128", "PeerCheckRequired", "p.ListenerIsIran()"],
+    "internal/manage/listenerpreflight_linux_test.go": ["TestListenerPreflightDetectsBoundRawTCPReservationWithoutListen", "unix.Bind", "syscall.EADDRINUSE"],
+    "internal/manage/listenerpreflight_test.go": ["TestAutoListenerPreflightUsesLocalRoleAndHelperPorts", "TestQuickAutoSuggestionChecksWholeLocalPoolAndPrivateHelpers", "TestCreateRefusesCarrierConflictBeforeAnyConfigurationWrite", "TestStoppedDirectAndL3ClaimsKeepForeignPortsSeparate"],
+    "internal/webui/handlers_tunnels.go": ["case \"auto-ports\":", "manage.SuggestQuickAutoPorts"],
+    "internal/webui/panel/js/ui/autoports.js": ["wireAutoPortSuggestions", "api.suggestAutoPorts", "current !== request", "edited && !force"],
+    "docs/auto-listener-ports.md": ["خلاصهٔ فارسی", "128", "PENDING", "24-hour"],
     "internal/tunnel/peerauto/muxflow.go": ["func enableAuthenticatedFlowControl", "case boundCarrier:", "case *helperCarrier:", "case *rawPacketCarrier:", "BufferedReceive"],
     "internal/tunnel/peerauto/muxflow_test.go": ["TestMuxIsolationRequiresAcceptedProductionEnrollment", "manifest-rejected", "locally-disabled"],
     "internal/tunnel/peerauto/flowmux/enrollment.go": ["EnableAuthenticatedFlowControl", "s.config.Version != 2", "s.authenticatedFlow.Store(true)", "PrioritizeControl", "*burst < 16", "s.controlStream.CompareAndSwap(0, id)"],
@@ -327,7 +333,7 @@
     "internal/app/installrelease_test.go": ["replayed-tag", "tampered-archive", "TestInstallerPinsTheApplicationReleaseKey"],
     "internal/manage/peerpreflight_test.go": ["TestPeerSetupRefusesOccupiedForwardsBeforeHostChanges", "TestPeerSetupRejectsMissingAddressesBeforeCreation", "Applying Network Optimizations", "foreign backend listener was incorrectly refused"],
     "docs/peer-setup-port-review.md": ["anonymous-tunnel-ir01.service", "firenode.service", "SKIPPED", "خلاصهٔ فارسی"],
-    "internal/manage/quickauto.go": ["QuickAutoCarriers()", "expandQuickAuto", "ObserveOnly: false", "Approve These Endpoints And Create Quick Auto", "ConnectionLimit: &limit"],
+    "internal/manage/quickauto.go": ["QuickAutoCarriers()", "expandQuickAuto", "ObserveOnly: false", "Approve These Endpoints And Create Quick Auto", "ConnectionLimit: &limit", "SuggestQuickAutoPorts(q.Mode, n.Ports)"],
     "internal/manage/quickauto_test.go": ["TestQuickAutoBuildsReviewedEndpointsAndTrustedPeerLink", "TestQuickAutoRejectsMissingAddressesConflictingPortsAndMixedEnrollment"],
     "internal/manage/spec/peercheck_test.go": ["TestPeerConfigRoleMarkersDoNotRequireSocketPorts", "legacy-server-zero", "auto-user-port-zero"],
     "docs/quick-auto-setup.md": ["Quick TCP/UDP", "four selected", "خلاصهٔ فارسی"],

@@ -30,6 +30,7 @@ Reference pages: what each part of FullPack **is**, and every setting it has.
 - [Signed FullPack release verification](fullpack-release-verification.md)
 - [Auto control liveness and NL EOF](auto-control-liveness.md)
 - [smux review and Auto stream isolation](smux-flow-control.md)
+- [Auto listener preflight and free port suggestions](auto-listener-ports.md)
 - [Measured native ICMP/xDi fixture comparison](waticmp-benchmark.md)
 - [Choosing a transport (Link Test)](choosing-a-transport.md)
 - [TCP + PCK](tcp-pck.md) — TCP without the kernel's TCP stack
