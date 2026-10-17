@@ -1,0 +1,574 @@
+{
+  "recordedAt": "2026-10-17T12:40:47.692142+00:00",
+  "installedRelease": "v1.9.4-beta.12",
+  "sourceCommit": "1987d4314278aec3b8eebf92870f832e22f3cb37",
+  "releaseUrl": "https://github.com/firegoood/FullPack/releases/tag/v1.9.4-beta.12",
+  "signatureVerified": true,
+  "fullCiRun": 39025041926,
+  "verificationJobs": 11,
+  "fullCiConclusion": "success",
+  "allSevenArchitectureHashesAndLegalMembersVerified": true,
+  "livePortChanges": {
+    "wss-r": {
+      "old": 24454,
+      "new": 24654
+    },
+    "tcpmux-r": {
+      "old": 24457,
+      "new": 24657
+    },
+    "ws-r": {
+      "old": 24458,
+      "new": 24658
+    },
+    "wsmux-r": {
+      "old": 24459,
+      "new": 24659
+    },
+    "wssmux-r": {
+      "old": 24460,
+      "new": 24660
+    }
+  },
+  "newNames": [
+    "NL-clearports",
+    "NL-clearports-kharej"
+  ],
+  "unchangedForwardedPorts": [
+    8888,
+    8889
+  ],
+  "unchangedApprovedEndpointCount": 38,
+  "connectionLimit": 0,
+  "retiredConfigurationAndFencingPreserved": true,
+  "trEngineAndOperatorBackendPidsPreserved": true,
+  "freshPairEnrollment": "New authenticated identities and manifest; retiring generation is not reset or reused.",
+  "unusedInitialPendingEnrollment": "The earlier two-port-only private staging was never activated and was preserved.",
+  "configuredReservations": {
+    "at": "2026-10-17T10:54:08.511865+00:00",
+    "results": [
+      {
+        "host": "188.136.159.49",
+        "result": {
+          "localClaims": 23,
+          "otherConfiguredClaims": 23,
+          "conflicts": [],
+          "internalConflicts": []
+        }
+      },
+      {
+        "host": "185.114.49.230",
+        "result": {
+          "localClaims": 19,
+          "otherConfiguredClaims": 0,
+          "conflicts": [],
+          "internalConflicts": []
+        }
+      }
+    ]
+  },
+  "replacementCarrierDataProbes": [
+    {
+      "candidate": "wss-r",
+      "measurement": 1,
+      "at": "2026-10-17T11:00:08.728801+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "tcpmux-r",
+      "measurement": 1,
+      "at": "2026-10-17T11:00:14.425216+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "ws-r",
+      "measurement": 1,
+      "at": "2026-10-17T11:00:33.755910+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "wss-r",
+      "measurement": 2,
+      "at": "2026-10-17T11:01:10.213321+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "tcpmux-r",
+      "measurement": 2,
+      "at": "2026-10-17T11:01:17.490067+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "ws-r",
+      "measurement": 2,
+      "at": "2026-10-17T11:01:23.561256+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "wss-r",
+      "measurement": 3,
+      "at": "2026-10-17T11:01:34.201165+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "tcpmux-r",
+      "measurement": 3,
+      "at": "2026-10-17T11:01:39.455291+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "ws-r",
+      "measurement": 3,
+      "at": "2026-10-17T11:01:44.753188+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "wsmux-r",
+      "measurement": 1,
+      "at": "2026-10-17T11:02:57.395385+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "wssmux-r",
+      "measurement": 1,
+      "at": "2026-10-17T11:03:05.842181+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "wsmux-r",
+      "measurement": 2,
+      "at": "2026-10-17T11:03:14.320406+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "wssmux-r",
+      "measurement": 2,
+      "at": "2026-10-17T11:03:22.758633+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "wsmux-r",
+      "measurement": 3,
+      "at": "2026-10-17T11:03:32.814946+00:00",
+      "passed": true
+    },
+    {
+      "candidate": "wssmux-r",
+      "measurement": 3,
+      "at": "2026-10-17T11:03:41.351219+00:00",
+      "passed": true
+    }
+  ],
+  "applicationWorkloads": [
+    {
+      "mode": "persistent",
+      "forwardedPort": 8888,
+      "result": {
+        "counts": {
+          "connections": 1,
+          "exchanges": 900,
+          "bytes": 17100,
+          "firstHash": "b16e15764b8bc06c5c3f9f19bc8b99fa48e7894aa5a6ccdad65da49bbf564793"
+        },
+        "elapsedSeconds": 1800.001643008,
+        "kind": "result",
+        "mode": "persistent",
+        "ok": true,
+        "started": "2026-10-17T12:04:35.71870192Z"
+      },
+      "receiptPersistence": "Private files on the actual nodes; independent of management SSH lifetime",
+      "observedCounterDeltas": {
+        "188.136.159.49": {
+          "flowCountersNotUsers": {
+            "admitted": 34590,
+            "completed": 34621,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 18805
+          },
+          "typedDataErrorDeltas": {}
+        },
+        "185.114.49.230": {
+          "flowCountersNotUsers": {
+            "admitted": 34805,
+            "completed": 34838,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "typedDataErrorDeltas": {}
+        }
+      },
+      "observerErrors": [],
+      "independentStatusSampleCounts": {
+        "188.136.159.49": 129,
+        "185.114.49.230": 133
+      },
+      "observedStates": [
+        {
+          "host": "188.136.159.49",
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2
+        },
+        {
+          "host": "185.114.49.230",
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2
+        }
+      ],
+      "directApplicationPrerequisite": "passed",
+      "temporaryIdentityRemoved": true,
+      "independentRemainingOwnedUsers": 0,
+      "operatorBackendsUnchanged": true,
+      "boundedUnitsStoppedAndPrivateCredentialInputsRemoved": true,
+      "privateReceiptSha256": "1c5870f7b155c5fe759b5cfdfda9563ca65754c35c66bef36139ff0ad96cecb6"
+    },
+    {
+      "mode": "fresh",
+      "forwardedPort": 8888,
+      "result": {
+        "counts": {
+          "connections": 1800,
+          "exchanges": 3600,
+          "bytes": 68400,
+          "firstHash": "b16e15764b8bc06c5c3f9f19bc8b99fa48e7894aa5a6ccdad65da49bbf564793"
+        },
+        "elapsedSeconds": 1800.001669328,
+        "kind": "result",
+        "mode": "fresh",
+        "ok": true,
+        "started": "2026-10-17T12:05:25.720468151Z"
+      },
+      "receiptPersistence": "Private files on the actual nodes; independent of management SSH lifetime",
+      "observedCounterDeltas": {
+        "188.136.159.49": {
+          "flowCountersNotUsers": {
+            "admitted": 33893,
+            "completed": 34034,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 18661
+          },
+          "typedDataErrorDeltas": {}
+        },
+        "185.114.49.230": {
+          "flowCountersNotUsers": {
+            "admitted": 33905,
+            "completed": 34039,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          },
+          "typedDataErrorDeltas": {}
+        }
+      },
+      "observerErrors": [],
+      "independentStatusSampleCounts": {
+        "188.136.159.49": 127,
+        "185.114.49.230": 130
+      },
+      "observedStates": [
+        {
+          "host": "188.136.159.49",
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2
+        },
+        {
+          "host": "185.114.49.230",
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 2
+        }
+      ],
+      "directApplicationPrerequisite": "passed",
+      "temporaryIdentityRemoved": true,
+      "independentRemainingOwnedUsers": 0,
+      "operatorBackendsUnchanged": true,
+      "boundedUnitsStoppedAndPrivateCredentialInputsRemoved": true,
+      "privateReceiptSha256": "f7eb567e76e6bdf11b1c9e7f67de00298c6ef7d98da4ab84e9773d6649531a69"
+    },
+    {
+      "mode": "secondary8889",
+      "forwardedPort": 8889,
+      "result": {
+        "counts": {
+          "connections": 1,
+          "exchanges": 2,
+          "bytes": 38,
+          "firstHash": "b16e15764b8bc06c5c3f9f19bc8b99fa48e7894aa5a6ccdad65da49bbf564793"
+        },
+        "elapsedSeconds": 0.245683961,
+        "kind": "result",
+        "mode": "smoke",
+        "ok": true,
+        "started": "2026-10-17T11:02:18.672933906Z"
+      },
+      "directAndPostWan": "passed",
+      "temporaryIdentityRemoved": true,
+      "independentRemainingOwnedUsers": 0,
+      "operatorBackendsUnchanged": true,
+      "privateReceiptSha256": "fed5af3c763fe4e16a316034642440594c36b233744e672ad3fd2ec20762aeb9"
+    },
+    {
+      "mode": "postWindow8888",
+      "forwardedPort": 8888,
+      "result": {
+        "counts": {
+          "connections": 1,
+          "exchanges": 2,
+          "bytes": 38,
+          "firstHash": "b16e15764b8bc06c5c3f9f19bc8b99fa48e7894aa5a6ccdad65da49bbf564793"
+        },
+        "elapsedSeconds": 0.252353304,
+        "kind": "result",
+        "mode": "smoke",
+        "ok": true,
+        "started": "2026-10-17T12:38:38.969593437Z"
+      },
+      "directAndPostWan": "passed",
+      "temporaryIdentityRemoved": true,
+      "independentRemainingOwnedUsers": 0,
+      "operatorBackendsUnchanged": true,
+      "privateReceiptSha256": "8d54ab1fea7bc7d1b626f1c6f8d833da655a7f2821fc4439bde418c80a59d5e4"
+    }
+  ],
+  "finalActualSocketAndHistoryAudit": {
+    "at": "2026-10-17T12:39:04.039988+00:00",
+    "results": [
+      {
+        "host": "188.136.159.49",
+        "data": {
+          "at": "2026-10-17T12:39:03.446796+00:00",
+          "name": "NL-clearports",
+          "pid": 633618,
+          "runningSignedBinarySha256": "8b198eaa8fcf0a56f77102fb574daf4392e0a53da5095c3fbef73d1ff7b69d90",
+          "version": "v1.9.4-beta.12\nhttps://github.com/firegoood/FullPack",
+          "listeners": [
+            {
+              "tcpPort": 24654,
+              "owningPid": 633618
+            },
+            {
+              "tcpPort": 24659,
+              "owningPid": 633618
+            },
+            {
+              "tcpPort": 24658,
+              "owningPid": 633618
+            },
+            {
+              "tcpPort": 24657,
+              "owningPid": 633618
+            },
+            {
+              "tcpPort": 24660,
+              "owningPid": 633618
+            }
+          ],
+          "trPidPreserved": true,
+          "fireNodePidPreserved": true,
+          "retiredConfigAndFencingPreserved": true,
+          "active": "tcp-r",
+          "generation": 2,
+          "state": "HEALTHY",
+          "selection": {
+            "target": 4,
+            "refillAt": 2,
+            "healthy": 0,
+            "scanning": true,
+            "selected": [
+              "tcp-r"
+            ],
+            "reason": "insufficient confirmed stable paths; retrying only the explicitly enrolled reserve pool"
+          },
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 302,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 777,
+            "admitted": 98501,
+            "completed": 97725,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 8735,
+            "udpQueueDrops": 46920
+          }
+        }
+      },
+      {
+        "host": "185.114.49.230",
+        "data": {
+          "at": "2026-10-17T12:39:03.270268+00:00",
+          "name": "NL-clearports-kharej",
+          "pid": 233322,
+          "runningSignedBinarySha256": "8b198eaa8fcf0a56f77102fb574daf4392e0a53da5095c3fbef73d1ff7b69d90",
+          "version": "v1.9.4-beta.12\nhttps://github.com/firegoood/FullPack",
+          "listeners": [],
+          "trPidPreserved": true,
+          "fireNodePidPreserved": true,
+          "retiredConfigAndFencingPreserved": true,
+          "active": "tcp-r",
+          "generation": 2,
+          "state": "HEALTHY",
+          "selection": {
+            "target": 4,
+            "refillAt": 2,
+            "healthy": 0,
+            "scanning": false,
+            "selected": [
+              "tcp-r"
+            ],
+            "reason": ""
+          },
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 302,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 780,
+            "admitted": 98501,
+            "completed": 97721,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          }
+        }
+      }
+    ]
+  },
+  "postTestReserveReadiness": {
+    "at": "2026-10-17T12:40:12.992215+00:00",
+    "peers": [
+      {
+        "host": "188.136.159.49",
+        "active": "tcp-r",
+        "state": "HEALTHY",
+        "generation": 2,
+        "selection": {
+          "target": 4,
+          "refillAt": 2,
+          "healthy": 0,
+          "scanning": true,
+          "selected": [
+            "tcp-r"
+          ],
+          "reason": "insufficient confirmed stable paths; retrying only the explicitly enrolled reserve pool"
+        },
+        "liveConnectionsNotUsers": 832,
+        "readyCandidatesWithPressureSkips": [
+          "tcp-r",
+          "wss-r",
+          "stealth-r",
+          "wat-r-n",
+          "wat-r-r",
+          "wat-d-n",
+          "wat-d-r",
+          "tcpmux-r",
+          "ws-r",
+          "wsmux-r",
+          "wssmux-r",
+          "kcp-r",
+          "udp-r",
+          "xdi-r",
+          "xdi-d",
+          "pck-r",
+          "sni-r"
+        ]
+      },
+      {
+        "host": "185.114.49.230",
+        "active": "tcp-r",
+        "state": "HEALTHY",
+        "generation": 2,
+        "selection": {
+          "target": 4,
+          "refillAt": 2,
+          "healthy": 0,
+          "scanning": false,
+          "selected": [
+            "tcp-r"
+          ],
+          "reason": ""
+        },
+        "liveConnectionsNotUsers": 827,
+        "readyCandidatesWithPressureSkips": [
+          "tcp-r",
+          "wss-r",
+          "stealth-r",
+          "wat-r-n",
+          "wat-r-r",
+          "wat-d-n",
+          "wat-d-r",
+          "tcpmux-r",
+          "ws-r",
+          "wsmux-r",
+          "wssmux-r",
+          "kcp-r",
+          "udp-r",
+          "xdi-r",
+          "xdi-d",
+          "pck-r",
+          "sni-r"
+        ]
+      }
+    ],
+    "interpretation": "Selected reserve freshness is not established under ongoing local resource-pressure skips. Pressure skips are not carrier failures or proof of renewed stability; active application delivery remains a separate measured result."
+  },
+  "privateReserveDiagnosticSha256": "0142a7c70bf30fa0a70671332be6ce4d56c30517e6019ff8e29e70dcafb8a484",
+  "privateFinalAuditSha256": "a5de19af74fc0e0e941dc6d90cac40f9fc1b5a9e9ebc295a517a1107fcdea3a7",
+  "durableAuditResourceLimits": {
+    "unprivilegedApplicationProcess": true,
+    "applicationCpuPercent": 25,
+    "applicationMemoryMiB": 256,
+    "swapMiB": 0,
+    "tasksMax": 128,
+    "runtimeMaxSeconds": 2100,
+    "telemetryCpuPercent": 5,
+    "telemetryMemoryMiB": 64
+  },
+  "earlierManagementInterruptedAttempts": [
+    {
+      "mode": "persistent",
+      "started": "2026-10-17T11:01:07.217562+00:00",
+      "outcome": "INCONCLUSIVE",
+      "reason": "Management connectivity interruption; complete application receipt was not received. Expiry leases subsequently removed the identities and independent API queries confirmed zero.",
+      "privateReceiptSha256": "6729cedf39c3ad6b7975509d9c06ba77f8766874c47753035bc9227a57fe8237"
+    },
+    {
+      "mode": "fresh",
+      "started": "2026-10-17T11:01:59.101485+00:00",
+      "outcome": "INCONCLUSIVE",
+      "reason": "Management connectivity interruption; complete application receipt was not received. Expiry leases subsequently removed the identities and independent API queries confirmed zero.",
+      "privateReceiptSha256": "f450952309971fa5f38139ae7c1ea7686e260015c42dc11522cb653b41a024e0"
+    }
+  ],
+  "independentExpiryCleanupQueryAt": "2026-10-17T12:00:40.081262+00:00",
+  "privateExpiryCleanupReceiptSha256": "696080b68fa5bc108a236fe97dfe844968fb05a83f29cca85d72e57fee40de5b",
+  "privateReceiptSha256": {
+    "install": "3bec0585f8887673beb7b553c7cb74aae09e4c46a7184816cd003cf08e1223ce",
+    "activation": "c71d60557dfb769800707097ab1852b707b7f36e003066a295f188ed661c53c1",
+    "carrierProbes": "f86c78731a98ebf74e61ba2824301da498de80a48d6b80e17ea19fd26644d8e1"
+  },
+  "limits": [
+    "Free local ports do not establish remote reachability or guaranteed availability.",
+    "CI held-load cases are controlled application connection concurrency, not 1000 real production users.",
+    "These post-migration checks are bounded; 24-hour acceptance remains PENDING.",
+    "Earlier TCP WAN failure and separately recorded WS evidence remain unchanged.",
+    "UDP queue drops and aggregate connection counters are not proven loss-free user sessions.",
+    "Iran UDP queue-drop increments were 18805 and 18661 in overlapping telemetry windows; do not sum them or infer an end-to-end packet-loss ratio.",
+    "Only the active TCP route remained selected at the final observation; four currently stable reserve paths are NOT VERIFIED under resource-pressure probe skips."
+  ]
+}

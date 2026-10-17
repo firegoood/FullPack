@@ -73,6 +73,36 @@ deadline/session-close/write-error aliasing regressions and repeated real
 mid-transfer cancellation gate. The fix does not establish the cause of the
 earlier WAN TCP failure or complete any pending soak.
 
+Signed beta.12 run `39025041926` subsequently passed all eleven jobs and the
+release job, including five repeated cancellation/ownership race cases and all
+nine held-load workloads. The seven archive hashes/signature/legal/Go build
+records were independently checked. Beta.12 was installed on Iran/NL; the actual
+fresh pair is `NL-clearports` / `NL-clearports-kharej`, with old config/fencing
+retained. Preserve all five authorized replacement listener ports
+24654/24657/24658/24659/24660 (WSS/TCPMux/WS/WSMux/WSSMux Reverse), 8888/8889
+forwards, 38 approved endpoints and unlimited0. TR's engine/config and operator
+services were preserved. Each changed carrier passed three full official data
+probes at least ten seconds apart; the real signed listener owners were checked.
+Cold enrollment took about 197 seconds including failed Direct measurements;
+do not promise instant startup. Both thirty-minute TCP application checks passed:
+one persistent connection/900 verified exchanges and 1,800 sequential fresh
+connections/3,600 exchanges. Peer telemetry retained HEALTHY TCP generation 2.
+These are bounded data-path results, not simultaneous-user capacity, failover
+or 24-hour acceptance; preserve the separate earlier WAN failure evidence.
+Final reserve probes were resource-pressure skips and only the active TCP path
+remained selected; four currently stable paths were not established. Keep this
+distinct from the initial four-path selection and successful TCP application
+receipts. Record the overlapping UDP queue-drop increases without summing them
+or claiming an end-to-end loss rate; never raise pressure limits to force passes.
+Management-attached tests without a returned application receipt remain
+INCONCLUSIVE, with bounded lease cleanup independently verified. Replacement
+WAN receipts persist privately on the actual servers independently of SSH;
+retain their bounded resources, exact owned-identity cleanup and observed scope.
+The final guard review combined three duplicated manifest entries without
+dropping either set of requirements (slow-reader backend readiness, smux/Wat
+release attribution and paced/replay-bounded probes). Keep the duplicate-key
+regression: normal JSON decoding silently discarded the earlier requirements.
+
 ## Auto stream isolation and smux review (2026-10-16)
 
 The dependency is already the newest official tag, `github.com/xtaci/smux

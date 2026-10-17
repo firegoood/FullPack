@@ -257,6 +257,14 @@ The deterministic queued-payload regression failed on the pre-fix adaptation
 for deadline, session-close and write-error returns and passed with ownership.
 The isolated manual-adapter ownership/short-write regressions passed. The
 Windows network package remains unsupported by pre-existing socket code;
-Linux integration, repeated mid-transfer race, full CI, signed release and
-production deployment remain PENDING. This repair does not establish the
+At that local-review stage, Linux integration, repeated mid-transfer race,
+full CI, signed release and production deployment were PENDING; subsequent
+completion is recorded below. This repair does not establish the
 cause of the earlier WAN TCP failure and is not a 24-hour acceptance.
+
+Beta.12 subsequently passed all eleven verification jobs and the signed release
+job in run `39025041926`, including the complete race suite and five repeated
+real mid-transfer/ownership cases. Its signed running binary was independently
+verified on Iran and NL. The earlier failure and local non-race scope above
+remain historical evidence; post-migration WAN results are recorded separately.
+See `verification/mux-payload-ownership-20261017.json` for the bounded evidence.

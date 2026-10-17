@@ -1,0 +1,96 @@
+{
+  "recordedAt": "2026-10-17T10:30:59.451997+00:00",
+  "sourceCommit": "1987d4314278aec3b8eebf92870f832e22f3cb37",
+  "failedCandidate": {
+    "version": "v1.9.4-beta.11",
+    "sourceCommit": "e4731c865d0e305c1d203903fe6a8f8029893fbe",
+    "run": 39007479007,
+    "verificationJobs": 11,
+    "successfulJobs": 10,
+    "failedJob": "Build and test (race)",
+    "actualDataRace": true,
+    "test": "TestAPeerKilledMidTransferDoesNotWedgeTheOther/tcpmux",
+    "conflict": [
+      "upstream smux v1.5.57 stream.go:161 bufferRing.consumeFront writes",
+      "upstream smux v1.5.57 session.go:638 sendLoop reads borrowed payload"
+    ],
+    "publishedOrInstalled": false,
+    "privateRaceLogSha256": "727d7077442a9e915aef96cebe7fb504d5b92ea0ffdc834d79ff36d08060f2d7"
+  },
+  "repair": {
+    "auto": "Own frame payload before queue insertion",
+    "manual": "Retain unchanged upstream dependency; own caller payload through bounded adapter on Reverse/Direct streams",
+    "manualCopyChunkBytes": 32768,
+    "newConnectionCeiling": false,
+    "wireVersionsOrDefaultsChanged": false
+  },
+  "deterministicRegression": {
+    "baselineSource": "e4731c8",
+    "baseline": [
+      "deadline FAILED",
+      "session-close FAILED",
+      "write-error FAILED"
+    ],
+    "repair": [
+      "deadline PASS",
+      "session-close PASS",
+      "write-error PASS"
+    ],
+    "isolatedManualAdapterOwnershipAndShortWrite": "PASS",
+    "scope": "Patched Go 1.27.2; deterministic aliasing tests, not WAN or full Linux race acceptance"
+  },
+  "linuxIntegration": {
+    "patchedGo": "1.27.2",
+    "networkIsolation": true,
+    "unprivileged": true,
+    "cpuQuotaPercent": 60,
+    "memoryMaxMiB": 768,
+    "memoryPeakSystemd": "436.0M",
+    "swapPeak": 0,
+    "manualMidTransferTransports": [
+      "tcp",
+      "tcpmux",
+      "ws"
+    ],
+    "manualMidTransferSeconds": 10.7,
+    "allFlowmuxTests": "PASS",
+    "slowReaderCarrierDirections": [
+      "tcp/reverse",
+      "tcp/direct",
+      "wss/reverse",
+      "wss/direct",
+      "stealth/reverse",
+      "stealth/direct"
+    ],
+    "slowReaderSeconds": 125.74,
+    "allApplicationControlAndJoinedCleanupAssertions": "PASS",
+    "raceInstrumented": false,
+    "privateReceiptSha256": "b587a0164be92d4c5b378521835620279f194a37c98c75b1bc8bccce43429acd"
+  },
+  "fullCi": {
+    "candidate": "v1.9.4-beta.12",
+    "run": 39025041926,
+    "sourceCommit": "1987d4314278aec3b8eebf92870f832e22f3cb37",
+    "verificationJobs": 11,
+    "conclusion": "success",
+    "wholeRaceAndFiveRepeatedCancellationRegressions": "success",
+    "allNineHeld1000ConnectionWorkloadsExecuted": true,
+    "releaseUrl": "https://github.com/firegoood/FullPack/releases/tag/v1.9.4-beta.12",
+    "independentForkSignatureAndSevenArchiveChecks": "success"
+  },
+  "limits": [
+    "Not established as the cause of earlier WAN TCP failure.",
+    "No 24-hour or 1000-real-user acceptance is claimed."
+  ],
+  "deployment": {
+    "release": "v1.9.4-beta.12",
+    "runningSignedBinaryVerifiedOn": [
+      "188.136.159.49",
+      "185.114.49.230"
+    ],
+    "trEngineNotRestarted": true,
+    "retiredConfigAndFencingPreserved": true,
+    "privateAuditSha256": "7ffca6c2e39ae9f96f813198399e811f26b69d9e9f9da0eb3a0041696e0ceb8f",
+    "scope": "Deployment and local/CI regressions; owned post-migration WAN evidence is recorded separately."
+  }
+}

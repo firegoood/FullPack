@@ -2,6 +2,7 @@
 import subprocess
 import contextlib
 import io
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -11,6 +12,17 @@ import reapply
 
 
 class ReapplicationTests(unittest.TestCase):
+    def test_manifest_never_silently_discards_duplicate_feature_guards(self):
+        def unique_keys(items):
+            result = {}
+            for key, value in items:
+                self.assertNotIn(key, result, f"duplicate customization key: {key}")
+                result[key] = value
+            return result
+
+        json.loads((reapply.ROOT / "tools/customize/fullpack.json").read_text(encoding="utf-8"),
+                   object_pairs_hook=unique_keys)
+
     def upstream(self, path):
         return subprocess.check_output(["git", "show", "HEAD:" + path], cwd=reapply.ROOT).decode("utf-8")
 
