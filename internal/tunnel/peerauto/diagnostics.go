@@ -52,10 +52,23 @@ func classifyCandidateError(err error) (code, summary string) {
 
 func (m *Manager) candidateFailure(id, stage, prefix string, err error) {
 	code, summary := classifyCandidateError(err)
-	m.candidateStatus(id, func(s *CandidateStatus) {
-		s.Ready = false
-		s.ErrorCode, s.ErrorStage = code, stage
-		s.Reason = prefix + ": " + summary
-	})
-	m.log.WithField("candidate", id).WithField("stage", stage).WithField("errorCode", code).WithError(err).Debug("carrier attempt failed")
+	// The same listener accepts production and isolated probe sessions. A
+	// failed extra handshake must not mark an existing enrolled session dead.
+	// Check and publish under one lock so a newly accepted session cannot be
+	// overwritten by an older attempt's diagnostic. Its owner handles closure.
+	m.mu.Lock()
+	e := m.endpoints[id]
+	live := e != nil && e.ctx.Err() == nil
+	if !live {
+		for i := range m.status.Candidates {
+			if s := &m.status.Candidates[i]; s.ID == id {
+				s.Ready = false
+				s.ErrorCode, s.ErrorStage = code, stage
+				s.Reason = prefix + ": " + summary
+				break
+			}
+		}
+	}
+	m.mu.Unlock()
+	m.log.WithField("candidate", id).WithField("stage", stage).WithField("errorCode", code).WithField("enrolledSessionRetained", live).WithError(err).Debug("carrier attempt failed")
 }

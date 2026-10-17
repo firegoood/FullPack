@@ -108,8 +108,9 @@ bytes, unchanged generations and continuing unrelated application data/control.
 The manifest-rejected/locally-disabled enrollment cases retained their shared
 budget; accepted production enabled isolation. The first fixture attempt had
 invalid short test identities and failed before traffic; those fixture IDs were
-corrected without relaxing validation. Race/full CI, signed deployment and
-extended post-repair WAN delivery are **PENDING**. The full-tunnel regression
+corrected without relaxing validation. At that initial local record, race/full
+CI, signed deployment and extended WAN delivery were pending; the subsequent
+release/deployment status follows below. The full-tunnel regression
 requires 64 slow readers to queue more
 than the former 4 MiB budget while another application and multiple heartbeats
 continue with unchanged generation and no interrupted/rejected flows, using
@@ -152,5 +153,73 @@ twice within one `||` chain. Its remaining work was cancelled as superseded.
 Beta.7 expresses each allowance transition as an explicit sequential test step;
 production transport code is unchanged from the locally tested beta.6 candidate.
 The replacement still requires every original CI and signed-deployment gate.
+
+## Signed beta.7 deployment
+
+All eleven verification jobs and the signed release job passed in
+[run 38952846950](https://github.com/firegoood/FullPack/actions/runs/38952846950),
+source `9d49231a1c205f13651d11eb3bc3723e489f257d`. Each of the eight explicitly
+enabled 1000-held-connection carrier/direction workloads and the mixed TCP/UDP
+workload actually ran, with both integrity passes and joined cleanup. These are
+loopback connections, not a guarantee of 1000 independent production users.
+All seven release archives were independently checked against their hashes,
+tag-bound fork signature, patched Go 1.27.2 build records and exact legal members.
+
+The verified binary was installed on Iran and NL with unchanged configuration
+hashes, enrollment and durable fencing. Private beta.4 binary rollback was kept;
+its saved fencing is forensic only. TR engines and operator FireNode/Xray were
+not restarted. Coordinated NL restart began at 20:46:35 UTC and committed TCP
+Reverse generation 120 at 20:48:51 UTC, about 136 seconds later. Requests during
+that cold route scan were rejected as `no_route`; they are not successful users
+or zero-outage deployment. Both peers then exposed negotiated v2 receive
+isolation and the enrolled control-priority lane.
+
+The secondary port 8889 passed direct/WAN/after HTTP byte-integrity checks and
+its temporary identity was independently queried absent. The thirty-minute fresh
+and persistent application tests on port 8888 **FAILED** before completion. The
+persistent connection timed out after 1417.92 seconds (701 exchanges); fresh
+connections reset after 1395.31 seconds (1374 connections / 2746 exchanges).
+Direct Xray prerequisites passed, and both temporary identities were removed
+and independently queried absent. Both peers still reported HEALTHY TCP Reverse
+generation 120 during the data failure; Iran recorded TCP control timeout at
+21:13:11 UTC, then automatically committed WS Reverse generation 121 at
+21:13:54 UTC. This candidate is not accepted as a lasting WAN EOF fix. Bounded
+failure evidence is in `verification/auto-smux-priority-wan-failure-20261016.json`.
+These tests use
+owned synthetic Shadowsocks identities and the exact expected HTTP 404 body of
+an owned missing-path endpoint; this checks delivery, not throughput or business
+endpoint success. Increasing UDP queue-drop counters remain a separate
+observation and must not be described as loss-free UDP acceptance.
+
+On 2026-10-17 at 03:38 UTC, both processes still agreed on WS Reverse generation
+121 without a restart since deployment. A subsequent direct/WAN port-8889 smoke
+test passed with independently removed synthetic credentials. This later success
+does not change the failed TCP tests. Iran also exposed `ready=false` for that
+live WS session after an extra probe authentication failure. The diagnostic
+repair now checks session ownership and publishes under the same manager lock:
+an unsuccessful extra handshake cannot overwrite a live enrolled session's
+readiness. Real closed-session/reconnect failures remain typed. This repairs
+status attribution; it does not establish the cause of the earlier data outage.
+The new regression failed against the previous implementation and passed against
+the repair in an isolated Linux namespace with Go 1.27.2. The full peerauto
+package and ten customization-tool tests passed locally. The diagnostic change
+is not installed on production; its full CI remains a separate gate.
+
+At 03:44:50–03:45:35 UTC, simultaneous TCP header summaries on both hosts showed
+an established TCP Direct connection to the approved NL port 24485 repeatedly
+losing forward progress after its initial exchange. For one captured connection,
+Iran retransmitted sequence range 1857:2707 and acknowledged NL data through 3018;
+NL continued acknowledging only 1857 and retransmitting 2767:3018. The matching
+Iran data/ACK packets were absent from NL's capture. Both captures reported zero
+kernel capture drops, and the subsequent qdisc/filter inspection showed no
+qdisc drops or egress filter. This is evidence of packet loss outside the
+application on that observed path, not proof of DPI or the cause of the earlier
+active TCP Reverse failure. Packet bodies/credentials are not published.
+
+Two other unavailable Iran endpoints have a separate local explanation:
+WSS Reverse port 24454 and TCPMUX Reverse port 24457 conflict with raw-port
+reservations already owned by the TR configuration. Their no-listener/SYN
+failures must not be described as evidence of WAN filtering. The existing
+TR process, its firewall rules and both immutable endpoint manifests are kept.
 
 *Last verified against FullPack v1.9.4-beta.7 (source review of bounded Auto receive/transmit isolation, 2026-10-16; historical measurements keep their scope; CI/deployment and soak require separate evidence).*

@@ -149,6 +149,16 @@ Beta.5's full release gate failed and its release job was skipped; no beta.5
 binary was installed. The failed native/race pool bootstraps, subsequent race
 failures and the isolated-fixture change remain recorded in `smux-flow-control.md`.
 
+The receive/transmit repair's signed beta.7 passed all eleven verification jobs
+and was installed on both NL endpoints without rewriting enrollment/fencing or
+restarting operator backends. The cold scan took about 136 seconds before TCP
+Reverse generation 120; requests during that scan were rejected as no-route.
+Its separate post-install continuity tests failed after about 23 minutes,
+despite HEALTHY TCP status; Auto subsequently recovered to WS Reverse generation
+121. Exact failed workloads and limits are recorded in `smux-flow-control.md`.
+Beta.7 is not accepted as a lasting WAN repair. Beta.4's earlier recurrences
+remain historical failures.
+
 **NOT VERIFIED:** continuous real-hour/24-hour operation, sustained bandwidth,
 every carrier under load and guaranteed production capacity for 1000 real users.
 

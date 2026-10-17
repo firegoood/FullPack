@@ -77,6 +77,25 @@ Beta.6 run `38952186871` found SA4000 in a stateful test expression and was
 cancelled as superseded without release/installation. Keep explicit sequential
 allowance checks and retain the complete gate on its beta.7 replacement.
 
+Beta.7 source `9d49231a1c205f13651d11eb3bc3723e489f257d` passed all eleven
+verification jobs plus signing in run `38952846950`. All nine explicit held-load
+workloads actually ran. Seven signed architecture archives were independently
+verified before installation on Iran/NL. Keep the unchanged enrollment/config,
+durable fencing and private beta.4 rollback; TR and operator backend processes
+were not restarted. Subsequent WAN continuity, UDP drops and remaining soak
+limits are recorded in `docs/smux-flow-control.md`; local CI is not WAN acceptance.
+The beta.7 thirty-minute fresh/persistent WAN checks failed after about 23 minutes
+while TCP still reported HEALTHY. Preserve their failed evidence in
+`docs/verification/auto-smux-priority-wan-failure-20261016.json`; subsequent WS
+recovery does not establish a lasting EOF fix.
+
+On 2026-10-17, the continuing NL investigation found a live WS session with
+`ready=false` after an extra isolated handshake failed. Keep attempt diagnostics
+scoped: a failed extra accept/authentication must not overwrite the readiness of
+an existing enrolled session. Check ownership and publish under Manager.mu;
+retain typed failures when no live session remains and keep private debug logs
+for failed attempts. This status repair does not establish an EOF/network fix.
+
 ## Auto control liveness repair approved on 2026-10-16
 
 Slow isolated reserve probes must never starve production control heartbeats.

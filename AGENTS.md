@@ -20,6 +20,8 @@ updating this repository. These files record the user's persistent preferences.
   typed diagnostics, joined cancellation, scoped lock-waiting cleanup and
   bounded connection-admission tests. Do not equate sockets with users or
   bounded WAN recovery with production/24-hour acceptance.
+  Failed extra carrier/probe handshakes must not overwrite a live enrolled
+  session's readiness; retain typed reconnect failures and private attempt logs.
   Keep the one-hour transaction replay window and bounded 4096-entry cache
   compatible with the global one-second probe pacing. Budget skips must not
   cancel production or count toward carrier quarantine/data failures; preserve

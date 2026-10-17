@@ -1,0 +1,189 @@
+{
+  "recordedAt": "2026-10-17T03:42:17.095694+00:00",
+  "tag": "v1.9.4-beta.7",
+  "source": "9d49231a1c205f13651d11eb3bc3723e489f257d",
+  "ciRun": 38952846950,
+  "allElevenVerificationJobs": "passed",
+  "signedReleaseAndSevenArchitectures": "independently verified before installation",
+  "configurationEnrollmentFencingPreserved": true,
+  "applicationAcceptance": "FAILED",
+  "workloads": [
+    {
+      "mode": "persistent",
+      "result": {
+        "counts": {
+          "connections": 1,
+          "exchanges": 701,
+          "bytes": 13319,
+          "firstHash": "b16e15764b8bc06c5c3f9f19bc8b99fa48e7894aa5a6ccdad65da49bbf564793"
+        },
+        "elapsedSeconds": 1417.922807577,
+        "error": "read tcp 127.0.0.1:50548->127.0.0.1:8888: i/o timeout",
+        "kind": "result",
+        "mode": "persistent",
+        "ok": false,
+        "started": "2026-10-16T20:49:24.624542007Z"
+      },
+      "directPrerequisite": "passed",
+      "wanContinuity": "FAILED",
+      "after": {
+        "188.136.159.49": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 120,
+          "data": {
+            "code": "recent_errors",
+            "detail": "recent data admission failures: stream_pool_timeout; inspect counters and capacity",
+            "lastErrorCode": "stream_pool_timeout",
+            "lastErrorStage": "peer_handshake",
+            "lastErrorAt": "2026-10-16T21:13:07.219257868Z",
+            "errors": {
+              "handshake_timeout": 70,
+              "no_route": 15165,
+              "stream_pool_timeout": 245
+            }
+          },
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 268,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 695,
+            "admitted": 15413,
+            "completed": 14892,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 6830,
+            "udpQueueDrops": 4804
+          }
+        },
+        "185.114.49.230": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 120,
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          },
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 300,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 710,
+            "admitted": 15480,
+            "completed": 14770,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          }
+        }
+      },
+      "temporaryIdentitiesRemoved": true,
+      "independentRemainingOwnedUsers": 0,
+      "operatorBackendsUnchanged": true,
+      "privateReceiptSha256": "1b5a70416e1cc7757716600d0470ce0238dc565413601aed1d53f94826cb52d0"
+    },
+    {
+      "mode": "fresh",
+      "result": {
+        "counts": {
+          "connections": 1374,
+          "exchanges": 2746,
+          "bytes": 52174,
+          "firstHash": "b16e15764b8bc06c5c3f9f19bc8b99fa48e7894aa5a6ccdad65da49bbf564793"
+        },
+        "elapsedSeconds": 1395.311463813,
+        "error": "read tcp 127.0.0.1:55978->127.0.0.1:8888: read: connection reset by peer",
+        "kind": "result",
+        "mode": "fresh",
+        "ok": false,
+        "started": "2026-10-16T20:49:44.057814002Z"
+      },
+      "directPrerequisite": "passed",
+      "wanContinuity": "FAILED",
+      "after": {
+        "188.136.159.49": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 120,
+          "data": {
+            "code": "recent_errors",
+            "detail": "recent data admission failures: stream_pool_timeout; inspect counters and capacity",
+            "lastErrorCode": "stream_pool_timeout",
+            "lastErrorStage": "peer_handshake",
+            "lastErrorAt": "2026-10-16T21:13:06.688861752Z",
+            "errors": {
+              "handshake_timeout": 70,
+              "no_route": 15165,
+              "stream_pool_timeout": 235
+            }
+          },
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 272,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 699,
+            "admitted": 15413,
+            "completed": 14888,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 6824,
+            "udpQueueDrops": 4794
+          }
+        },
+        "185.114.49.230": {
+          "state": "HEALTHY",
+          "active": "tcp-r",
+          "generation": 120,
+          "data": {
+            "code": "available",
+            "detail": "data admission available; application delivery is not verified",
+            "lastErrorAt": "0001-01-01T00:00:00Z",
+            "errors": {}
+          },
+          "flows": {
+            "unlimited": true,
+            "limit": 0,
+            "liveUdp": 300,
+            "udpLimit": 0,
+            "queuedTcp": 0,
+            "queueLimit": 0,
+            "live": 710,
+            "admitted": 15480,
+            "completed": 14770,
+            "drained": 0,
+            "interrupted": 0,
+            "rejected": 0,
+            "udpQueueDrops": 0
+          }
+        }
+      },
+      "temporaryIdentitiesRemoved": true,
+      "independentRemainingOwnedUsers": 0,
+      "operatorBackendsUnchanged": true,
+      "privateReceiptSha256": "97f9516a94134526ed5231d8f22bb8b3f8f1c72875b5a688b89fe367e1384ba9"
+    }
+  ],
+  "subsequentObservedRecovery": {
+    "atUtc": "2026-10-16T21:13:54.126106Z",
+    "carrier": "ws-r",
+    "generation": 121
+  },
+  "limitations": [
+    "Local/race/held-connection passes did not establish WAN continuity.",
+    "Later WS traffic does not turn the failed TCP tests into passes.",
+    "Socket loss observed hours later is not a contemporaneous trace of the original failure.",
+    "24-hour stability and 1000-real-user production acceptance NOT VERIFIED."
+  ]
+}

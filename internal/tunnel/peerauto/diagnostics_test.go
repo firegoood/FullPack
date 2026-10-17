@@ -15,6 +15,7 @@ import (
 
 func TestCandidateDiagnosticsSeparateTimeoutFromPeerRejectionAndHideSecrets(t *testing.T) {
 	m, e, _ := followerForState(t)
+	delete(m.endpoints, e.spec.ID) // no enrolled production session owns this attempt
 	for _, tc := range []struct {
 		code string
 		err  error
@@ -40,6 +41,30 @@ func TestCandidateDiagnosticsSeparateTimeoutFromPeerRejectionAndHideSecrets(t *t
 		if s.ErrorCode != tc.code || s.ErrorStage != "control_auth" || s.Ready || strings.Contains(s.Reason, m.token) {
 			t.Fatalf("wrong or unsafe diagnostic: %+v", s)
 		}
+	}
+}
+
+func TestFailedExtraAttemptCannotOverwriteLiveSessionDiagnostics(t *testing.T) {
+	m, e, _ := followerForState(t)
+	ctx, cancel := context.WithCancel(m.ctx)
+	defer cancel()
+	e.ctx = ctx
+	m.candidateStatus(e.spec.ID, func(s *CandidateStatus) {
+		s.Ready = true
+		s.Reason = "authenticated enrolled endpoint"
+	})
+	before := m.Snapshot().Candidates[0]
+	for _, stage := range []string{"carrier_accept", "control_open", "control_type", "control_auth", "mux_enrollment"} {
+		m.candidateFailure(e.spec.ID, stage, "extra attempt failed", context.DeadlineExceeded)
+		if got := m.Snapshot().Candidates[0]; got != before {
+			t.Fatalf("%s changed live session diagnostics: %+v", stage, got)
+		}
+	}
+	cancel()
+	m.candidateFailure(e.spec.ID, "control_auth", "new attempt failed", io.EOF)
+	got := m.Snapshot().Candidates[0]
+	if got.Ready || got.ErrorCode != "connection_closed" || got.ErrorStage != "control_auth" {
+		t.Fatalf("closed session concealed a real reconnect failure: %+v", got)
 	}
 }
 
